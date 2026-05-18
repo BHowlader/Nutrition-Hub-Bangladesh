@@ -118,11 +118,11 @@ function SignupContent() {
       </div>
 
       {/* Form Portion (Right) - Stretched Full Height */}
-      <div className="w-full lg:w-[48%] xl:w-[45%] h-full flex flex-col justify-center bg-ink border-l border-cream/5 px-8 sm:px-12 md:px-16 lg:px-20 py-8 overflow-y-auto max-h-screen">
-        <div className="w-full max-w-md mx-auto my-auto py-6">
+      <div className="w-full lg:w-[48%] xl:w-[45%] h-full flex flex-col justify-center bg-ink border-l border-cream/5 px-8 sm:px-12 md:px-16 lg:px-20 py-8 overflow-hidden max-h-screen">
+        <div className="w-full max-w-md mx-auto my-auto py-4">
           {/* Logo - Centered at the top of the form flow */}
-          <div className="flex flex-col items-center text-center mb-8">
-            <Link href="/" className="mb-4 flex items-center gap-3 justify-center">
+          <div className="flex flex-col items-center text-center mb-6">
+            <Link href="/" className="mb-3 flex items-center gap-3 justify-center">
               <Image src="/images/logo.png" alt="Nutrition Hub" width={48} height={48} className="rounded-lg" />
               <span>
                 <strong className="block text-xl leading-tight text-cream font-black tracking-wide">Nutrition Hub</strong>
@@ -130,43 +130,43 @@ function SignupContent() {
               </span>
             </Link>
             
-            <h1 className="text-2xl md:text-3xl font-black text-cream tracking-tight mt-2">Create account</h1>
-            <p className="text-sm text-cream/50 mt-1">Join Nutrition Hub Bangladesh</p>
+            <h1 className="text-2xl md:text-3xl font-black text-cream tracking-tight mt-1.5">Create account</h1>
+            <p className="text-sm text-cream/50 mt-0.5">Join Nutrition Hub Bangladesh</p>
           </div>
 
           {error && (
-            <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm text-red-400">
+            <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm text-red-400">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-3.5 md:space-y-4">
             <div>
-              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-cream/40">Full Name</label>
+              <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-cream/40">Full Name</label>
               <input
                 type="text"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-xl border border-cream/10 bg-cream/[0.04] px-4 py-2.5 md:py-3 text-sm md:text-base text-cream outline-none transition focus:border-gold/50 focus:ring-1 focus:ring-gold/30"
+                className="w-full rounded-xl border border-cream/10 bg-cream/[0.04] px-4 py-2 md:py-2.5 text-sm text-cream outline-none transition focus:border-gold/50 focus:ring-1 focus:ring-gold/30"
                 placeholder="Your full name"
               />
             </div>
 
             <div>
-              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-cream/40">Email</label>
+              <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-cream/40">Email</label>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-cream/10 bg-cream/[0.04] px-4 py-2.5 md:py-3 text-sm md:text-base text-cream outline-none transition focus:border-gold/50 focus:ring-1 focus:ring-gold/30"
+                className="w-full rounded-xl border border-cream/10 bg-cream/[0.04] px-4 py-2 md:py-2.5 text-sm text-cream outline-none transition focus:border-gold/50 focus:ring-1 focus:ring-gold/30"
                 placeholder="you@example.com"
               />
             </div>
 
             <div>
-              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-cream/40">Password</label>
+              <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-cream/40">Password</label>
               <div className="relative">
                 <input
                   type={showPw ? "text" : "password"}
@@ -174,7 +174,7 @@ function SignupContent() {
                   minLength={6}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-xl border border-cream/10 bg-cream/[0.04] px-4 py-2.5 md:py-3 pr-11 text-sm md:text-base text-cream outline-none transition focus:border-gold/50 focus:ring-1 focus:ring-gold/30"
+                  className="w-full rounded-xl border border-cream/10 bg-cream/[0.04] px-4 py-2 md:py-2.5 pr-11 text-sm text-cream outline-none transition focus:border-gold/50 focus:ring-1 focus:ring-gold/30"
                   placeholder="Min 6 characters"
                 />
                 <button
@@ -190,14 +190,14 @@ function SignupContent() {
             <button
               type="submit"
               disabled={submitting}
-              className="btn-primary w-full disabled:opacity-50 min-h-[44px] md:min-h-[48px] text-sm md:text-base mt-2"
+              className="btn-primary w-full disabled:opacity-50 min-h-[44px] md:min-h-[48px] text-sm md:text-base mt-2.5"
             >
               <UserPlus size={20} />
               {submitting ? "Creating account..." : "Create Account"}
             </button>
           </form>
 
-          <div className="my-5 md:my-6 flex items-center gap-4">
+          <div className="my-4 md:my-5 flex items-center gap-4">
             <div className="h-px flex-1 bg-cream/10" />
             <span className="text-xs font-bold text-cream/30">OR</span>
             <div className="h-px flex-1 bg-cream/10" />
