@@ -16,6 +16,15 @@ export function Hero() {
 
   useEffect(() => {
     setMounted(true);
+    
+    // Disable browser scroll restoration and force scroll to top on reload
+    if (typeof window !== "undefined") {
+      if ("scrollRestoration" in window.history) {
+        window.history.scrollRestoration = "manual";
+      }
+      window.scrollTo(0, 0);
+    }
+
     // Smooth progress bar simulation
     const interval = setInterval(() => {
       setProgress((prev) => {
