@@ -34,7 +34,7 @@ function SignupContent() {
     setIsExiting(true);
     setTimeout(() => {
       router.push(href);
-    }, 600);
+    }, 300);
   };
 
   const googleBtnRef = useRef<HTMLDivElement>(null);
@@ -101,7 +101,7 @@ function SignupContent() {
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-ink">
       {/* Image Portion (Left) */}
-      <div className={`hidden lg:block lg:w-[52%] xl:w-[55%] h-full relative overflow-hidden transition-all duration-[600ms] ease-out-expo ${isExiting ? '-translate-x-full opacity-0' : 'translate-x-0 opacity-100'} animate-slide-left`}>
+      <div className={`hidden lg:block lg:w-[52%] xl:w-[55%] h-full relative overflow-hidden transition-all duration-[300ms] ease-out-expo ${isExiting ? '-translate-x-full opacity-0' : 'translate-x-0 opacity-100'} animate-slide-left`}>
         <Image 
           src="/images/signup-gym-protein.png" 
           alt="Premium Nutrition" 
@@ -127,7 +127,7 @@ function SignupContent() {
       </div>
 
       {/* Form Portion (Right) - Stretched Full Height */}
-      <div className={`w-full lg:w-[48%] xl:w-[45%] h-full flex flex-col justify-center bg-ink border-l border-cream/5 px-8 sm:px-12 md:px-16 lg:px-20 py-8 overflow-hidden max-h-screen transition-all duration-[600ms] ease-out-expo ${isExiting ? 'translate-x-full opacity-0' : 'translate-x-0 opacity-100'} animate-slide-right`}>
+      <div className={`w-full lg:w-[48%] xl:w-[45%] h-full flex flex-col justify-center bg-ink border-l border-cream/5 px-8 sm:px-12 md:px-16 lg:px-20 py-8 overflow-hidden max-h-screen transition-all duration-[300ms] ease-out-expo ${isExiting ? 'translate-x-full opacity-0' : 'translate-x-0 opacity-100'} animate-slide-right`}>
         <div className="w-full max-w-md mx-auto my-auto py-4">
           {/* Logo - Centered at the top of the form flow */}
           <div className="flex flex-col items-center text-center mb-6">
