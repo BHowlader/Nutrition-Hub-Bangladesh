@@ -10,11 +10,10 @@ import { useAuth } from "@/lib/auth";
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const navItems = [
-  ["Catalog", "#catalog"],
-  ["Authenticity", "#authenticity"],
-  ["Delivery", "#delivery"],
-  ["Trust", "#trust"],
-  ["CMS", "/admin/products"],
+  ["Shop Catalog", "#catalog"],
+  ["100% Authentic", "#authenticity"],
+  ["Superfast Delivery", "#delivery"],
+  ["Our Guarantee", "#trust"],
 ];
 
 function UserAvatar({ name, photoUrl }: { name: string; photoUrl: string | null }) {
@@ -115,12 +114,20 @@ export function Header() {
                       </div>
                       <div className="py-1">
                         <Link
+                          href="/admin/products"
+                          onClick={() => setDropdownOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gold transition hover:bg-cream/5 hover:text-champagne font-black"
+                        >
+                          <LayoutDashboard size={16} />
+                          CMS / Admin Panel
+                        </Link>
+                        <Link
                           href="/dashboard"
                           onClick={() => setDropdownOpen(false)}
                           className="flex items-center gap-3 px-4 py-2.5 text-sm text-cream/70 transition hover:bg-cream/5 hover:text-cream"
                         >
-                          <LayoutDashboard size={16} />
-                          Dashboard
+                          <UserIcon size={16} />
+                          My Profile
                         </Link>
                         <button
                           onClick={() => {
