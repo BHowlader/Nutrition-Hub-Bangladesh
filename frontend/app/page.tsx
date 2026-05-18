@@ -343,8 +343,20 @@ export default function HomePage() {
         <div className="shell">
           <div className="grid gap-10 md:grid-cols-[1.2fr_0.8fr_0.8fr]">
             <div>
-              <strong className="text-xl font-black">Nutrition Hub Bangladesh</strong>
-              <p className="mt-4 max-w-sm text-sm leading-relaxed text-cream/50">
+              <div className="flex items-center gap-3 mb-4">
+                <Image
+                  src="/images/logo.png"
+                  alt="Nutrition Hub Bangladesh Logo"
+                  width={40}
+                  height={40}
+                  className="rounded-lg object-contain border border-white/5 shadow-md"
+                />
+                <strong className="text-xl font-black leading-tight text-cream">
+                  Nutrition Hub
+                  <span className="block text-xs font-bold text-cream/40 tracking-wider uppercase mt-0.5">Bangladesh</span>
+                </strong>
+              </div>
+              <p className="max-w-sm text-sm leading-relaxed text-cream/50">
                 Premium supplement storefront for authentic sports nutrition, wellness,
                 and goal-based product guidance in Bangladesh.
               </p>
