@@ -280,14 +280,16 @@ export function Hero() {
                   }}
                 >
                   {/* Seamless dark container for image blending */}
-                  <div className="relative h-[220px] w-full overflow-hidden rounded-2xl bg-[#050811] border border-white/[0.04] p-4 flex items-center justify-center">
-                    <Image
-                      src={product.image!}
-                      alt={product.name}
-                      width={200}
-                      height={200}
-                      className="object-contain drop-shadow-2xl"
-                    />
+                  <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-[#050811] border border-white/[0.04]">
+                    <div className="absolute inset-0">
+                      <Image
+                        src={product.image!}
+                        alt={product.name}
+                        fill
+                        className="object-cover w-full h-full"
+                        priority
+                      />
+                    </div>
                   </div>
                   <div className="mt-4 px-2">
                     <div className="text-[10px] font-bold uppercase tracking-widest text-cream/50 mb-1">{product.category}</div>
