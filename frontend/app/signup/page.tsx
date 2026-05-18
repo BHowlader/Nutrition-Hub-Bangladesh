@@ -100,7 +100,7 @@ function SignupContent() {
       {/* Image Portion (Left) */}
       <div className={`hidden lg:block lg:w-[52%] xl:w-[55%] h-full relative overflow-hidden transition-[transform,opacity] duration-500 ease-out-expo ${(!mounted) ? '-translate-x-8 opacity-0' : 'translate-x-0 opacity-100'}`}>
         <Image 
-          src="/images/signup-gym-protein.png" 
+          src="/images/signup-gym-athlete.png" 
           alt="Premium Nutrition" 
           fill
           priority
