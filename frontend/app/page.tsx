@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Image from "next/image";
 import {
   ArrowRight,
@@ -24,28 +25,22 @@ import { products } from "@/lib/products";
 
 const categories = [
   {
-    title: "Whey Protein",
-    text: "Isolate, concentrate, mass gainer, and daily protein options for gym progress.",
-    icon: Dumbbell,
+    title: "Vitamins and minerals",
+    text: "Wellcore Creatines, MuscleBlaze Omega-3s, Multivitamins, and Liquid L-Carnitine support formulas.",
+    icon: Pill,
     accent: "from-gold/20 to-gold/5"
   },
   {
-    title: "Strength & Performance",
-    text: "Creatine, pre-workout, amino blends, hydration, and workout support.",
+    title: "Breakfast Cereal and peanut butter",
+    text: "PINTOLA premium dark chocolate high-protein oats and rich crunchy chocolate peanut butter.",
     icon: Sparkles,
     accent: "from-mint/20 to-mint/5"
   },
   {
-    title: "Vitamins & Wellness",
-    text: "Multivitamins, omega-3, minerals, immunity, sleep, and everyday health.",
-    icon: Pill,
+    title: "Herbal Supplements",
+    text: "Pure Himalayan Shilajit Gold Resin and Kapiva Ashwagandha Gold capsules infused with 24k Gold.",
+    icon: ShieldCheck,
     accent: "from-champagne/20 to-champagne/5"
-  },
-  {
-    title: "Goal-Based Stacks",
-    text: "Simple bundles for lean muscle, strength, weight gain, fat loss, and recovery.",
-    icon: HeartPulse,
-    accent: "from-moss/30 to-moss/5"
   }
 ];
 
@@ -128,7 +123,7 @@ export default function HomePage() {
             </div>
           </Reveal>
 
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {categories.map(({ title, text, icon: Icon }, index) => (
               <Reveal delay={index * 0.06} key={title}>
                 <article className="group relative min-h-[280px] rounded-2xl border border-white/[0.06] bg-[#0c1324]/40 p-7 transition-all duration-300 hover:-translate-y-1 hover:border-gold/30 hover:bg-[#0c1324]/75 hover:shadow-[0_20px_40px_rgba(96,165,250,0.05)]">
@@ -168,11 +163,29 @@ export default function HomePage() {
           </Reveal>
 
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {products.map((product, index) => (
-              <Reveal delay={index * 0.05} key={product.id}>
-                <ProductCard product={product} />
-              </Reveal>
-            ))}
+            {products
+              .filter(p => 
+                p.id === "creatine-tropical-tango" ||
+                p.id === "creatine-kiwi-kick" ||
+                p.id === "mb-omega3-gold" ||
+                p.id === "mb-vite-multivitamin" ||
+                p.id === "pintola-protein-oats" ||
+                p.id === "kapiva-shilajit-gold"
+              )
+              .map((product, index) => (
+                <Reveal delay={index * 0.05} key={product.id}>
+                  <ProductCard product={product} />
+                </Reveal>
+              ))}
+          </div>
+
+          <div className="mt-16 text-center">
+            <Link 
+              href="/products" 
+              className="inline-flex items-center gap-2.5 rounded-full border border-gold/40 bg-gold/5 px-8 py-4 text-base font-black uppercase tracking-wider text-gold shadow-[0_0_30px_rgba(245,158,11,0.05)] transition-all duration-300 hover:border-gold hover:bg-gold hover:text-ink hover:shadow-[0_0_40px_rgba(245,158,11,0.15)]"
+            >
+              View All Products <ArrowRight size={18} />
+            </Link>
           </div>
         </div>
       </section>

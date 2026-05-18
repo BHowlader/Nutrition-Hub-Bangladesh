@@ -11,7 +11,6 @@ export function ProductCard({ product }: { product: Product }) {
   const { user } = useAuth();
   const router = useRouter();
   const [hovered, setHovered] = useState(false);
-  const isLightBg = product.id.includes("creatine") || product.id === "daily-multivitamin";
 
   // Split details into visual pill tags
   const specs = product.detail.split(/·|\|/).map(s => s.trim()).filter(Boolean);
@@ -38,19 +37,13 @@ export function ProductCard({ product }: { product: Product }) {
       )}
 
       {/* Image Container with matching background blend */}
-      <div className={`relative h-[250px] w-full overflow-hidden p-6 border-b border-white/[0.05] transition-colors duration-500 ${isLightBg ? 'bg-white' : 'bg-[#050811]'}`}>
-        {isLightBg ? (
-          <div className="absolute inset-0 bg-gradient-to-b from-black/[0.02] to-transparent pointer-events-none" />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
-        )}
-
-        <div className={`relative h-full w-full drop-shadow-[0_20px_40px_rgba(0,0,0,0.15)] transition-transform duration-700 ease-out ${hovered ? 'scale-110 -translate-y-1' : 'scale-100'}`}>
+      <div className="relative h-[250px] w-full overflow-hidden border-b border-white/[0.05]">
+        <div className={`relative h-full w-full transition-transform duration-700 ease-out ${hovered ? 'scale-110' : 'scale-100'}`}>
           <Image
             src={product.image || "/images/logo.png"}
             alt={product.name}
             fill
-            className="object-contain"
+            className="object-cover"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             priority
           />

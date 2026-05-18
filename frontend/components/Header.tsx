@@ -10,8 +10,8 @@ import { useAuth } from "@/lib/auth";
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const navItems = [
-  ["Products", "#catalog"],
-  ["Authenticity", "#authenticity"],
+  ["Products", "/products"],
+  ["Authenticity", "/#authenticity"],
 ];
 
 function UserAvatar({ name, photoUrl }: { name: string; photoUrl: string | null }) {
