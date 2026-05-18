@@ -30,6 +30,13 @@ export function ProductCard({ product }: { product: Product }) {
         <ShieldCheck size={10} className="text-mint" /> Authentic
       </div>
 
+      {/* Sold Out Badge overlay */}
+      {product.stock === 0 && (
+        <div className="absolute right-4 top-4 z-20 inline-flex items-center gap-1 rounded-full border border-red-500/20 bg-red-500/10 px-3 py-1 text-[9px] font-black uppercase tracking-wider text-red-400 backdrop-blur-md">
+          Sold Out
+        </div>
+      )}
+
       {/* Image Container with matching background blend */}
       <div className={`relative h-[250px] w-full overflow-hidden p-6 border-b border-white/[0.05] transition-colors duration-500 ${isLightBg ? 'bg-white' : 'bg-[#050811]'}`}>
         {isLightBg ? (
@@ -91,19 +98,28 @@ export function ProductCard({ product }: { product: Product }) {
             <strong className="text-xl font-black text-cream">{formatTaka(product.price)}</strong>
           </div>
 
-          <button
-            onClick={() => {
-              if (!user) {
-                router.push("/login?redirect=/");
-                return;
-              }
-              // Cart / buy functionality placeholder
-            }}
-            className="group/btn relative flex h-10 w-24 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/5 text-cream transition-all duration-300 hover:border-gold/50 hover:bg-gold hover:text-ink"
-          >
-            <ShoppingBag size={14} className="mr-1.5 transition-transform duration-300 group-hover/btn:scale-110" />
-            <span className="text-xs font-black">Buy</span>
-          </button>
+          {product.stock > 0 ? (
+            <button
+              onClick={() => {
+                if (!user) {
+                  router.push("/login?redirect=/");
+                  return;
+                }
+                // Cart / buy functionality placeholder
+              }}
+              className="group/btn relative flex h-10 w-24 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/5 text-cream transition-all duration-300 hover:border-gold/50 hover:bg-gold hover:text-ink"
+            >
+              <ShoppingBag size={14} className="mr-1.5 transition-transform duration-300 group-hover/btn:scale-110" />
+              <span className="text-xs font-black">Buy</span>
+            </button>
+          ) : (
+            <button
+              disabled
+              className="flex h-10 w-24 items-center justify-center rounded-xl border border-white/5 bg-white/[0.02] text-cream/35 cursor-not-allowed"
+            >
+              <span className="text-xs font-black">Sold Out</span>
+            </button>
+          )}
         </div>
       </div>
     </article>
