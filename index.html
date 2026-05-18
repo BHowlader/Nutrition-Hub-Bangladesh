@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Nutrition Hub Bangladesh is a premium static e-commerce storefront for authentic supplements, sports nutrition, and wellness products."
+    />
+    <title>Nutrition Hub Bangladesh | Premium Supplements</title>
+    <link rel="preload" as="image" href="assets/hero-products.png" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="nav shell" aria-label="Primary navigation">
+        <a class="brand" href="#top" aria-label="Nutrition Hub Bangladesh home">
+          <img src="logo.png" alt="Nutrition Hub Bangladesh" width="44" height="44" class="brand-logo" />
+          <span>
+            <strong>Nutrition Hub</strong>
+            <small>Bangladesh</small>
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="#catalog">Catalog</a>
+          <a href="#performance">Performance</a>
+          <a href="#trust">Trust</a>
+          <a href="#checkout">Checkout</a>
+        </div>
+        <button class="cart-trigger" type="button" data-open-cart>
+          Cart <span data-cart-count>0</span>
+        </button>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <img
+          class="hero-image"
+          src="assets/hero-products.png"
+          alt="Premium supplement collection arranged on a luxury retail counter"
+          width="1536"
+          height="1024"
+        />
+        <div class="hero-shade"></div>
+        <div class="hero-content shell">
+          <p class="eyebrow">Premium supplement reseller in Bangladesh</p>
+          <h1>Authentic nutrition built for serious results.</h1>
+          <p class="hero-copy">
+            A fast, premium storefront for whey protein, creatine, vitamins, wellness
+            formulas, and sports nutrition with Bangladesh-first checkout flows.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#catalog">Shop best sellers</a>
+            <a class="button button-ghost" href="#performance">View speed plan</a>
+          </div>
+          <div class="hero-stats" aria-label="Store highlights">
+            <div><strong>1000+</strong><span>concurrent users ready</span></div>
+            <div><strong>&lt;100KB</strong><span>critical JS target</span></div>
+            <div><strong>24h</strong><span>Dhaka delivery option</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="service-strip" id="trust" aria-label="Store promises">
+        <div class="shell service-grid">
+          <article>
+            <span>01</span>
+            <h2>Verified stock</h2>
+            <p>Batch, expiry, importer, and seal checks are visible before checkout.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h2>COD and bKash</h2>
+            <p>Buyer-friendly payment methods for Dhaka and nationwide orders.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h2>Fast storefront</h2>
+            <p>Static pages, CDN cache, compressed assets, and no database reads for browsing.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="catalog shell" id="catalog">
+        <div class="section-head">
+          <p class="eyebrow dark">Curated catalog</p>
+          <h2>Best sellers for Bangladesh shoppers</h2>
+          <p>
+            Product cards are dense, scannable, and conversion-focused, with prices in taka
+            and clear authenticity cues.
+          </p>
+        </div>
+
+        <div class="filter-bar" role="tablist" aria-label="Product category filters">
+          <button class="filter active" type="button" data-filter="all">All</button>
+          <button class="filter" type="button" data-filter="protein">Protein</button>
+          <button class="filter" type="button" data-filter="strength">Strength</button>
+          <button class="filter" type="button" data-filter="wellness">Wellness</button>
+          <button class="filter" type="button" data-filter="vitamins">Vitamins</button>
+        </div>
+
+        <div class="product-grid" data-product-grid></div>
+      </section>
+
+      <section class="feature-band shell">
+        <div class="feature-visual" aria-hidden="true">
+          <span class="jar jar-one"></span>
+          <span class="jar jar-two"></span>
+          <span class="jar jar-three"></span>
+        </div>
+        <div class="feature-copy">
+          <p class="eyebrow dark">Featured stack</p>
+          <h2>Lean muscle essentials</h2>
+          <p>
+            A simple starter stack for high-intent gym customers: whey isolate, creatine
+            monohydrate, omega-3, and daily multivitamin.
+          </p>
+          <ul>
+            <li>Clear supplement facts and serving guidance</li>
+            <li>Expiry date and importer notes on product pages</li>
+            <li>Bundle offers without slowing catalog browsing</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="performance" id="performance">
+        <div class="shell performance-grid">
+          <div class="section-head compact">
+            <p class="eyebrow">Performance architecture</p>
+            <h2>Designed for 1000 concurrent users.</h2>
+            <p>
+              The public storefront is static, cacheable, and CDN-friendly. Only checkout
+              submission needs a server endpoint, so browsing traffic does not overload the app.
+            </p>
+          </div>
+          <div class="ops-grid">
+            <article><strong>Static catalog</strong><span>HTML/CSS/JS can be served from CDN edge cache.</span></article>
+            <article><strong>Small runtime</strong><span>No framework hydration is required for first paint.</span></article>
+            <article><strong>Async checkout</strong><span>Orders can post to a separate API, queue, or Shopify/WooCommerce backend.</span></article>
+            <article><strong>Asset discipline</strong><span>Hero image is preloaded, with CSS visuals for product cards.</span></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="checkout shell" id="checkout">
+        <div>
+          <p class="eyebrow dark">Checkout-ready</p>
+          <h2>Built around Bangladesh buying habits.</h2>
+          <p>
+            The front end includes cart state, quantity controls, quick add, and a checkout
+            panel. Connect the order button to your preferred backend when inventory and
+            payment providers are finalized.
+          </p>
+        </div>
+        <button class="button button-primary" type="button" data-open-cart>Review cart</button>
+      </section>
+    </main>
+
+    <aside class="cart-drawer" aria-hidden="true" data-cart>
+      <div class="cart-panel">
+        <div class="cart-head">
+          <div>
+            <p class="eyebrow dark">Your cart</p>
+            <h2>Order summary</h2>
+          </div>
+          <button class="icon-button" type="button" data-close-cart aria-label="Close cart">×</button>
+        </div>
+        <div class="cart-items" data-cart-items></div>
+        <div class="cart-empty" data-cart-empty>Cart is empty. Add a product from the catalog.</div>
+        <div class="cart-total">
+          <span>Total</span>
+          <strong data-cart-total>Tk 0</strong>
+        </div>
+        <button class="button button-primary checkout-button" type="button">Proceed to COD checkout</button>
+        <p class="cart-note">Demo storefront: wire this button to your production order API.</p>
+      </div>
+    </aside>
+
+    <footer class="footer">
+      <div class="shell footer-grid">
+        <div>
+          <strong>Nutrition Hub Bangladesh</strong>
+          <p>Fresh premium storefront concept for authentic supplements.</p>
+        </div>
+        <div>
+          <span>Dhaka delivery</span>
+          <span>Cash on delivery</span>
+          <span>bKash ready</span>
+        </div>
+      </div>
+    </footer>
+
+    <script src="script.js" defer></script>
+  </body>
+</html>

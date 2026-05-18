@@ -1,0 +1,12 @@
+{
+  "name": "nutrition-hub-bangladesh-fresh",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build:frontend": "npm --prefix frontend run build",
+    "dev:backend": "uvicorn app.main:app --reload --app-dir backend",
+    "db:up": "docker compose up -d postgres",
+    "dev": "npm run dev:frontend"
+  }
+}
