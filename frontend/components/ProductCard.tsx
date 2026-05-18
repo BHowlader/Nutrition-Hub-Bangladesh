@@ -38,12 +38,12 @@ export function ProductCard({ product }: { product: Product }) {
 
       {/* Image Container with matching background blend */}
       <div className="relative aspect-square w-full overflow-hidden border-b border-white/[0.05] bg-[#050811]">
-        <div className={`relative h-full w-full transition-transform duration-700 ease-out ${hovered ? 'scale-105' : 'scale-100'}`}>
+        <div className={`absolute inset-0 transition-transform duration-700 ease-out ${hovered ? 'scale-105' : 'scale-100'}`}>
           <Image
             src={product.image || "/images/logo.png"}
             alt={product.name}
             fill
-            className="object-cover"
+            className="object-cover w-full h-full"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             priority
           />
