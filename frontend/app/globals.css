@@ -143,5 +143,53 @@ a {
 .animate-aurora-3 { animation: aurora-3 22s ease-in-out infinite; }
 .animate-aurora-4 { animation: aurora-4 18s ease-in-out infinite; }
 
+/* Mindrona Branding Hover Blink Animation */
+.mindrona-link {
+  color: #ffc72c; /* Theme-matched premium gold */
+  font-weight: 800;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-block;
+  position: relative;
+  text-decoration: none;
+}
+
+.mindrona-link::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0);
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+  background-color: #00f2fe;
+  transform-origin: bottom right;
+  transition: transform 0.25s ease-out;
+}
+
+.mindrona-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+
+.mindrona-link:hover {
+  animation: mindrona-blink 0.6s infinite ease-in-out alternate;
+  color: #00f2fe; /* Premium Cyan neon */
+}
+
+@keyframes mindrona-blink {
+  0% {
+    opacity: 1;
+    text-shadow: 0 0 8px rgba(0, 242, 254, 0.8), 0 0 15px rgba(0, 242, 254, 0.3);
+  }
+  50% {
+    opacity: 0.35;
+    text-shadow: none;
+  }
+  100% {
+    opacity: 1;
+    text-shadow: 0 0 12px rgba(0, 242, 254, 1), 0 0 20px rgba(0, 242, 254, 0.5);
+  }
+}
+
 
 

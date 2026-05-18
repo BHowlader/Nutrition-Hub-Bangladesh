@@ -339,7 +339,7 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#0c1324] py-14 text-cream border-t border-white/[0.05]">
+      <footer className="bg-[#0c1324] pt-14 pb-8 text-cream border-t border-white/[0.05]">
         <div className="shell">
           <div className="grid gap-10 md:grid-cols-[1.2fr_0.8fr_0.8fr]">
             <div>
@@ -367,8 +367,19 @@ export default function HomePage() {
               </ul>
             </div>
           </div>
-          <div className="mt-12 border-t border-white/[0.05] pt-8 text-center text-xs text-cream/30">
-            Nutrition Hub Bangladesh. All rights reserved.
+          <div className="mt-12 border-t border-white/[0.05] pt-8 text-center text-xs text-cream/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <span>Nutrition Hub Bangladesh. All rights reserved.</span>
+            <span>
+              Built by{" "}
+              <a 
+                href="https://mindrona.com" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="mindrona-link"
+              >
+                Mindrona
+              </a>
+            </span>
           </div>
         </div>
       </footer>
