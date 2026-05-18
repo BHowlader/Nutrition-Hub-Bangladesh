@@ -114,13 +114,9 @@ function LoginContent() {
       <div className={`w-full lg:w-[48%] xl:w-[45%] h-full flex flex-col justify-center bg-ink border-r border-cream/5 px-8 sm:px-12 md:px-16 lg:px-20 py-8 overflow-hidden max-h-screen transition-all duration-[300ms] ease-out-expo ${isExiting ? '-translate-x-full opacity-0' : 'translate-x-0 opacity-100'} animate-slide-left`}>
         <div className="w-full max-w-md mx-auto my-auto py-4">
           {/* Logo - Centered at the top of the form flow */}
-          <div className="flex flex-col items-center text-center mb-6">
-            <Link href="/" className="mb-3 flex items-center gap-3 justify-center">
-              <Image src="/images/logo.png" alt="Nutrition Hub" width={48} height={48} className="rounded-lg" />
-              <span>
-                <strong className="block text-xl leading-tight text-cream font-black tracking-wide">Nutrition Hub</strong>
-                <small className="block text-xs text-cream/60 text-left">Bangladesh</small>
-              </span>
+          <div className="flex flex-col items-center text-center mb-5">
+            <Link href="/" className="mb-3 flex items-center justify-center">
+              <Image src="/images/logo.png" alt="Nutrition Hub" width={56} height={56} className="rounded-xl shadow-lg border border-cream/5" />
             </Link>
             
             <h1 className="text-2xl md:text-3xl font-black text-cream tracking-tight mt-1.5">Welcome back</h1>
