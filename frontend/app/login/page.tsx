@@ -40,13 +40,18 @@ function LoginContent() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleNavigate = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
     setIsExiting(true);
     setTimeout(() => {
       router.push(href);
-    }, 300);
+    }, 500);
   };
 
   const googleBtnRef = useRef<HTMLDivElement>(null);
@@ -111,7 +116,7 @@ function LoginContent() {
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-ink">
       {/* Form Portion (Left) - Stretched Full Height */}
-      <div className={`w-full lg:w-[48%] xl:w-[45%] h-full flex flex-col justify-center bg-ink border-r border-cream/5 px-8 sm:px-12 md:px-16 lg:px-20 py-8 overflow-hidden max-h-screen transition-all duration-[300ms] ease-out-expo ${isExiting ? '-translate-x-full opacity-0' : 'translate-x-0 opacity-100'} animate-slide-left`}>
+      <div className={`w-full lg:w-[48%] xl:w-[45%] h-full flex flex-col justify-center bg-ink border-r border-cream/5 px-8 sm:px-12 md:px-16 lg:px-20 py-8 overflow-hidden max-h-screen transition-[transform,opacity] duration-500 ease-out-expo ${(!mounted || isExiting) ? '-translate-x-full opacity-0' : 'translate-x-0 opacity-100'}`}>
         <div className="w-full max-w-md mx-auto my-auto py-4">
           {/* Logo - Centered at the top of the form flow */}
           <div className="flex flex-col items-center text-center mb-5">
@@ -214,7 +219,7 @@ function LoginContent() {
       </div>
 
       {/* Image Portion (Right) */}
-      <div className={`hidden lg:block lg:w-[52%] xl:w-[55%] h-full relative overflow-hidden transition-all duration-[300ms] ease-out-expo ${isExiting ? 'translate-x-full opacity-0' : 'translate-x-0 opacity-100'} animate-slide-right`}>
+      <div className={`hidden lg:block lg:w-[52%] xl:w-[55%] h-full relative overflow-hidden transition-[transform,opacity] duration-500 ease-out-expo ${(!mounted || isExiting) ? 'translate-x-full opacity-0' : 'translate-x-0 opacity-100'}`}>
         <Image 
           src="/images/login-protein-man.png" 
           alt="Nutrition Hub Premium" 
