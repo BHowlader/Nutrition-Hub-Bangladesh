@@ -83,8 +83,12 @@ export function Hero() {
     return () => ctx.revert();
   }, [loading]);
 
-  // Use a subset of products for the visual right side
-  const visualProducts = products.filter(p => p.image).slice(0, 3);
+  // Use a diverse subset of products representing different categories for the visual right side
+  const visualProducts = products.filter(p => 
+    p.id === "creatine-tropical-tango" ||
+    p.id === "pintola-protein-oats" ||
+    p.id === "kapiva-shilajit-gold"
+  );
 
   return (
     <>
