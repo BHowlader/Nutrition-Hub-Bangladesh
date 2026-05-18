@@ -1,10 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
-from app.api import orders, products
+from app.api import auth, orders, products
 from app.core.config import settings
 from app.core.database import Base, engine
-from app.models import catalog, order  # noqa: F401
+from app.models import catalog, order, user  # noqa: F401
 
 app = FastAPI(title="Nutrition Hub Bangladesh API", version="0.1.0")
 
@@ -30,3 +31,9 @@ def health() -> dict[str, str]:
 
 app.include_router(products.router, prefix="/api")
 app.include_router(orders.router, prefix="/api")
+app.include_router(auth.router, prefix="/api")
+
+import os
+static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
+os.makedirs(static_dir, exist_ok=True)
+app.mount("/static", StaticFiles(directory=static_dir), name="static")

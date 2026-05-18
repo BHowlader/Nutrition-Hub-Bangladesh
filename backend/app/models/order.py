@@ -27,9 +27,11 @@ class Order(Base):
     payment_method: Mapped[str] = mapped_column(String(40), default="cod")
     status: Mapped[OrderStatus] = mapped_column(SqlEnum(OrderStatus), default=OrderStatus.pending, index=True)
     total: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=0)
+    user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
 
     items: Mapped[list["OrderItem"]] = relationship(back_populates="order", cascade="all, delete-orphan")
+    user = relationship("User", back_populates="orders")
 
 
 class OrderItem(Base):

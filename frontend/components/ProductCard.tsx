@@ -2,10 +2,14 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Star, ShieldCheck, ShoppingBag } from "lucide-react";
 import { formatTaka, type Product } from "@/lib/products";
+import { useAuth } from "@/lib/auth";
 
 export function ProductCard({ product }: { product: Product }) {
+  const { user } = useAuth();
+  const router = useRouter();
   const [hovered, setHovered] = useState(false);
   const isLightBg = product.id.includes("creatine") || product.id === "daily-multivitamin";
 
@@ -87,7 +91,14 @@ export function ProductCard({ product }: { product: Product }) {
             <strong className="text-xl font-black text-cream">{formatTaka(product.price)}</strong>
           </div>
 
-          <button 
+          <button
+            onClick={() => {
+              if (!user) {
+                router.push("/login?redirect=/");
+                return;
+              }
+              // Cart / buy functionality placeholder
+            }}
             className="group/btn relative flex h-10 w-24 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/5 text-cream transition-all duration-300 hover:border-gold/50 hover:bg-gold hover:text-ink"
           >
             <ShoppingBag size={14} className="mr-1.5 transition-transform duration-300 group-hover/btn:scale-110" />

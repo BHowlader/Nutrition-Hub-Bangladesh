@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     jwt_secret: str = "development-secret"
     admin_email: str = "admin@nutritionhubbangladesh.com"
     admin_password: str = "change-this-password"
+    google_client_id: str = ""
     backend_cors_origins: str = "http://localhost:3000"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
