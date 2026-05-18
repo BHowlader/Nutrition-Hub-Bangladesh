@@ -22,7 +22,7 @@ export const products: Product[] = [
     description: "Wellcore Micronised Creatine Monohydrate in Tropical Tango flavor. Rapid absorption formula for explosive power, muscle growth, and ATP production.",
     detail: "83 servings · 307g",
     accent: "#F59E0B",
-    image: "/images/products/creatine/tropical-tango.jpg"
+    image: "/images/products/creatine/tropical-tango.png"
   },
   {
     id: "creatine-fruit-fusion",
@@ -34,7 +34,7 @@ export const products: Product[] = [
     description: "Wellcore Micronised Creatine Monohydrate in Fruit Fusion flavor. Rapid absorption formula for explosive power, muscle growth, and ATP production.",
     detail: "83 servings · 307g",
     accent: "#EC4899",
-    image: "/images/products/creatine/fruit-fusion.jpg"
+    image: "/images/products/creatine/fruit-fusion.png"
   },
   {
     id: "creatine-kiwi-kick",
@@ -46,7 +46,7 @@ export const products: Product[] = [
     description: "Wellcore Micronised Creatine Monohydrate in Kiwi Kick flavor. Rapid absorption formula for explosive power, muscle growth, and ATP production.",
     detail: "83 servings · 307g",
     accent: "#84CC16",
-    image: "/images/products/creatine/kiwi-kick.jpg"
+    image: "/images/products/creatine/kiwi-kick.png"
   },
   {
     id: "creatine-watermelon-wave",
