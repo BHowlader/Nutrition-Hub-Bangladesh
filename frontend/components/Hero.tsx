@@ -274,13 +274,13 @@ export function Hero() {
                 }}
               >
                 <div 
-                  className={`hero-visual-card animate-float-${i + 1} w-[260px] rounded-3xl border border-white/[0.08] bg-[#0c1324] p-4 shadow-[0_30px_60px_rgba(0,0,0,0.4)] backdrop-blur-2xl transition-all duration-300 hover:border-white/20`}
+                  className={`hero-visual-card animate-float-${i + 1} w-[260px] overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0c1324] shadow-[0_30px_60px_rgba(0,0,0,0.4)] backdrop-blur-2xl transition-all duration-300 hover:border-white/20`}
                   style={{
                     boxShadow: `0 30px 60px -10px ${product.accent}15`
                   }}
                 >
-                  {/* Seamless dark container for image blending */}
-                  <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-[#050811] border border-white/[0.04]">
+                  {/* Seamless dark container for image blending - full bleed to top, left, right */}
+                  <div className="relative aspect-square w-full overflow-hidden bg-[#050811] border-b border-white/[0.04]">
                     <div className="absolute inset-0">
                       <Image
                         src={product.image!}
@@ -291,7 +291,8 @@ export function Hero() {
                       />
                     </div>
                   </div>
-                  <div className="mt-4 px-2">
+                  {/* Padded text section below */}
+                  <div className="p-4">
                     <div className="text-[10px] font-bold uppercase tracking-widest text-cream/50 mb-1">{product.category}</div>
                     <h3 className="text-base font-bold text-cream truncate">{product.name}</h3>
                     <div className="mt-3 flex items-center justify-between">
