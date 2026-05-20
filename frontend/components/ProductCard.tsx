@@ -2,21 +2,19 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Star, ShieldCheck, ShoppingBag } from "lucide-react";
 import { formatTaka, type Product } from "@/lib/products";
-import { useAuth } from "@/lib/auth";
 
 export function ProductCard({ product }: { product: Product }) {
-  const { user } = useAuth();
-  const router = useRouter();
   const [hovered, setHovered] = useState(false);
 
   // Split details into visual pill tags
   const specs = product.detail.split(/·|\|/).map(s => s.trim()).filter(Boolean);
 
   return (
-    <article 
+    <Link 
+      href={`/products/${product.id}`}
       className="group relative flex flex-col h-full overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#090d16] transition-all duration-500 hover:border-white/20"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -92,29 +90,21 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
 
           {product.stock > 0 ? (
-            <button
-              onClick={() => {
-                if (!user) {
-                  router.push("/login?redirect=/");
-                  return;
-                }
-                // Cart / buy functionality placeholder
-              }}
+            <div
               className="group/btn relative flex h-10 w-24 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/5 text-cream transition-all duration-300 hover:border-gold/50 hover:bg-gold hover:text-ink"
             >
               <ShoppingBag size={14} className="mr-1.5 transition-transform duration-300 group-hover/btn:scale-110" />
               <span className="text-xs font-black">Buy</span>
-            </button>
+            </div>
           ) : (
-            <button
-              disabled
+            <div
               className="flex h-10 w-24 items-center justify-center rounded-xl border border-white/5 bg-white/[0.02] text-cream/35 cursor-not-allowed"
             >
               <span className="text-xs font-black">Sold Out</span>
-            </button>
+            </div>
           )}
         </div>
       </div>
-    </article>
+    </Link>
   );
 }
