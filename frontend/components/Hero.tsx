@@ -94,7 +94,7 @@ export function Hero() {
     <>
       <section
         ref={rootRef}
-        className="relative flex min-h-[100svh] items-center overflow-hidden bg-[#04060d] pt-32 md:pt-36 pb-12 md:pb-16"
+        className="relative flex min-h-[100svh] items-center overflow-hidden bg-[#04060d] pb-10 pt-[6.75rem] sm:pt-[7.25rem] md:pt-[7.75rem] lg:pb-12 lg:pt-[7.75rem]"
       >
         {/* Cinematic Loader Shutter Panels */}
         {loading && (
@@ -218,11 +218,11 @@ export function Hero() {
           ))}
         </div>
 
-        <div className="shell relative z-10 mx-auto grid lg:grid-cols-2 gap-12 items-center">
+        <div className="shell relative z-10 mx-auto grid items-center gap-10 py-4 sm:py-6 lg:grid-cols-[minmax(620px,0.98fr)_minmax(0,1.02fr)] lg:gap-8 lg:py-0 xl:grid-cols-[minmax(680px,0.95fr)_minmax(0,1.05fr)]">
           
           {/* Left Column - Content */}
-          <div className="flex flex-col items-start pt-10 lg:pt-0 lg:-translate-y-6">
-            <div className="hero-badge mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-md">
+          <div className="flex max-w-3xl flex-col items-start">
+            <div className="hero-badge mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-md sm:mb-5">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-mint opacity-75"></span>
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-mint"></span>
@@ -232,27 +232,27 @@ export function Hero() {
               </span>
             </div>
 
-            <h1 className="flex flex-col text-[clamp(3rem,6vw,5.5rem)] font-black leading-[0.95] tracking-tight text-cream" style={{ perspective: "1000px" }}>
+            <h1 className="flex flex-col text-[clamp(2.8rem,5.45vw,5.15rem)] font-black leading-[0.95] tracking-tight text-cream" style={{ perspective: "1000px" }}>
               <span className="hero-title-line block">Power Your</span>
               <span className="hero-title-line block mt-2">
                 <span className="bg-gradient-to-r from-gold via-champagne to-mint bg-clip-text text-transparent">
                   Performance.
                 </span>
               </span>
-              <span className="hero-title-line block mt-2 text-[clamp(2.5rem,4vw,4rem)] text-cream/80">
+              <span className="hero-title-line block mt-2 text-[clamp(2.2rem,3.45vw,3.55rem)] text-cream/80">
                 Without Compromise.
               </span>
             </h1>
 
-            <p className="hero-desc mt-8 max-w-xl text-lg leading-relaxed text-cream/60">
+            <p className="hero-desc mt-6 max-w-xl text-base leading-relaxed text-cream/60 sm:text-lg lg:mt-7">
               Elevate your training with 100% verified authentic supplements. Batch-checked, sealed, and delivered nationwide with uncompromising trust.
             </p>
 
-            <div className="mt-10 flex flex-wrap items-center gap-4">
-              <a href="#catalog" className="hero-btn btn-primary min-h-[56px] text-lg px-8">
+            <div className="mt-7 flex w-full flex-nowrap items-center gap-3 sm:mt-8 sm:gap-4">
+              <a href="#catalog" className="hero-btn btn-primary min-h-[54px] whitespace-nowrap px-6 text-base sm:min-h-[56px] sm:px-7 sm:text-lg">
                 Explore Products <ArrowRight size={20} className="ml-1" />
               </a>
-              <a href="#authenticity" className="hero-btn btn-secondary min-h-[56px] border-white/10 text-lg px-8 bg-white/5 backdrop-blur-md">
+              <a href="#authenticity" className="hero-btn btn-secondary min-h-[54px] whitespace-nowrap border-white/10 bg-white/5 px-6 text-base backdrop-blur-md sm:min-h-[56px] sm:px-7 sm:text-lg">
                 <ShieldCheck size={20} className="mr-2 text-mint" />
                 Verify Authenticity
               </a>
@@ -260,7 +260,7 @@ export function Hero() {
           </div>
 
           {/* Right Column - Visual Showcase */}
-          <div className="relative hidden lg:flex h-[600px] w-full items-center justify-center lg:-translate-y-8" style={{ perspective: "1200px" }}>
+          <div className="relative hidden h-[min(49vw,560px)] min-h-[470px] w-full items-center justify-center lg:flex" style={{ perspective: "1200px" }}>
             <div className="absolute inset-0 rounded-full border border-white/5 pointer-events-none" />
             
             {visualProducts.map((product, i) => (

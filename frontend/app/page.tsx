@@ -13,7 +13,6 @@ import {
   Sparkles,
   Star,
   Truck,
-  WalletCards,
   PackageCheck
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -75,8 +74,7 @@ const testimonials = [
 const deliveryOptions: { icon: LucideIcon; title: string; text: string }[] = [
   { icon: Truck, title: "Dhaka priority", text: "Same-day or next-day delivery target for available stock." },
   { icon: MapPin, title: "Nationwide courier", text: "Coverage for major cities and district-level delivery." },
-  { icon: Banknote, title: "Cash on delivery", text: "Pay after product arrival for lower purchase friction." },
-  { icon: WalletCards, title: "bKash/Nagad ready", text: "Mobile payment status can be added to checkout flow." }
+  { icon: Banknote, title: "Cash on delivery", text: "Pay after product arrival for zero purchase friction." }
 ];
 
 export default function HomePage() {
@@ -91,7 +89,7 @@ export default function HomePage() {
           <div className="grid gap-px overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.06] md:grid-cols-3">
             {[
               { num: "01", title: "Authenticity first", text: "Visible batch, expiry, importer, and sealed-stock checks before dispatch.", icon: ShieldCheck },
-              { num: "02", title: "Bangladesh checkout", text: "Cash on delivery, bKash/Nagad-ready flows, and phone-first ordering.", icon: CheckCircle2 },
+              { num: "02", title: "Bangladesh checkout", text: "Cash on Delivery (COD) nationwide, with phone-first order confirmation.", icon: CheckCircle2 },
               { num: "03", title: "Fast delivery", text: "Dhaka priority delivery with nationwide courier support for supplement orders.", icon: Truck }
             ].map(({ num, title, text, icon: Icon }) => (
               <article className="bg-[#0c1324] p-7 backdrop-blur-md" key={title}>
@@ -270,7 +268,7 @@ export default function HomePage() {
             </div>
           </Reveal>
 
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {deliveryOptions.map(({ icon: Icon, title, text }, index) => (
               <Reveal delay={index * 0.05} key={title}>
                 <article className="rounded-2xl border border-white/[0.06] bg-[#0c1324]/40 p-7 text-center transition-all duration-300 hover:-translate-y-1 hover:border-gold/30 hover:bg-[#0c1324]/75">
