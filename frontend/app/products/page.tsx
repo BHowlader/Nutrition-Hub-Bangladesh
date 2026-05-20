@@ -8,20 +8,22 @@ import { formatTaka, products } from "@/lib/products";
 import {
   ArrowRight,
   BadgeCheck,
+  CookingPot,
   Dumbbell,
   PackageCheck,
   Pill,
   Search,
   ShieldCheck,
-  Sparkles,
-  Truck
+  Truck,
+  UtensilsCrossed
 } from "lucide-react";
 
 const filterCategories = [
   { id: "all", label: "All Products", icon: Dumbbell },
-  { id: "Vitamins and minerals", label: "Vitamins & Minerals", icon: Pill },
-  { id: "Breakfast Cereal and peanut butter", label: "Breakfast & Peanut Butter", icon: Sparkles },
-  { id: "Herbal Supplements", label: "Herbal Supplements", icon: ShieldCheck }
+  { id: "Gym Supplements", label: "Gym Supplements", icon: Dumbbell },
+  { id: "Vitamins & Supplements", label: "Vitamins & Supplements", icon: Pill },
+  { id: "Protein Oats", label: "Protein Oats", icon: CookingPot },
+  { id: "Peanut Butter", label: "Peanut Butter", icon: UtensilsCrossed }
 ];
 
 export default function ProductsPage() {
@@ -276,9 +278,10 @@ export default function ProductsPage() {
             <div>
               <strong className="text-sm font-black uppercase tracking-[0.12em] text-cream/40">Store Categories</strong>
               <ul className="mt-4 space-y-3 text-sm text-cream/60">
-                <li className="transition hover:text-cream cursor-pointer" onClick={() => handleCategoryChange("Vitamins and minerals")}>Vitamins & Minerals</li>
-                <li className="transition hover:text-cream cursor-pointer" onClick={() => handleCategoryChange("Breakfast Cereal and peanut butter")}>Breakfast & Peanut Butter</li>
-                <li className="transition hover:text-cream cursor-pointer" onClick={() => handleCategoryChange("Herbal Supplements")}>Herbal Supplements</li>
+                <li className="transition hover:text-cream cursor-pointer" onClick={() => handleCategoryChange("Gym Supplements")}>Gym Supplements</li>
+                <li className="transition hover:text-cream cursor-pointer" onClick={() => handleCategoryChange("Vitamins & Supplements")}>Vitamins & Supplements</li>
+                <li className="transition hover:text-cream cursor-pointer" onClick={() => handleCategoryChange("Protein Oats")}>Protein Oats</li>
+                <li className="transition hover:text-cream cursor-pointer" onClick={() => handleCategoryChange("Peanut Butter")}>Peanut Butter</li>
               </ul>
             </div>
             <div>

@@ -24,22 +24,28 @@ import { products } from "@/lib/products";
 
 const categories = [
   {
-    title: "Vitamins and minerals",
-    text: "Wellcore Creatines, MuscleBlaze Omega-3s, Multivitamins, and Liquid L-Carnitine support formulas.",
+    title: "Gym Supplements",
+    text: "Wellcore Creatines and MuscleBlaze Liquid L-Carnitine for explosive power, muscle growth, and endurance.",
     icon: Pill,
     accent: "from-gold/20 to-gold/5"
   },
   {
-    title: "Breakfast Cereal and peanut butter",
-    text: "PINTOLA premium dark chocolate high-protein oats and rich crunchy chocolate peanut butter.",
+    title: "Vitamins & Supplements",
+    text: "MuscleBlaze Omega-3s, Multivitamins, Kapiva Ashwagandha Gold, and Shilajit Gold Resin.",
+    icon: ShieldCheck,
+    accent: "from-champagne/20 to-champagne/5"
+  },
+  {
+    title: "Protein Oats",
+    text: "PINTOLA premium dark chocolate and masala high-protein oats and muesli for power breakfasts.",
     icon: Sparkles,
     accent: "from-mint/20 to-mint/5"
   },
   {
-    title: "Herbal Supplements",
-    text: "Pure Himalayan Shilajit Gold Resin and Kapiva Ashwagandha Gold capsules infused with 24k Gold.",
-    icon: ShieldCheck,
-    accent: "from-champagne/20 to-champagne/5"
+    title: "Peanut Butter",
+    text: "PINTOLA high protein chocolate peanut butters in crunchy, creamy, and dark chocolate crispy variants.",
+    icon: Sparkles,
+    accent: "from-gold/20 to-gold/5"
   }
 ];
 
