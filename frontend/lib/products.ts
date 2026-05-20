@@ -64,7 +64,7 @@ export const products: Product[] = [
     description: "Wellcore Micronised Creatine Monohydrate in Watermelon Wave flavor. Rapid absorption formula for explosive power, muscle growth, and ATP production.",
     detail: "83 servings · 307g",
     accent: "#EF4444",
-    image: "/images/products/creatine/watermelon-wave.jpg"
+    image: "/images/products/creatine/watermelon-wave.png"
   },
 
   // ── Gym Supplements › Amino Acid ──
