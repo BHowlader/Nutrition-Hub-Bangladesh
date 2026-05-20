@@ -131,10 +131,10 @@ export default function ProductsPage() {
         </div>
       </section>
 
-      <main className="py-12 md:py-16">
-        <div className="shell grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
-          <aside className="lg:sticky lg:top-28 lg:self-start">
-            <div className="rounded-xl border border-white/[0.08] bg-[#0c1324]/55 p-4 backdrop-blur-md">
+      <main className="relative py-12 md:py-16">
+        <div className="shell grid items-start gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
+          <aside className="lg:sticky lg:top-[7.5rem] lg:max-h-[calc(100svh-8.5rem)] lg:self-start">
+            <div className="rounded-xl border border-white/[0.08] bg-[#0c1324]/55 p-4 backdrop-blur-md lg:max-h-[calc(100svh-8.5rem)] lg:overflow-y-auto">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-sm font-black uppercase tracking-[0.14em] text-cream/55">Categories</h2>
                 <span className="rounded-full bg-white/[0.06] px-2.5 py-1 text-[10px] font-black text-cream/45">
