@@ -382,16 +382,16 @@ export default function HomePage() {
               </p>
             </div>
             <div>
-              <strong className="text-sm font-black uppercase tracking-[0.12em] text-cream/40">Store</strong>
+              <strong className="text-sm font-black uppercase tracking-[0.12em] text-cream/40">Store Categories</strong>
               <ul className="mt-4 space-y-3 text-sm text-cream/60">
-                <li className="transition hover:text-cream cursor-pointer">Whey Protein</li>
-                <li className="transition hover:text-cream cursor-pointer">Creatine</li>
-                <li className="transition hover:text-cream cursor-pointer">Vitamins</li>
-                <li className="transition hover:text-cream cursor-pointer">Wellness</li>
+                <li><Link href="/products?category=Gym Supplements" className="transition hover:text-cream">Gym Supplements</Link></li>
+                <li><Link href="/products?category=Vitamins & Supplements" className="transition hover:text-cream">Vitamins & Supplements</Link></li>
+                <li><Link href="/products?category=Protein Oats" className="transition hover:text-cream">Protein Oats</Link></li>
+                <li><Link href="/products?category=Peanut Butter" className="transition hover:text-cream">Peanut Butter</Link></li>
               </ul>
             </div>
             <div>
-              <strong className="text-sm font-black uppercase tracking-[0.12em] text-cream/40">Trust</strong>
+              <strong className="text-sm font-black uppercase tracking-[0.12em] text-cream/40">Trust Metrics</strong>
               <ul className="mt-4 space-y-3 text-sm text-cream/60">
                 <li className="flex items-center gap-2"><ShieldCheck size={14} className="text-gold" /> Authenticity checks</li>
                 <li className="flex items-center gap-2"><PackageCheck size={14} className="text-gold" /> Sealed stock</li>
