@@ -17,7 +17,7 @@ export function ProductCard({ product }: { product: Product }) {
 
   return (
     <article 
-      className="group relative flex flex-col overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#090d16] transition-all duration-500 hover:border-white/20"
+      className="group relative flex flex-col h-full overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#090d16] transition-all duration-500 hover:border-white/20"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -85,7 +85,7 @@ export function ProductCard({ product }: { product: Product }) {
         </div>
 
         {/* Price & Action Drawer */}
-        <div className="mt-6 border-t border-white/[0.06] pt-5 flex items-center justify-between">
+        <div className="mt-auto border-t border-white/[0.06] pt-5 flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-[9px] font-bold uppercase tracking-widest text-cream/30">BD Price</span>
             <strong className="text-xl font-black text-cream">{formatTaka(product.price)}</strong>

@@ -94,7 +94,7 @@ export function Hero() {
     <>
       <section
         ref={rootRef}
-        className="relative flex min-h-[100svh] items-center overflow-hidden bg-[#04060d] pt-28 md:pt-32 pb-12 md:pb-16"
+        className="relative flex min-h-[100svh] items-center overflow-hidden bg-[#04060d] pt-32 md:pt-36 pb-12 md:pb-16"
       >
         {/* Cinematic Loader Shutter Panels */}
         {loading && (
@@ -221,7 +221,7 @@ export function Hero() {
         <div className="shell relative z-10 mx-auto grid lg:grid-cols-2 gap-12 items-center">
           
           {/* Left Column - Content */}
-          <div className="flex flex-col items-start pt-10 lg:pt-0 lg:-translate-y-10">
+          <div className="flex flex-col items-start pt-10 lg:pt-0 lg:-translate-y-6">
             <div className="hero-badge mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-md">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-mint opacity-75"></span>
@@ -260,7 +260,7 @@ export function Hero() {
           </div>
 
           {/* Right Column - Visual Showcase */}
-          <div className="relative hidden lg:flex h-[600px] w-full items-center justify-center lg:-translate-y-12" style={{ perspective: "1200px" }}>
+          <div className="relative hidden lg:flex h-[600px] w-full items-center justify-center lg:-translate-y-8" style={{ perspective: "1200px" }}>
             <div className="absolute inset-0 rounded-full border border-white/5 pointer-events-none" />
             
             {visualProducts.map((product, i) => (
