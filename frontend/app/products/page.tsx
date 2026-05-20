@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Header } from "@/components/Header";
 import { ProductCard } from "@/components/ProductCard";
@@ -27,6 +27,7 @@ const filterCategories = [
 export default function ProductsPage() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [query, setQuery] = useState("");
+  const catalogRef = useRef<HTMLDivElement>(null);
 
   // Force scroll to top on mount for page transition
   useEffect(() => {
@@ -43,6 +44,11 @@ export default function ProductsPage() {
     const searchText = `${product.name} ${product.category} ${product.description} ${product.detail}`.toLowerCase();
     return searchText.includes(query.trim().toLowerCase());
   });
+
+  const handleCategoryChange = (categoryId: string) => {
+    setActiveCategory(categoryId);
+    catalogRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const categoryCounts = filterCategories.reduce<Record<string, number>>((acc, category) => {
     acc[category.id] = category.id === "all"
@@ -131,7 +137,7 @@ export default function ProductsPage() {
         </div>
       </section>
 
-      <main className="relative py-12 md:py-16">
+      <main ref={catalogRef} className="relative py-12 md:py-16 scroll-mt-[6.75rem]">
         <div className="shell grid items-start gap-8 md:grid-cols-[260px_minmax(0,1fr)] xl:grid-cols-[280px_minmax(0,1fr)]">
           <aside className="md:sticky md:top-[6.75rem] md:self-start">
             <div className="rounded-xl border border-white/[0.08] bg-[#0c1324]/55 p-4 backdrop-blur-md md:max-h-[calc(100svh-7.75rem)] md:overflow-y-auto">
@@ -150,7 +156,7 @@ export default function ProductsPage() {
                   return (
                     <button
                       key={category.id}
-                      onClick={() => setActiveCategory(category.id)}
+                      onClick={() => handleCategoryChange(category.id)}
                       className={`flex w-full items-center justify-between gap-3 rounded-lg border px-3 py-3 text-left transition ${
                         active
                           ? "border-gold/55 bg-gold/10 text-cream"
@@ -270,9 +276,9 @@ export default function ProductsPage() {
             <div>
               <strong className="text-sm font-black uppercase tracking-[0.12em] text-cream/40">Store Categories</strong>
               <ul className="mt-4 space-y-3 text-sm text-cream/60">
-                <li className="transition hover:text-cream cursor-pointer" onClick={() => setActiveCategory("Vitamins and minerals")}>Vitamins & Minerals</li>
-                <li className="transition hover:text-cream cursor-pointer" onClick={() => setActiveCategory("Breakfast Cereal and peanut butter")}>Breakfast & Peanut Butter</li>
-                <li className="transition hover:text-cream cursor-pointer" onClick={() => setActiveCategory("Herbal Supplements")}>Herbal Supplements</li>
+                <li className="transition hover:text-cream cursor-pointer" onClick={() => handleCategoryChange("Vitamins and minerals")}>Vitamins & Minerals</li>
+                <li className="transition hover:text-cream cursor-pointer" onClick={() => handleCategoryChange("Breakfast Cereal and peanut butter")}>Breakfast & Peanut Butter</li>
+                <li className="transition hover:text-cream cursor-pointer" onClick={() => handleCategoryChange("Herbal Supplements")}>Herbal Supplements</li>
               </ul>
             </div>
             <div>
