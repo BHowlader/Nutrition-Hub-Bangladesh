@@ -130,14 +130,17 @@ export default function HomePage() {
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {categories.map(({ title, text, icon: Icon }, index) => (
               <Reveal delay={index * 0.06} key={title}>
-                <article className="group relative min-h-[280px] rounded-2xl border border-white/[0.06] bg-[#0c1324]/40 p-7 transition-all duration-300 hover:-translate-y-1 hover:border-gold/30 hover:bg-[#0c1324]/75 hover:shadow-[0_20px_40px_rgba(96,165,250,0.05)]">
+                <Link
+                  href={`/products?category=${encodeURIComponent(title)}`}
+                  className="group block relative min-h-[280px] rounded-2xl border border-white/[0.06] bg-[#0c1324]/40 p-7 transition-all duration-300 hover:-translate-y-1 hover:border-gold/30 hover:bg-[#0c1324]/75 hover:shadow-[0_20px_40px_rgba(96,165,250,0.05)]"
+                >
                   <div className="mb-8 grid h-14 w-14 place-items-center rounded-xl bg-gold/10 border border-white/5 text-gold">
                     <Icon size={26} />
                   </div>
                   <h3 className="text-xl font-bold text-cream group-hover:text-gold transition-colors duration-300">{title}</h3>
                   <p className="mt-3 text-sm leading-relaxed text-cream/60">{text}</p>
                   <ArrowRight size={18} className="absolute bottom-7 right-7 text-cream/20 transition-all group-hover:text-gold group-hover:translate-x-1" />
-                </article>
+                </Link>
               </Reveal>
             ))}
           </div>
@@ -160,9 +163,9 @@ export default function HomePage() {
                   anyone building a cleaner daily nutrition routine.
                 </p>
               </div>
-              <a className="hidden items-center gap-2 font-black text-gold transition hover:text-mint md:inline-flex text-sm" href="#catalog">
+              <Link className="hidden items-center gap-2 font-black text-gold transition hover:text-mint md:inline-flex text-sm" href="/products">
                 View all products <ArrowRight size={16} />
-              </a>
+              </Link>
             </div>
           </Reveal>
 
@@ -207,9 +210,9 @@ export default function HomePage() {
                   seals, and unclear import sources. We make those concerns part of the
                   purchase flow — not hidden after checkout.
                 </p>
-                <a href="#catalog" className="mt-8 inline-flex items-center gap-2 font-bold text-gold transition hover:text-mint">
+                <Link href="/products" className="mt-8 inline-flex items-center gap-2 font-bold text-gold transition hover:text-mint">
                   Shop verified products <ArrowRight size={18} />
-                </a>
+                </Link>
               </div>
             </Reveal>
 

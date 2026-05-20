@@ -31,10 +31,15 @@ export default function ProductsPage() {
   const [query, setQuery] = useState("");
   const catalogRef = useRef<HTMLDivElement>(null);
 
-  // Force scroll to top on mount for page transition
+  // Force scroll to top on mount for page transition and parse category parameter
   useEffect(() => {
     if (typeof window !== "undefined") {
       window.scrollTo(0, 0);
+      const params = new URLSearchParams(window.location.search);
+      const cat = params.get("category");
+      if (cat && filterCategories.some((c) => c.id === cat)) {
+        setActiveCategory(cat);
+      }
     }
   }, []);
 
