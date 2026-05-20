@@ -45,6 +45,7 @@ export function ProductCard({ product }: { product: Product }) {
             fill
             className="object-cover w-full h-full"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            quality={72}
           />
         </div>
       </div>

@@ -68,7 +68,6 @@ export function Header() {
             width={44}
             height={44}
             className="rounded-lg object-contain"
-            priority
           />
           <span>
             <strong className="block leading-tight">Nutrition Hub</strong>

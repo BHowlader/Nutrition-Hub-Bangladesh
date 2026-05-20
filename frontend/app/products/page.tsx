@@ -69,6 +69,7 @@ export default function ProductsPage() {
             fill
             className="object-cover opacity-[0.18]"
             sizes="100vw"
+            quality={55}
           />
           <div className="absolute inset-0 bg-[linear-gradient(90deg,#04060d_0%,rgba(4,6,13,0.88)_42%,rgba(4,6,13,0.58)_100%)]" />
           <div className="absolute inset-0 bg-[linear-gradient(180deg,#04060d_0%,rgba(4,6,13,0.2)_45%,#04060d_100%)]" />
@@ -115,6 +116,7 @@ export default function ProductsPage() {
                       fill
                       className="object-cover transition duration-500 group-hover:scale-105"
                       sizes="80px"
+                      quality={60}
                     />
                   </div>
                   <div className="min-w-0 flex-1">
