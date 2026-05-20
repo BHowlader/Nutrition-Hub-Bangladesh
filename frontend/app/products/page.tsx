@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Header } from "@/components/Header";
 import { ProductCard } from "@/components/ProductCard";
-import { Reveal } from "@/components/Reveal";
 import { formatTaka, products } from "@/lib/products";
 import {
   ArrowRight,
@@ -69,68 +68,64 @@ export default function ProductsPage() {
             alt=""
             fill
             className="object-cover opacity-[0.18]"
-            priority
+            sizes="100vw"
           />
           <div className="absolute inset-0 bg-[linear-gradient(90deg,#04060d_0%,rgba(4,6,13,0.88)_42%,rgba(4,6,13,0.58)_100%)]" />
           <div className="absolute inset-0 bg-[linear-gradient(180deg,#04060d_0%,rgba(4,6,13,0.2)_45%,#04060d_100%)]" />
         </div>
 
         <div className="shell relative z-10 grid items-end gap-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(360px,0.65fr)]">
-          <Reveal>
-            <div className="max-w-3xl">
-              <p className="eyebrow text-gold">Premium Catalog</p>
-              <h1 className="text-[clamp(2.8rem,6vw,5.8rem)] font-black leading-[0.92] tracking-tight">
-                Verified supplements, organized for serious buyers.
-              </h1>
-              <p className="mt-6 max-w-2xl text-base leading-relaxed text-cream/60 md:text-lg">
-                Browse authentic sports nutrition, wellness essentials, breakfast staples, and herbal formulas with clear stock, serving size, and pricing details.
-              </p>
+          <div className="max-w-3xl">
+            <p className="eyebrow text-gold">Premium Catalog</p>
+            <h1 className="text-[clamp(2.8rem,6vw,5.8rem)] font-black leading-[0.92] tracking-tight">
+              Verified supplements, organized for serious buyers.
+            </h1>
+            <p className="mt-6 max-w-2xl text-base leading-relaxed text-cream/60 md:text-lg">
+              Browse authentic sports nutrition, wellness essentials, breakfast staples, and herbal formulas with clear stock, serving size, and pricing details.
+            </p>
 
-              <div className="mt-8 grid max-w-2xl grid-cols-3 overflow-hidden rounded-xl border border-white/[0.08] bg-[#0c1324]/60 backdrop-blur-md">
-                <div className="p-4">
-                  <strong className="block text-2xl font-black text-cream">{products.length}</strong>
-                  <span className="text-xs font-bold uppercase tracking-wider text-cream/40">Products</span>
-                </div>
-                <div className="border-x border-white/[0.06] p-4">
-                  <strong className="block text-2xl font-black text-cream">{availableCount}</strong>
-                  <span className="text-xs font-bold uppercase tracking-wider text-cream/40">In stock</span>
-                </div>
-                <div className="p-4">
-                  <strong className="block text-2xl font-black text-cream">COD</strong>
-                  <span className="text-xs font-bold uppercase tracking-wider text-cream/40">Available</span>
-                </div>
+            <div className="mt-8 grid max-w-2xl grid-cols-3 overflow-hidden rounded-xl border border-white/[0.08] bg-[#0c1324]/60 backdrop-blur-md">
+              <div className="p-4">
+                <strong className="block text-2xl font-black text-cream">{products.length}</strong>
+                <span className="text-xs font-bold uppercase tracking-wider text-cream/40">Products</span>
+              </div>
+              <div className="border-x border-white/[0.06] p-4">
+                <strong className="block text-2xl font-black text-cream">{availableCount}</strong>
+                <span className="text-xs font-bold uppercase tracking-wider text-cream/40">In stock</span>
+              </div>
+              <div className="p-4">
+                <strong className="block text-2xl font-black text-cream">COD</strong>
+                <span className="text-xs font-bold uppercase tracking-wider text-cream/40">Available</span>
               </div>
             </div>
-          </Reveal>
+          </div>
 
-          <Reveal delay={0.08}>
-            <div className="hidden lg:block">
-              <div className="mb-4 flex items-center justify-between">
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-cream/45">Featured stock</span>
-                <BadgeCheck size={18} className="text-gold" />
-              </div>
-              <div className="space-y-3">
-                {featuredProducts.map((product) => (
-                  <article key={product.id} className="group flex items-center gap-4 rounded-xl border border-white/[0.08] bg-[#0c1324]/72 p-3 backdrop-blur-md transition hover:border-gold/35">
-                    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-[#050811]">
-                      <Image
-                        src={product.image || "/images/logo.png"}
-                        alt={product.name}
-                        fill
-                        className="object-cover transition duration-500 group-hover:scale-105"
-                        sizes="80px"
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-black text-cream">{product.name}</p>
-                      <p className="mt-1 text-xs font-semibold text-cream/45">{product.badge}</p>
-                    </div>
-                    <strong className="whitespace-nowrap text-sm font-black text-gold">{formatTaka(product.price)}</strong>
-                  </article>
-                ))}
-              </div>
+          <div className="hidden lg:block">
+            <div className="mb-4 flex items-center justify-between">
+              <span className="text-xs font-black uppercase tracking-[0.18em] text-cream/45">Featured stock</span>
+              <BadgeCheck size={18} className="text-gold" />
             </div>
-          </Reveal>
+            <div className="space-y-3">
+              {featuredProducts.map((product) => (
+                <article key={product.id} className="group flex items-center gap-4 rounded-xl border border-white/[0.08] bg-[#0c1324]/72 p-3 backdrop-blur-md transition hover:border-gold/35">
+                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-[#050811]">
+                    <Image
+                      src={product.image || "/images/logo.png"}
+                      alt={product.name}
+                      fill
+                      className="object-cover transition duration-500 group-hover:scale-105"
+                      sizes="80px"
+                    />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-black text-cream">{product.name}</p>
+                    <p className="mt-1 text-xs font-semibold text-cream/45">{product.badge}</p>
+                  </div>
+                  <strong className="whitespace-nowrap text-sm font-black text-gold">{formatTaka(product.price)}</strong>
+                </article>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -197,10 +192,8 @@ export default function ProductsPage() {
 
             {filteredProducts.length > 0 ? (
               <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                {filteredProducts.map((product, index) => (
-                  <Reveal key={product.id} delay={index * 0.035}>
-                    <ProductCard product={product} />
-                  </Reveal>
+                {filteredProducts.map((product) => (
+                  <ProductCard product={product} key={product.id} />
                 ))}
               </div>
             ) : (
