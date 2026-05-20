@@ -11,7 +11,12 @@ export const metadata: Metadata = {
   title: "Nutrition Hub Bangladesh | Premium Supplements",
   description:
     "CMS-ready premium e-commerce platform for authentic supplements and sports nutrition in Bangladesh.",
-  metadataBase: new URL("https://nutritionhubbangladesh.com")
+  metadataBase: new URL("https://nutritionhubbangladesh.com"),
+  icons: {
+    icon: "/images/logo.png",
+    shortcut: "/images/logo.png",
+    apple: "/images/logo.png"
+  }
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
