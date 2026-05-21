@@ -711,12 +711,11 @@ function ProductsSection({
       </div>
 
       <div className="overflow-x-auto scrollbar-thin">
-        <table className="w-full min-w-[1040px] border-collapse text-left">
+        <table className="w-full min-w-[880px] border-collapse text-left">
           <thead>
             <tr className="border-b border-cream/[0.08] bg-forest/40 text-[10px] uppercase tracking-wider font-black text-cream/40">
               <th className="px-5 py-3.5">Product</th>
               <th className="py-3.5">Category</th>
-              <th className="py-3.5">SKU</th>
               <th className="py-3.5">Price</th>
               <th className="py-3.5">Stock</th>
               <th className="py-3.5">Status</th>
@@ -732,12 +731,14 @@ function ProductsSection({
                     <div className="min-w-0">
                       <strong className="block max-w-[340px] truncate text-sm text-cream font-bold">{product.name}</strong>
                       <span className="block max-w-[400px] truncate text-xs text-cream/40 mt-0.5">{product.description}</span>
-                      <span className="mt-1 block text-[10px] font-black text-cream/30">/{product.slug}</span>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="inline-block text-[9px] font-black tracking-wider text-gold bg-gold/10 px-1.5 py-0.5 rounded border border-gold/15 font-mono">{product.sku}</span>
+                        <span className="text-[10px] font-black text-cream/30">/{product.slug}</span>
+                      </div>
                     </div>
                   </div>
                 </td>
                 <td className="text-xs font-bold text-cream/70">{product.category?.name || "Unassigned"}</td>
-                <td className="text-xs font-black text-cream/50 tracking-wider">{product.sku}</td>
                 <td>
                   <div className="text-sm font-black text-cream">Tk {Number(product.price).toLocaleString("en-BD")}</div>
                   {product.compare_at_price && (
@@ -785,7 +786,7 @@ function ProductsSection({
             ))}
             {!loading && filteredProducts.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-5 py-16 text-center text-xs font-bold text-cream/30">
+                <td colSpan={6} className="px-5 py-16 text-center text-xs font-bold text-cream/30">
                   No products match the current filters.
                 </td>
               </tr>
