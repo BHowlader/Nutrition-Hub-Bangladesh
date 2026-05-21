@@ -15,6 +15,20 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   const isLoginPage = pathname === "/admin/login";
 
+  // Disable browser-level overscroll/rubber-band on admin routes (rescinded on unmount).
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtml = html.style.overscrollBehavior;
+    const prevBody = body.style.overscrollBehavior;
+    html.style.overscrollBehavior = "none";
+    body.style.overscrollBehavior = "none";
+    return () => {
+      html.style.overscrollBehavior = prevHtml;
+      body.style.overscrollBehavior = prevBody;
+    };
+  }, []);
+
   useEffect(() => {
     if (isLoginPage) return;
     if (loading) return;

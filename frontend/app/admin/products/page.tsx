@@ -529,7 +529,7 @@ export default function AdminProductsPage() {
             </button>
           </div>
           {/* Horizontal Scrollable Tabs */}
-          <div className="flex gap-2 overflow-x-auto scrollbar-thin pb-1">
+          <div className="flex gap-2 overflow-x-auto overscroll-none scrollbar-thin pb-1">
             {([
               ["products", Boxes, "Products"],
               ["orders", ClipboardList, "Orders"],
@@ -558,7 +558,7 @@ export default function AdminProductsPage() {
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 lg:h-screen overflow-y-auto max-w-full z-10 scrollbar-thin">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 lg:h-screen overflow-y-auto overscroll-none max-w-full z-10 scrollbar-thin">
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-cream">
