@@ -61,7 +61,7 @@ export function Hero({
       setLoading(false);
       setProgress(100);
     }
-    
+
     // Disable browser scroll restoration and force scroll to top on reload
     if (typeof window !== "undefined") {
       if ("scrollRestoration" in window.history) {
@@ -110,22 +110,19 @@ export function Hero({
         {loading && (
           <div className="fixed inset-0 z-[999] flex flex-col items-center justify-center pointer-events-none">
             {/* Layered vertical panels sliding away using clean, hardware-accelerated CSS transitions */}
-            <div 
-              className={`absolute inset-0 bg-[#070b14] z-0 transition-transform duration-500 ease-in-out origin-top ${
-                animatingOut ? "scale-y-0" : "scale-y-100"
-              }`} 
+            <div
+              className={`absolute inset-0 bg-[#070b14] z-0 transition-transform duration-500 ease-in-out origin-top ${animatingOut ? "scale-y-0" : "scale-y-100"
+                }`}
               style={{ transitionDelay: "150ms" }}
             />
-            <div 
-              className={`absolute inset-0 bg-[#04060d] z-0 transition-transform duration-500 ease-in-out origin-top ${
-                animatingOut ? "scale-y-0" : "scale-y-100"
-              }`}
+            <div
+              className={`absolute inset-0 bg-[#04060d] z-0 transition-transform duration-500 ease-in-out origin-top ${animatingOut ? "scale-y-0" : "scale-y-100"
+                }`}
             />
 
-            <div 
-              className={`loader-content relative z-10 flex flex-col items-center max-w-md px-6 text-center transition-all duration-300 ease-out ${
-                animatingOut ? "opacity-0 -translate-y-12" : "opacity-100 translate-y-0"
-              }`}
+            <div
+              className={`loader-content relative z-10 flex flex-col items-center max-w-md px-6 text-center transition-all duration-300 ease-out ${animatingOut ? "opacity-0 -translate-y-12" : "opacity-100 translate-y-0"
+                }`}
             >
               {/* Glowing Brand Icon */}
               <div className="relative mb-6 flex h-20 w-20 items-center justify-center rounded-2xl border border-gold/30 bg-gold/5 shadow-[0_0_50px_rgba(96,165,250,0.15)]">
@@ -141,12 +138,12 @@ export function Hero({
 
               {/* Progress Bar Container */}
               <div className="relative mt-8 h-[2px] w-64 overflow-hidden rounded-full bg-white/10">
-                <div 
+                <div
                   className="absolute top-0 left-0 h-full bg-gradient-to-r from-gold via-champagne to-mint transition-all duration-300 ease-out"
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              
+
               {/* Dynamic Loading Text */}
               <span className="mt-4 text-[10px] font-black uppercase tracking-[0.3em] text-gold animate-pulse">
                 Authenticating Sealed Stock {progress}%
@@ -183,8 +180,8 @@ export function Hero({
 
         {/* Perspective 3D Grid Flooring at the bottom */}
         <div className="absolute inset-x-0 bottom-0 h-[450px] overflow-hidden pointer-events-none z-0 opacity-[0.15]">
-          <div 
-            className="animate-grid-travel w-[200%] h-[900px] absolute left-[-50%] top-[-250px]" 
+          <div
+            className="animate-grid-travel w-[200%] h-[900px] absolute left-[-50%] top-[-250px]"
             style={{
               backgroundImage: 'linear-gradient(to right, rgba(96,165,250,0.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(96,165,250,0.15) 1px, transparent 1px)',
               backgroundSize: '4rem 4rem',
@@ -214,9 +211,9 @@ export function Hero({
         {/* Floating Cinematic Dust Particles */}
         <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
           {mounted && Array.from({ length: 18 }).map((_, i) => (
-            <div 
-              key={i} 
-              className="animate-particle absolute rounded-full bg-gold/15 blur-[6px]" 
+            <div
+              key={i}
+              className="animate-particle absolute rounded-full bg-gold/15 blur-[6px]"
               style={{
                 width: `${Math.random() * 8 + 4}px`,
                 height: `${Math.random() * 8 + 4}px`,
@@ -229,7 +226,7 @@ export function Hero({
         </div>
 
         <div className="shell relative z-10 mx-auto grid items-start gap-6 py-2 sm:items-center sm:gap-10 sm:py-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-8 lg:py-0 xl:grid-cols-[minmax(680px,0.95fr)_minmax(0,1.05fr)]">
-          
+
           {/* Left Column - Content */}
           <div className="flex max-w-3xl flex-col items-start">
             <div className="hero-badge mb-4 inline-flex max-w-full items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 backdrop-blur-md sm:mb-5 sm:px-4 sm:py-2">
@@ -242,22 +239,13 @@ export function Hero({
               </span>
             </div>
 
-            <h1 className="flex max-w-full flex-col items-start gap-2 sm:gap-3">
-              {/* Top framer */}
-              <span className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-cream/55 sm:text-[11px] sm:tracking-[0.36em]">
-                <span className="h-px w-7 bg-gold/50 sm:w-10" aria-hidden="true" />
-                Power Your
-              </span>
-
-              {/* Focal hero word */}
-              <span className="block break-words bg-gradient-to-br from-gold via-champagne to-mint bg-clip-text font-extrabold leading-[0.92] tracking-[-0.04em] text-transparent text-[clamp(2.5rem,12.5vw,6.5rem)]">
+            <h1 className="max-w-[10.5ch] text-[clamp(2.25rem,10.5vw,4.75rem)] font-extrabold leading-[0.98] tracking-tight text-cream sm:max-w-none sm:leading-[1.08]">
+              <span className="block">Power Your</span>
+              <span className="bg-gradient-to-r from-gold via-champagne to-mint bg-clip-text text-transparent block sm:inline">
                 Performance.
               </span>
-
-              {/* Bottom framer */}
-              <span className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-cream/55 sm:text-[11px] sm:tracking-[0.36em]">
+              <span className="mt-3 block max-w-[16ch] text-[clamp(1.22rem,5.4vw,3.2rem)] font-bold leading-tight text-cream/78 sm:mt-2 sm:max-w-none">
                 Without Compromise.
-                <span className="h-px w-7 bg-gold/50 sm:w-10" aria-hidden="true" />
               </span>
             </h1>
 
@@ -266,15 +254,15 @@ export function Hero({
             </p>
 
             <div className="mt-5 grid w-full grid-cols-1 gap-2.5 min-[430px]:grid-cols-2 sm:mt-7 sm:flex sm:w-auto sm:items-center sm:gap-3">
-              <a 
-                href="#catalog" 
+              <a
+                href="#catalog"
                 className="group hero-btn btn-primary min-h-[44px] w-full justify-center whitespace-nowrap px-5 text-sm sm:min-h-[52px] sm:w-auto sm:max-w-none sm:px-6 sm:text-base"
               >
-                Explore Products 
+                Explore Products
                 <ArrowRight size={18} className="ml-1.5 transition-transform group-hover:translate-x-1" />
               </a>
-              <a 
-                href="#authenticity" 
+              <a
+                href="#authenticity"
                 className="group hero-btn btn-secondary min-h-[44px] w-full justify-center whitespace-nowrap border-white/10 bg-white/5 px-5 text-sm backdrop-blur-md sm:min-h-[52px] sm:w-auto sm:max-w-none sm:px-6 sm:text-base"
               >
                 <ShieldCheck size={18} className="mr-2 text-mint transition-transform group-hover:scale-110" />
@@ -306,16 +294,14 @@ export function Hero({
                 {visualProducts.slice(1, 3).map((product, index) => (
                   <div
                     key={product.id}
-                    className={`absolute bottom-2 w-[clamp(118px,42vw,205px)] sm:bottom-0 sm:w-[clamp(190px,30vw,245px)] ${
-                      index === 0
+                    className={`absolute bottom-2 w-[clamp(118px,42vw,205px)] sm:bottom-0 sm:w-[clamp(190px,30vw,245px)] ${index === 0
                         ? "left-0 z-20 -rotate-6 sm:left-3"
                         : "right-0 z-10 rotate-6 sm:right-3"
-                    }`}
+                      }`}
                   >
                     <div
-                      className={`overflow-hidden rounded-[1.25rem] border border-white/10 bg-[#0c1324] shadow-[0_22px_55px_rgba(0,0,0,0.38)] sm:rounded-3xl ${
-                        index === 0 ? "animate-float-2" : "animate-float-3"
-                      }`}
+                      className={`overflow-hidden rounded-[1.25rem] border border-white/10 bg-[#0c1324] shadow-[0_22px_55px_rgba(0,0,0,0.38)] sm:rounded-3xl ${index === 0 ? "animate-float-2" : "animate-float-3"
+                        }`}
                       style={{ boxShadow: `0 22px 55px -18px ${product.accent || "#F59E0B"}50` }}
                     >
                       <div className="relative aspect-square">
@@ -337,9 +323,9 @@ export function Hero({
           {/* Right Column - Visual Showcase */}
           <div className="relative hidden w-full items-center justify-center lg:flex lg:h-[min(49vw,560px)] lg:min-h-[470px]" style={{ perspective: "1200px" }}>
             <div className="absolute inset-0 rounded-full border border-white/5 pointer-events-none" />
-            
+
             {visualProducts.map((product, i) => (
-              <div 
+              <div
                 key={product.id}
                 className="hero-visual-card-wrapper absolute transition-all duration-700 ease-out"
                 style={{
@@ -378,7 +364,7 @@ export function Hero({
                 </div>
               </div>
             ))}
-            
+
             {/* Decorative floating elements */}
             <div className="animate-float-1 absolute -right-4 top-32 h-20 w-20 rounded-2xl border border-white/10 bg-gradient-to-tr from-mint/20 to-transparent backdrop-blur-xl" style={{ transform: 'translateZ(-50px) rotate(15deg)' }}></div>
             <div className="animate-float-3 absolute bottom-24 -left-8 h-24 w-24 rounded-full border border-white/10 bg-gradient-to-br from-gold/20 to-transparent backdrop-blur-xl" style={{ transform: 'translateZ(-20px)' }}></div>
