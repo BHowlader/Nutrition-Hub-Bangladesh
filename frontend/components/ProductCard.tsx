@@ -51,7 +51,7 @@ export function ProductCard({ product }: { product: Product }) {
             src={product.image_url || "/images/logo.png"}
             alt={product.name}
             fill
-            className="h-full w-full object-contain p-3 sm:object-cover sm:p-0"
+            className="h-full w-full object-cover"
             sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 25vw"
             quality={72}
           />
