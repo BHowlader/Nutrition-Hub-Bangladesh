@@ -3,7 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.audit import write_audit_log
-from app.core.auth import require_admin, require_trusted_admin_origin
+from app.core.auth import require_admin_google, require_trusted_admin_origin
 from app.core.database import get_db
 from app.core.limiter import limiter
 from app.models.catalog import Category
@@ -24,7 +24,7 @@ def create_category(
     request: Request,
     payload: CategoryCreate,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_admin_google),
 ) -> Category:
     require_trusted_admin_origin(request)
     if db.query(Category).filter((Category.name == payload.name) | (Category.slug == payload.slug)).first():

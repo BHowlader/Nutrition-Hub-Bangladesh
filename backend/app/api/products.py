@@ -9,7 +9,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.audit import write_audit_log
-from app.core.auth import require_admin, require_trusted_admin_origin
+from app.core.auth import require_admin_google, require_trusted_admin_origin
 from app.core.cache import cache_delete_prefix, cache_get_json, cache_set_json
 from app.core.config import settings
 from app.core.database import get_db
@@ -96,7 +96,7 @@ def get_product_by_slug(slug: str, response: Response, db: Session = Depends(get
 @router.get("/admin", response_model=list[ProductRead])
 def admin_list_products(
     db: Session = Depends(get_db),
-    _admin: User = Depends(require_admin),
+    _admin: User = Depends(require_admin_google),
 ) -> list[Product]:
     stmt = select(Product).options(selectinload(Product.category)).order_by(Product.created_at.desc())
     return list(db.scalars(stmt))
@@ -108,7 +108,7 @@ def create_product(
     request: Request,
     payload: ProductCreate,
     db: Session = Depends(get_db),
-    _admin: User = Depends(require_admin),
+    _admin: User = Depends(require_admin_google),
 ) -> Product:
     require_trusted_admin_origin(request)
     product = Product(**payload.model_dump())
@@ -135,7 +135,7 @@ def update_product(
     product_id: str,
     payload: ProductUpdate,
     db: Session = Depends(get_db),
-    _admin: User = Depends(require_admin),
+    _admin: User = Depends(require_admin_google),
 ) -> Product:
     require_trusted_admin_origin(request)
     product = db.get(Product, product_id)
@@ -167,7 +167,7 @@ def delete_product(
     request: Request,
     product_id: str,
     db: Session = Depends(get_db),
-    _admin: User = Depends(require_admin),
+    _admin: User = Depends(require_admin_google),
 ) -> None:
     require_trusted_admin_origin(request)
     product = db.get(Product, product_id)
@@ -192,7 +192,7 @@ def upload_product_image(
     request: Request,
     file: UploadFile,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_admin_google),
 ) -> dict[str, str]:
     require_trusted_admin_origin(request)
     if file.content_type not in ALLOWED_IMAGE_TYPES:

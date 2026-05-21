@@ -5,7 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.audit import write_audit_log
-from app.core.auth import require_admin, require_owner, require_trusted_admin_origin
+from app.core.auth import require_admin_google, require_owner, require_trusted_admin_origin
 from app.core.database import get_db
 from app.core.limiter import limiter
 from app.models.audit import AuditLog
@@ -20,7 +20,7 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 @router.get("/stats", response_model=AdminStats)
 def admin_stats(
     db: Session = Depends(get_db),
-    _admin: User = Depends(require_admin),
+    _admin: User = Depends(require_admin_google),
 ) -> AdminStats:
     revenue = db.scalar(select(func.coalesce(func.sum(Order.total), 0)).where(Order.status != OrderStatus.cancelled))
     return AdminStats(
@@ -36,7 +36,7 @@ def admin_stats(
 @router.get("/audit-logs", response_model=list[AuditLogRead])
 def audit_logs(
     db: Session = Depends(get_db),
-    _admin: User = Depends(require_admin),
+    _admin: User = Depends(require_admin_google),
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
 ) -> list[AuditLog]:

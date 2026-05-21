@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.database import get_db
-from app.models.user import User, UserRole
+from app.models.user import AuthProvider, User, UserRole
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -103,6 +103,17 @@ def get_optional_user(
 def require_admin(user: User = Depends(get_current_user)) -> User:
     if not user.is_admin and user.role not in {UserRole.editor, UserRole.admin, UserRole.owner}:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
+    return user
+
+
+def require_admin_google(user: User = Depends(require_admin)) -> User:
+    """Enforce that admin users authenticated via Google OAuth only.
+    Rejects admin access from email/password authenticated sessions."""
+    if user.auth_provider != AuthProvider.google:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access requires Google authentication. Email/password login is not permitted for admin accounts.",
+        )
     return user
 
 

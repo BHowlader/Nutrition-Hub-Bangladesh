@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.audit import write_audit_log
-from app.core.auth import get_current_user, get_optional_user, require_admin, require_trusted_admin_origin
+from app.core.auth import get_current_user, get_optional_user, require_admin_google, require_trusted_admin_origin
 from app.core.database import get_db
 from app.core.limiter import limiter
 from app.models.catalog import Product
@@ -57,7 +57,7 @@ def my_orders(db: Session = Depends(get_db), user: User = Depends(get_current_us
 @router.get("/admin", response_model=list[OrderRead])
 def admin_orders(
     db: Session = Depends(get_db),
-    _admin: User = Depends(require_admin),
+    _admin: User = Depends(require_admin_google),
     status_filter: OrderStatus | None = Query(default=None, alias="status"),
     limit: int = Query(default=100, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
@@ -75,7 +75,7 @@ def update_order_status(
     order_id: str,
     payload: OrderStatusUpdate,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_admin_google),
 ) -> Order:
     require_trusted_admin_origin(request)
     order = db.scalars(select(Order).options(selectinload(Order.items)).where(Order.id == order_id)).first()

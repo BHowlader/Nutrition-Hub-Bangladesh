@@ -66,6 +66,12 @@ def login(request: Request, response: Response, body: UserLogin, db: Session = D
     user = db.query(User).filter(User.email == body.email.lower().strip()).first()
     if not user or not user.password_hash or not verify_password(body.password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+    # Block admin users from email/password login — must use Google OAuth
+    if user.is_admin or user.role in {UserRole.editor, UserRole.admin, UserRole.owner}:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin accounts must sign in with Google. Email/password login is not permitted for administrative users.",
+        )
     return _token_response(user, response)
 
 
