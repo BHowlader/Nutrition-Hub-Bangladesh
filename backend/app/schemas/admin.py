@@ -60,6 +60,6 @@ class CustomerSummary(BaseModel):
     delivered_count: int = 0
     cancelled_count: int = 0
     last_order_at: datetime | None = None
-    orders: list[OrderRead] = []
+    orders: list[OrderRead] = Field(default_factory=list)
 
     model_config = {"from_attributes": True}

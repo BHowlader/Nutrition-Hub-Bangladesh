@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, Query, Request
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.audit import write_audit_log
@@ -51,7 +51,14 @@ def admin_users(
     _owner: User = Depends(require_owner),
     limit: int = Query(default=100, ge=1, le=200),
 ) -> list[User]:
-    return list(db.scalars(select(User).order_by(User.created_at.desc()).limit(limit)))
+    return list(
+        db.scalars(
+            select(User)
+            .where(User.role.in_([UserRole.editor, UserRole.admin, UserRole.owner]))
+            .order_by(User.created_at.desc())
+            .limit(limit)
+        )
+    )
 
 
 @router.get("/customers", response_model=list[CustomerSummary])
@@ -85,13 +92,13 @@ def admin_customers(
             func.count(Order.id).label("order_count"),
             func.coalesce(
                 func.sum(
-                    func.case((Order.status != OrderStatus.cancelled, Order.total), else_=0)
+                    case((Order.status != OrderStatus.cancelled, Order.total), else_=0)
                 ),
                 0,
             ).label("total_spent"),
-            func.sum(func.case((Order.status == OrderStatus.pending, 1), else_=0)).label("pending_count"),
-            func.sum(func.case((Order.status == OrderStatus.delivered, 1), else_=0)).label("delivered_count"),
-            func.sum(func.case((Order.status == OrderStatus.cancelled, 1), else_=0)).label("cancelled_count"),
+            func.sum(case((Order.status == OrderStatus.pending, 1), else_=0)).label("pending_count"),
+            func.sum(case((Order.status == OrderStatus.delivered, 1), else_=0)).label("delivered_count"),
+            func.sum(case((Order.status == OrderStatus.cancelled, 1), else_=0)).label("cancelled_count"),
             func.max(Order.created_at).label("last_order_at"),
         )
         .where(Order.user_id.in_(user_ids))

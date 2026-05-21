@@ -1061,8 +1061,8 @@ function UsersSection({ users, saving, onRoleChange }: { users: AdminUser[]; sav
               <strong className="block text-sm text-cream font-bold">{adminUser.name}</strong>
               <span className="text-xs text-cream/45 mt-0.5">{adminUser.email}</span>
             </div>
-            <span className={`text-xs font-black uppercase tracking-wider ${adminUser.is_admin ? "text-gold" : "text-cream/35"}`}>
-              {adminUser.is_admin ? "CMS access" : "Customer"}
+            <span className="text-xs font-black uppercase tracking-wider text-gold">
+              CMS access
             </span>
             <div className="relative">
               <select
@@ -1071,7 +1071,6 @@ function UsersSection({ users, saving, onRoleChange }: { users: AdminUser[]; sav
                 onChange={(e) => onRoleChange(adminUser.id, e.target.value)}
                 className="h-10 w-full appearance-none rounded-xl border border-cream/[0.12] bg-forest/60 px-3.5 pr-8 text-xs font-bold text-cream outline-none focus:border-gold/50 focus:ring-4 focus:ring-gold/10 transition-all duration-300 cursor-pointer"
               >
-                <option value="customer">Customer</option>
                 <option value="editor">Editor</option>
                 <option value="admin">Admin</option>
                 <option value="owner">Owner</option>
@@ -1084,7 +1083,7 @@ function UsersSection({ users, saving, onRoleChange }: { users: AdminUser[]; sav
             </div>
           </div>
         ))}
-        {users.length === 0 && <div className="p-16 text-center text-xs font-bold text-cream/30">Only owners can view users.</div>}
+        {users.length === 0 && <div className="p-16 text-center text-xs font-bold text-cream/30">No admin users found.</div>}
       </div>
     </div>
   );
