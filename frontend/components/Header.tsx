@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ShoppingBag, LogIn, LogOut, User as UserIcon } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
@@ -14,6 +14,8 @@ const navItems = [
   ["Products", "/products"],
   ["Authenticity", "/#authenticity"],
 ];
+
+const SKIP_HOME_LOADER_KEY = "nutrition-hub-skip-home-loader";
 
 function UserAvatar({ name, photoUrl }: { name: string; photoUrl: string | null }) {
   if (photoUrl) {
@@ -39,6 +41,7 @@ export function Header() {
   const { user, loading, logout } = useAuth();
   const { totalCount } = useCart();
   const router = useRouter();
+  const pathname = usePathname();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -61,10 +64,16 @@ export function Header() {
     router.push("/cart");
   }
 
+  function handleLogoClick() {
+    if (pathname !== "/" && typeof window !== "undefined") {
+      window.sessionStorage.setItem(SKIP_HOME_LOADER_KEY, "1");
+    }
+  }
+
   return (
     <header className="fixed inset-x-0 top-0 z-50 pt-4">
       <nav className="shell flex min-h-[72px] items-center justify-between gap-6 rounded-lg border border-cream/10 bg-ink/75 px-5 text-cream backdrop-blur-xl">
-        <Link href="/" className="flex items-center gap-3">
+        <Link href="/" onClick={handleLogoClick} className="flex items-center gap-3">
           <Image
             src="/images/logo.png"
             alt="Nutrition Hub Bangladesh"

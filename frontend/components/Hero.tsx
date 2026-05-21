@@ -6,10 +6,19 @@ import { ArrowRight, ArrowDown, ShieldCheck, Zap } from "lucide-react";
 import { fetchProducts, formatTaka, type Product } from "@/lib/products";
 import gsap from "gsap";
 
+const SKIP_HOME_LOADER_KEY = "nutrition-hub-skip-home-loader";
+
+function shouldSkipHomeLoader() {
+  return (
+    typeof window !== "undefined" &&
+    window.sessionStorage.getItem(SKIP_HOME_LOADER_KEY) === "1"
+  );
+}
+
 export function Hero() {
   const rootRef = useRef<HTMLElement>(null);
-  const [loading, setLoading] = useState(true);
-  const [progress, setProgress] = useState(0);
+  const [loading, setLoading] = useState(() => !shouldSkipHomeLoader());
+  const [progress, setProgress] = useState(() => (shouldSkipHomeLoader() ? 100 : 0));
   const [animatingOut, setAnimatingOut] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -21,6 +30,12 @@ export function Hero() {
 
   useEffect(() => {
     setMounted(true);
+    const skipLoader = shouldSkipHomeLoader();
+    if (skipLoader) {
+      window.sessionStorage.removeItem(SKIP_HOME_LOADER_KEY);
+      setLoading(false);
+      setProgress(100);
+    }
     
     // Disable browser scroll restoration and force scroll to top on reload
     if (typeof window !== "undefined") {
@@ -29,6 +44,8 @@ export function Hero() {
       }
       window.scrollTo(0, 0);
     }
+
+    if (skipLoader) return;
 
     // Smooth progress bar simulation
     const interval = setInterval(() => {
@@ -46,14 +63,14 @@ export function Hero() {
 
   // Monitor progress to trigger exit sequence cleanly without GSAP race conditions
   useEffect(() => {
-    if (progress === 100) {
+    if (progress === 100 && loading) {
       setAnimatingOut(true);
       const timer = setTimeout(() => {
         setLoading(false);
       }, 1300); // Matches the panel slide out CSS transition duration
       return () => clearTimeout(timer);
     }
-  }, [progress]);
+  }, [loading, progress]);
 
   // Entrance animations for Hero content after loading finishes
   useEffect(() => {
