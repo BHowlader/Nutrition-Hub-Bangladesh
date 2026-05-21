@@ -46,6 +46,7 @@ def update_hero_settings(
         entity_type="site_settings",
         entity_id="1",
         summary="Updated hero section settings",
+        request=request,
     )
     db.commit()
     db.refresh(row)

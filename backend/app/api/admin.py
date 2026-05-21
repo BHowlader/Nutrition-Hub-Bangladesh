@@ -71,6 +71,8 @@ def update_user_role(
     old_role = user.role
     user.role = UserRole(payload.role)
     user.is_admin = user.role in {UserRole.editor, UserRole.admin, UserRole.owner}
+    # M5: invalidate every outstanding JWT for this user so a demotion takes effect immediately.
+    user.token_version = int(user.token_version or 0) + 1
     write_audit_log(
         db,
         actor=owner,
@@ -78,6 +80,7 @@ def update_user_role(
         entity_type="user",
         entity_id=user.id,
         summary=f"Changed {user.email} role from {old_role.value} to {user.role.value}",
+        request=request,
     )
     db.commit()
     db.refresh(user)

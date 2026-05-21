@@ -35,7 +35,11 @@ export default function AdminLoginPage() {
       setError("");
       setAuthenticating(true);
       try {
-        await googleLogin(credential);
+        const nonce = typeof window !== "undefined"
+          ? sessionStorage.getItem("google_oauth_nonce") || undefined
+          : undefined;
+        if (typeof window !== "undefined") sessionStorage.removeItem("google_oauth_nonce");
+        await googleLogin(credential, nonce);
 
         // Verify admin role immediately via /api/auth/me
         const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";

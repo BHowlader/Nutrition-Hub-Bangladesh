@@ -1,9 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from slowapi.errors import RateLimitExceeded
 from slowapi import _rate_limit_exceeded_handler
 from sqlalchemy import text
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.api import admin, auth, cart, categories, orders, products, settings as settings_api
 from app.core.config import settings
@@ -17,9 +18,49 @@ if settings.jwt_secret in {"", "development-secret", "local-development-secret",
         "JWT_SECRET is missing, default, or too short. Set a strong random JWT_SECRET (>=32 chars) in backend/.env"
     )
 
+if settings.is_production:
+    if not settings.cookie_secure:
+        raise RuntimeError(
+            "COOKIE_SECURE must be true in production. Auth cookies cannot be transmitted over plain HTTP."
+        )
+    insecure_origins = [
+        o.strip() for o in settings.backend_cors_origins.split(",")
+        if o.strip() and o.strip().startswith("http://") and "localhost" not in o
+    ]
+    if insecure_origins:
+        raise RuntimeError(
+            f"BACKEND_CORS_ORIGINS contains insecure http:// entries in production: {insecure_origins}"
+        )
+    if not settings.google_client_id:
+        raise RuntimeError("GOOGLE_CLIENT_ID must be set in production for admin OAuth.")
+
 app = FastAPI(title="Nutrition Hub Bangladesh API", version="0.1.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    """M6: defensive HTTP headers — clickjacking, MIME sniffing, referrer scope, HSTS in prod."""
+
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+        response.headers.setdefault(
+            "Permissions-Policy",
+            "geolocation=(), microphone=(), camera=(), payment=()",
+        )
+        response.headers.setdefault("Cross-Origin-Opener-Policy", "same-origin")
+        if settings.is_production:
+            response.headers.setdefault(
+                "Strict-Transport-Security",
+                "max-age=31536000; includeSubDomains",
+            )
+        return response
+
+
+app.add_middleware(SecurityHeadersMiddleware)
 
 origins = [origin.strip() for origin in settings.backend_cors_origins.split(",") if origin.strip()]
 app.add_middleware(
@@ -38,6 +79,11 @@ def create_tables() -> None:
         conn.execute(
             text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT FALSE")
         )
+        conn.execute(
+            text("ALTER TABLE users ADD COLUMN IF NOT EXISTS token_version INTEGER NOT NULL DEFAULT 0")
+        )
+        conn.execute(text("ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS ip_address VARCHAR(64)"))
+        conn.execute(text("ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS user_agent VARCHAR(500)"))
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS badge VARCHAR(120)"))
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS detail VARCHAR(200)"))
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS accent VARCHAR(20)"))

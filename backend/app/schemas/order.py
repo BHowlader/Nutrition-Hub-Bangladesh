@@ -11,10 +11,10 @@ class OrderItemCreate(BaseModel):
 
 class OrderCreate(BaseModel):
     customer_name: str = Field(min_length=2, max_length=160)
-    phone: str = Field(min_length=8, max_length=40)
+    phone: str = Field(min_length=8, max_length=40, pattern=r"^[+\d][\d\s\-()]{6,38}\d$")
     address: str = Field(min_length=8, max_length=500)
-    payment_method: str = "cod"
-    items: list[OrderItemCreate] = Field(min_length=1)
+    payment_method: str = Field(default="cod", pattern=r"^(cod|bkash|nagad|rocket|card)$")
+    items: list[OrderItemCreate] = Field(min_length=1, max_length=50)
 
 
 class OrderItemRead(BaseModel):

@@ -21,6 +21,8 @@ class AuditLogRead(BaseModel):
     entity_id: str | None = None
     summary: str
     metadata_json: str | None = None
+    ip_address: str | None = None
+    user_agent: str | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

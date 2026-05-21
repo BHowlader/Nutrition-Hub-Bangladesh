@@ -39,6 +39,7 @@ def create_category(
         entity_type="category",
         entity_id=category.id,
         summary=f"Created category {category.name}",
+        request=request,
     )
     db.commit()
     db.refresh(category)

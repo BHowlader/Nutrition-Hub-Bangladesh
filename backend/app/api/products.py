@@ -31,6 +31,19 @@ ALLOWED_IMAGE_TYPES = {
 MAX_IMAGE_BYTES = 5 * 1024 * 1024
 
 
+def _detect_image_mime(content: bytes) -> str | None:
+    """Validate image format by magic bytes — don't trust client-supplied content_type."""
+    if len(content) < 12:
+        return None
+    if content[:3] == b"\xff\xd8\xff":
+        return "image/jpeg"
+    if content[:8] == b"\x89PNG\r\n\x1a\n":
+        return "image/png"
+    if content[:4] == b"RIFF" and content[8:12] == b"WEBP":
+        return "image/webp"
+    return None
+
+
 @router.get("", response_model=list[ProductRead])
 def list_products(
     response: Response,
@@ -121,6 +134,7 @@ def create_product(
         entity_type="product",
         entity_id=product.id,
         summary=f"Created product {product.name}",
+        request=request,
     )
     db.commit()
     db.refresh(product)
@@ -154,6 +168,7 @@ def update_product(
         entity_id=product.id,
         summary=f"Updated product {product.name}",
         metadata={"fields": sorted(changes.keys())},
+        request=request,
     )
     db.commit()
     db.refresh(product)
@@ -180,6 +195,7 @@ def delete_product(
         entity_type="product",
         entity_id=product.id,
         summary=f"Deleted product {product.name}",
+        request=request,
     )
     db.delete(product)
     db.commit()
@@ -201,6 +217,14 @@ def upload_product_image(
     content = file.file.read(MAX_IMAGE_BYTES + 1)
     if len(content) > MAX_IMAGE_BYTES:
         raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="Image exceeds 5 MB limit")
+
+    # M3: verify file matches a real image format and matches the declared content_type.
+    detected = _detect_image_mime(content)
+    if detected is None or detected != file.content_type:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="File contents do not match a permitted image format",
+        )
 
     if settings.cloudinary_cloud_name and settings.cloudinary_api_key and settings.cloudinary_api_secret:
         timestamp = str(int(time.time()))
@@ -237,6 +261,7 @@ def upload_product_image(
         entity_id=None,
         summary="Uploaded product image",
         metadata={"image_url": url},
+        request=request,
     )
     db.commit()
     return {"image_url": url}

@@ -14,12 +14,13 @@ class UserLogin(BaseModel):
 
 class GoogleAuth(BaseModel):
     credential: str  # Google ID token
+    nonce: str | None = None  # optional client-generated nonce for replay protection
 
 
 class UserUpdate(BaseModel):
-    name: str | None = None
-    phone: str | None = None
-    address: str | None = None
+    name: str | None = Field(default=None, min_length=1, max_length=160)
+    phone: str | None = Field(default=None, min_length=8, max_length=40, pattern=r"^[+\d][\d\s\-()]{6,38}\d$")
+    address: str | None = Field(default=None, min_length=4, max_length=500)
 
 
 class UserOut(BaseModel):

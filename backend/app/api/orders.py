@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.audit import write_audit_log
@@ -17,11 +17,18 @@ router = APIRouter(prefix="/orders", tags=["orders"])
 
 
 @router.post("", response_model=OrderRead, status_code=status.HTTP_201_CREATED)
+@limiter.limit("5/minute")
 def create_order(
+    request: Request,
     payload: OrderCreate,
     db: Session = Depends(get_db),
     user: User | None = Depends(get_optional_user),
 ) -> Order:
+    # H3: collapse duplicate product_ids so a single item can't bypass per-row stock checks.
+    aggregated: dict[str, int] = {}
+    for item in payload.items:
+        aggregated[item.product_id] = aggregated.get(item.product_id, 0) + item.quantity
+
     order = Order(
         customer_name=payload.customer_name,
         phone=payload.phone,
@@ -31,22 +38,45 @@ def create_order(
     )
 
     total = Decimal("0")
-    for item in payload.items:
-        product = db.get(Product, item.product_id)
-        if not product:
-            raise HTTPException(status_code=404, detail=f"Product {item.product_id} not found")
-        if product.stock < item.quantity:
-            raise HTTPException(status_code=409, detail=f"{product.name} does not have enough stock")
+    decremented: list[tuple[str, int]] = []
+    try:
+        for product_id, quantity in aggregated.items():
+            product = db.get(Product, product_id)
+            if not product:
+                raise HTTPException(status_code=404, detail=f"Product {product_id} not found")
 
-        product.stock -= item.quantity
-        total += product.price * item.quantity
-        order.items.append(OrderItem(product_id=product.id, quantity=item.quantity, unit_price=product.price))
+            # H3: atomic conditional decrement. Only succeeds if there is still enough stock
+            # at the moment of UPDATE, preventing race conditions across concurrent orders.
+            result = db.execute(
+                update(Product)
+                .where(Product.id == product_id, Product.stock >= quantity)
+                .values(stock=Product.stock - quantity)
+            )
+            if result.rowcount == 0:
+                raise HTTPException(
+                    status_code=409,
+                    detail=f"{product.name} does not have enough stock",
+                )
+            decremented.append((product_id, quantity))
 
-    order.total = total
-    db.add(order)
-    db.commit()
-    db.refresh(order)
-    return order
+            total += product.price * quantity
+            order.items.append(
+                OrderItem(product_id=product_id, quantity=quantity, unit_price=product.price)
+            )
+
+        order.total = total
+        db.add(order)
+        db.commit()
+        db.refresh(order)
+        return order
+    except HTTPException:
+        # Roll the SQLAlchemy unit-of-work back so the order row is not persisted.
+        # The atomic UPDATEs above are part of the same transaction — rollback restores stock.
+        db.rollback()
+        raise
+    except Exception:
+        db.rollback()
+        raise
 
 
 @router.get("/my", response_model=list[OrderRead])
@@ -94,6 +124,7 @@ def update_order_status(
         entity_type="order",
         entity_id=order.id,
         summary=f"Changed order {order.id[:8]} from {old_status.value} to {new_status.value}",
+        request=request,
     )
     db.commit()
     db.refresh(order)

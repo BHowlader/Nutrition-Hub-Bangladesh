@@ -21,7 +21,7 @@ interface AuthState {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
-  googleLogin: (credential: string) => Promise<void>;
+  googleLogin: (credential: string, nonce?: string) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (data: { name?: string; phone?: string; address?: string }) => Promise<void>;
   uploadPhoto: (file: File) => Promise<void>;
@@ -83,10 +83,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(data.user);
   }, []);
 
-  const googleLogin = useCallback(async (credential: string) => {
+  const googleLogin = useCallback(async (credential: string, nonce?: string) => {
     const data = await apiFetch("/api/auth/google", {
       method: "POST",
-      body: JSON.stringify({ credential }),
+      body: JSON.stringify(nonce ? { credential, nonce } : { credential }),
     });
     setUser(data.user);
   }, []);
