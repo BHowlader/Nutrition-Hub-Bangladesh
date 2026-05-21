@@ -104,7 +104,7 @@ export function Hero({
     <>
       <section
         ref={rootRef}
-        className="relative flex min-h-[100svh] items-start overflow-hidden bg-[#04060d] pb-7 pt-[5.75rem] sm:items-center sm:pb-10 sm:pt-[7.25rem] md:pt-[7.75rem] lg:pb-12 lg:pt-[7.75rem]"
+        className="relative flex min-h-[100svh] items-start overflow-hidden bg-[#04060d] pb-7 pt-[5.25rem] sm:items-center sm:pb-10 sm:pt-[7.25rem] md:pt-[7.75rem] lg:pb-12 lg:pt-[7.75rem]"
       >
         {/* Cinematic Loader Shutter Panels */}
         {loading && (
@@ -172,10 +172,10 @@ export function Hero({
 
         {/* Living Aurora Borealis / Cinematic Nebula Backdrop */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-          <div className="animate-aurora-1 absolute -left-20 -top-20 h-[650px] w-[650px] rounded-full bg-mint/10 blur-[130px] mix-blend-screen" />
-          <div className="animate-aurora-2 absolute -right-20 -bottom-20 h-[750px] w-[750px] rounded-full bg-gold/10 blur-[150px] mix-blend-screen" />
-          <div className="animate-aurora-3 absolute left-1/3 top-1/4 h-[550px] w-[550px] rounded-full bg-indigo-500/8 blur-[120px] mix-blend-screen" />
-          <div className="animate-aurora-4 absolute right-1/4 top-10 h-[600px] w-[600px] rounded-full bg-cyan-400/8 blur-[130px] mix-blend-screen" />
+          <div className="animate-aurora-1 absolute -left-20 -top-20 h-[360px] w-[360px] rounded-full bg-mint/10 blur-[110px] mix-blend-screen sm:h-[650px] sm:w-[650px] sm:blur-[130px]" />
+          <div className="animate-aurora-2 absolute -right-20 -bottom-20 h-[420px] w-[420px] rounded-full bg-gold/10 blur-[120px] mix-blend-screen sm:h-[750px] sm:w-[750px] sm:blur-[150px]" />
+          <div className="animate-aurora-3 absolute left-1/3 top-1/4 h-[320px] w-[320px] rounded-full bg-indigo-500/8 blur-[100px] mix-blend-screen sm:h-[550px] sm:w-[550px] sm:blur-[120px]" />
+          <div className="animate-aurora-4 absolute right-1/4 top-10 h-[340px] w-[340px] rounded-full bg-cyan-400/8 blur-[105px] mix-blend-screen sm:h-[600px] sm:w-[600px] sm:blur-[130px]" />
         </div>
 
         {/* Dynamic Background Noise */}
@@ -233,40 +233,40 @@ export function Hero({
           {/* Left Column - Content */}
           <div className="flex max-w-3xl flex-col items-start">
             <div className="hero-badge mb-4 inline-flex max-w-full items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 backdrop-blur-md sm:mb-5 sm:px-4 sm:py-2">
-              <span className="relative flex h-2 w-2">
+              <span className="relative flex h-1.5 w-1.5 shrink-0 sm:h-2 sm:w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-mint opacity-75"></span>
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-mint"></span>
+                <span className="relative inline-flex h-full w-full rounded-full bg-mint"></span>
               </span>
-              <span className="truncate text-[10px] font-bold uppercase tracking-[0.14em] text-cream/90 sm:text-xs sm:tracking-wide">
+              <span className="truncate text-[9px] font-bold uppercase tracking-[0.16em] text-cream/90 min-[390px]:text-[10px] sm:text-xs sm:tracking-wide">
                 Premium Supplements Bangladesh
               </span>
             </div>
 
-            <h1 className="max-w-[11ch] text-[clamp(2.45rem,12vw,4.75rem)] font-extrabold leading-[0.96] tracking-tight text-cream sm:max-w-none sm:leading-[1.08]">
-              Power Your{" "}
+            <h1 className="max-w-[10.5ch] text-[clamp(2.25rem,10.5vw,4.75rem)] font-extrabold leading-[0.98] tracking-tight text-cream sm:max-w-none sm:leading-[1.08]">
+              <span className="block">Power Your</span>
               <span className="bg-gradient-to-r from-gold via-champagne to-mint bg-clip-text text-transparent block sm:inline">
                 Performance.
-              </span>{" "}
-              <span className="mt-3 block max-w-[16ch] text-[clamp(1.35rem,6vw,3.2rem)] font-bold leading-tight text-cream/80 sm:mt-2 sm:max-w-none">
+              </span>
+              <span className="mt-3 block max-w-[16ch] text-[clamp(1.22rem,5.4vw,3.2rem)] font-bold leading-tight text-cream/78 sm:mt-2 sm:max-w-none">
                 Without Compromise.
               </span>
             </h1>
 
-            <p className="hero-desc mt-4 max-w-xl text-[0.95rem] leading-7 text-cream/64 sm:mt-6 sm:text-lg sm:leading-relaxed">
+            <p className="hero-desc mt-4 max-w-[34rem] text-[0.9rem] leading-6 text-cream/62 sm:mt-6 sm:text-lg sm:leading-relaxed">
               {heroDescription}
             </p>
 
-            <div className="mt-6 grid w-full grid-cols-1 gap-3 min-[390px]:grid-cols-2 sm:mt-7 sm:flex sm:w-auto sm:items-center">
+            <div className="mt-5 grid w-full grid-cols-1 gap-2.5 min-[430px]:grid-cols-2 sm:mt-7 sm:flex sm:w-auto sm:items-center sm:gap-3">
               <a 
                 href="#catalog" 
-                className="group hero-btn btn-primary min-h-[46px] w-full justify-center whitespace-nowrap px-5 text-sm sm:min-h-[52px] sm:w-auto sm:max-w-none sm:px-6 sm:text-base"
+                className="group hero-btn btn-primary min-h-[44px] w-full justify-center whitespace-nowrap px-5 text-sm sm:min-h-[52px] sm:w-auto sm:max-w-none sm:px-6 sm:text-base"
               >
                 Explore Products 
                 <ArrowRight size={18} className="ml-1.5 transition-transform group-hover:translate-x-1" />
               </a>
               <a 
                 href="#authenticity" 
-                className="group hero-btn btn-secondary min-h-[46px] w-full justify-center whitespace-nowrap border-white/10 bg-white/5 px-5 text-sm backdrop-blur-md sm:min-h-[52px] sm:w-auto sm:max-w-none sm:px-6 sm:text-base"
+                className="group hero-btn btn-secondary min-h-[44px] w-full justify-center whitespace-nowrap border-white/10 bg-white/5 px-5 text-sm backdrop-blur-md sm:min-h-[52px] sm:w-auto sm:max-w-none sm:px-6 sm:text-base"
               >
                 <ShieldCheck size={18} className="mr-2 text-mint transition-transform group-hover:scale-110" />
                 Verify Authenticity
