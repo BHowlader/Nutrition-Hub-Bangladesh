@@ -8,6 +8,7 @@ import { Header } from "@/components/Header";
 import { ProductCard } from "@/components/ProductCard";
 import { formatTaka, type Product } from "@/lib/products";
 import { useAuth } from "@/lib/auth";
+import { useCart } from "@/lib/cart";
 import { Reveal } from "@/components/Reveal";
 import {
   ArrowLeft,
@@ -28,8 +29,13 @@ export function ProductDetailClient({
   relatedProducts: Product[]; 
 }) {
   const { user } = useAuth();
+  const { setQuantity, items } = useCart();
   const router = useRouter();
   const [hoveredImage, setHoveredImage] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [addMsg, setAddMsg] = useState("");
+
+  const inCart = items.find((it) => it.product_id === product.id)?.quantity || 0;
 
   // Force scroll to top on mount
   useEffect(() => {
@@ -169,17 +175,27 @@ export function ProductDetailClient({
                   <div className="mt-8 border-t border-white/[0.06] pt-6">
                     {product.stock > 0 ? (
                       <button
-                        onClick={() => {
+                        onClick={async () => {
                           if (!user) {
                             router.push(`/login?redirect=/products/${product.id}`);
                             return;
                           }
-                          // Handle purchase flow
+                          setAdding(true);
+                          setAddMsg("");
+                          try {
+                            await setQuantity(product.id, inCart + 1);
+                            setAddMsg(`Added to cart (${inCart + 1})`);
+                          } catch (e) {
+                            setAddMsg(e instanceof Error ? e.message : "Failed to add");
+                          } finally {
+                            setAdding(false);
+                          }
                         }}
-                        className="flex w-full min-h-[56px] items-center justify-center gap-2 rounded-xl bg-gold text-ink text-base font-black uppercase tracking-wider transition-all duration-300 hover:bg-champagne shadow-[0_10px_30px_rgba(245,158,11,0.2)]"
+                        disabled={adding}
+                        className="flex w-full min-h-[56px] items-center justify-center gap-2 rounded-xl bg-gold text-ink text-base font-black uppercase tracking-wider transition-all duration-300 hover:bg-champagne shadow-[0_10px_30px_rgba(245,158,11,0.2)] disabled:opacity-50"
                       >
                         <ShoppingBag size={18} />
-                        Place Cash on Delivery Order
+                        {adding ? "Adding…" : inCart > 0 ? `Add another (${inCart} in cart)` : "Add to cart"}
                       </button>
                     ) : (
                       <button
@@ -188,6 +204,9 @@ export function ProductDetailClient({
                       >
                         Sold Out
                       </button>
+                    )}
+                    {addMsg && (
+                      <p className="mt-3 text-center text-xs text-cream/60">{addMsg}</p>
                     )}
                   </div>
 

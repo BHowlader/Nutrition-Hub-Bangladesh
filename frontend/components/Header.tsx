@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ShoppingBag, LogIn, LogOut, User as UserIcon } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { useCart } from "@/lib/cart";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -36,6 +37,7 @@ function UserAvatar({ name, photoUrl }: { name: string; photoUrl: string | null 
 
 export function Header() {
   const { user, loading, logout } = useAuth();
+  const { totalCount } = useCart();
   const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -53,9 +55,10 @@ export function Header() {
 
   function handleCartClick() {
     if (!user) {
-      router.push("/login?redirect=/");
+      router.push("/login?redirect=/cart");
+      return;
     }
-    // Cart functionality placeholder
+    router.push("/cart");
   }
 
   return (
@@ -86,10 +89,15 @@ export function Header() {
         <div className="flex items-center gap-3">
           <button
             onClick={handleCartClick}
-            className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-cream px-4 font-black text-ink"
+            className="relative inline-flex min-h-11 items-center gap-2 rounded-lg bg-cream px-4 font-black text-ink"
           >
             <ShoppingBag size={18} />
             Cart
+            {totalCount > 0 && (
+              <span className="absolute -right-2 -top-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-gold px-1 text-[10px] font-black text-ink ring-2 ring-ink">
+                {totalCount}
+              </span>
+            )}
           </button>
 
           {!loading && (
