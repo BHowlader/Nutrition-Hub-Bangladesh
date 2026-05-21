@@ -5,24 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { PageLoading } from "@/components/PageLoading";
 
-/**
- * Session-gate key: set in sessionStorage only after explicit Google sign-in
- * on the admin login page. Cleared when the browser tab/window closes.
- */
-const ADMIN_SESSION_KEY = "nhb_admin_session";
-
-export function isAdminSessionActive(): boolean {
-  if (typeof window === "undefined") return false;
-  return sessionStorage.getItem(ADMIN_SESSION_KEY) === "active";
-}
-
-export function activateAdminSession(): void {
-  sessionStorage.setItem(ADMIN_SESSION_KEY, "active");
-}
-
-export function clearAdminSession(): void {
-  sessionStorage.removeItem(ADMIN_SESSION_KEY);
-}
+import { isAdminSessionActive } from "@/lib/adminSession";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const { user, loading, logout } = useAuth();
@@ -30,7 +13,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [redirecting, setRedirecting] = useState(false);
 
-  // The login page always renders without any guard
   const isLoginPage = pathname === "/admin/login";
 
   useEffect(() => {
@@ -40,7 +22,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
     // Not logged in at all → redirect to admin login
     if (!user) {
-      clearAdminSession();
       setRedirecting(true);
       router.replace("/admin/login");
       return;
@@ -49,7 +30,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     // Must be admin-tier role
     const isAdmin = user.is_admin || ["editor", "admin", "owner"].includes(user.role);
     if (!isAdmin) {
-      clearAdminSession();
       setRedirecting(true);
       router.replace("/");
       return;
@@ -57,7 +37,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
     // Security enforcement: admin must have used Google auth
     if (user.auth_provider !== "google") {
-      clearAdminSession();
       setRedirecting(true);
       logout().then(() => {
         router.replace("/admin/login");
@@ -65,7 +44,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       return;
     }
 
-    // Session gate: must have gone through admin login page explicitly
+    // Session gate check: must have explicitly signed in at the admin portal
     if (!isAdminSessionActive()) {
       setRedirecting(true);
       router.replace("/admin/login");
@@ -73,7 +52,14 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     }
   }, [user, loading, router, isLoginPage, logout, redirecting]);
 
-  // Login page renders freely — no guards
+  // Reset redirecting flag when we successfully land on the login page
+  useEffect(() => {
+    if (isLoginPage) {
+      setRedirecting(false);
+    }
+  }, [isLoginPage]);
+
+  // Login page renders freely without checks
   if (isLoginPage) {
     return <>{children}</>;
   }
@@ -83,14 +69,14 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     return <PageLoading label="Checking admin access" />;
   }
 
-  // Redirecting or no user → show spinner (useEffect handles redirect)
-  if (redirecting || !user) {
+  // Redirecting or no user or inactive admin session → show spinner
+  if (redirecting || !user || !isAdminSessionActive()) {
     return <PageLoading label="Redirecting to login" />;
   }
 
-  // Not admin, not google, or no admin session → block rendering
+  // Not admin or not google → block rendering
   const isAdmin = user.is_admin || ["editor", "admin", "owner"].includes(user.role);
-  if (!isAdmin || user.auth_provider !== "google" || !isAdminSessionActive()) {
+  if (!isAdmin || user.auth_provider !== "google") {
     return <PageLoading label="Verifying security credentials" />;
   }
 
