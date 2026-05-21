@@ -440,8 +440,8 @@ export default async function HomePage() {
           {/* Divider — visible only on mobile/sm to separate brand from links */}
           <div className="mx-auto my-9 h-px w-24 bg-white/[0.08] sm:my-10 md:hidden" />
 
-          {/* Link columns — 3-col from sm+, all centered until md, left-aligned at md+ */}
-          <div className="grid grid-cols-1 gap-y-9 text-center sm:grid-cols-3 sm:gap-x-6 sm:gap-y-10 md:mt-12 md:gap-x-12 md:text-left">
+          {/* Link columns — 2-col on mobile (Categories | Quick Links) with Trust Metrics centered below; 3-col from sm+ */}
+          <div className="grid grid-cols-2 gap-x-6 gap-y-9 text-center sm:grid-cols-3 sm:gap-x-6 sm:gap-y-10 md:mt-12 md:gap-x-12 md:text-left">
             <nav className="min-w-0">
               <strong className="text-[11px] font-black uppercase tracking-[0.18em] text-cream/45 sm:text-xs">
                 Store Categories
@@ -498,11 +498,11 @@ export default async function HomePage() {
               </ul>
             </nav>
 
-            <div className="min-w-0">
+            <div className="col-span-2 min-w-0 sm:col-span-1">
               <strong className="text-[11px] font-black uppercase tracking-[0.18em] text-cream/45 sm:text-xs">
                 Trust Metrics
               </strong>
-              <ul className="mt-4 space-y-2.5 text-[13px] text-cream/60 sm:space-y-3 sm:text-sm">
+              <ul className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2.5 text-[13px] text-cream/60 sm:mt-4 sm:flex-col sm:items-center sm:gap-x-0 sm:space-y-3 sm:text-sm md:items-start">
                 <li className="flex items-center justify-center gap-2 md:justify-start">
                   <ShieldCheck size={13} className="shrink-0 text-gold" />
                   <span>Authenticity checks</span>

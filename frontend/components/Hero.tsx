@@ -242,13 +242,22 @@ export function Hero({
               </span>
             </div>
 
-            <h1 className="max-w-[10.5ch] text-[clamp(2.25rem,10.5vw,4.75rem)] font-extrabold leading-[0.98] tracking-tight text-cream sm:max-w-none sm:leading-[1.08]">
-              <span className="block">Power Your</span>
-              <span className="bg-gradient-to-r from-gold via-champagne to-mint bg-clip-text text-transparent block sm:inline">
+            <h1 className="flex max-w-full flex-col items-start gap-2 sm:gap-3">
+              {/* Top framer */}
+              <span className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-cream/55 sm:text-[11px] sm:tracking-[0.36em]">
+                <span className="h-px w-7 bg-gold/50 sm:w-10" aria-hidden="true" />
+                Power Your
+              </span>
+
+              {/* Focal hero word */}
+              <span className="block break-words bg-gradient-to-br from-gold via-champagne to-mint bg-clip-text font-extrabold leading-[0.92] tracking-[-0.04em] text-transparent text-[clamp(2.5rem,12.5vw,6.5rem)]">
                 Performance.
               </span>
-              <span className="mt-3 block max-w-[16ch] text-[clamp(1.22rem,5.4vw,3.2rem)] font-bold leading-tight text-cream/78 sm:mt-2 sm:max-w-none">
+
+              {/* Bottom framer */}
+              <span className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-cream/55 sm:text-[11px] sm:tracking-[0.36em]">
                 Without Compromise.
+                <span className="h-px w-7 bg-gold/50 sm:w-10" aria-hidden="true" />
               </span>
             </h1>
 
