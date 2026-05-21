@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, LogIn } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { PageLoading } from "@/components/PageLoading";
 
 declare global {
   interface Window {
@@ -103,7 +104,7 @@ function LoginContent() {
     }
   }
 
-  if (loading) return null;
+  if (loading) return <PageLoading label="Checking session" />;
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-ink">

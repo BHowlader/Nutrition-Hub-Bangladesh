@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, UserPlus } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { PageLoading } from "@/components/PageLoading";
 
 export default function SignupPage() {
   return (
@@ -93,7 +94,7 @@ function SignupContent() {
     }
   }
 
-  if (loading) return null;
+  if (loading) return <PageLoading label="Checking session" />;
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-ink">

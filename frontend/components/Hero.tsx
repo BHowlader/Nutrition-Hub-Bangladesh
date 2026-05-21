@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ArrowRight, ArrowDown, ShieldCheck, Zap } from "lucide-react";
 import { fetchProducts, formatTaka, type Product } from "@/lib/products";
-import gsap from "gsap";
 
 const SKIP_HOME_LOADER_KEY = "nutrition-hub-skip-home-loader";
 
@@ -15,18 +14,17 @@ function shouldSkipHomeLoader() {
   );
 }
 
-export function Hero() {
+export function Hero({ initialProducts = [] }: { initialProducts?: Product[] }) {
   const rootRef = useRef<HTMLElement>(null);
   const [loading, setLoading] = useState(() => !shouldSkipHomeLoader());
   const [progress, setProgress] = useState(() => (shouldSkipHomeLoader() ? 100 : 0));
   const [animatingOut, setAnimatingOut] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
-  const hasAnimated = useRef(false);
+  const [allProducts, setAllProducts] = useState<Product[]>(initialProducts);
 
   useEffect(() => {
-    fetchProducts().then(setAllProducts);
-  }, []);
+    if (initialProducts.length === 0) fetchProducts().then(setAllProducts);
+  }, [initialProducts.length]);
 
   useEffect(() => {
     setMounted(true);
@@ -47,16 +45,15 @@ export function Hero() {
 
     if (skipLoader) return;
 
-    // Smooth progress bar simulation
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(interval);
           return 100;
         }
-        return prev + 5;
+        return prev + 10;
       });
-    }, 35);
+    }, 25);
 
     return () => clearInterval(interval);
   }, []);
@@ -67,43 +64,10 @@ export function Hero() {
       setAnimatingOut(true);
       const timer = setTimeout(() => {
         setLoading(false);
-      }, 1300); // Matches the panel slide out CSS transition duration
+      }, 650);
       return () => clearTimeout(timer);
     }
   }, [loading, progress]);
-
-  // Entrance animations for Hero content after loading finishes
-  useEffect(() => {
-    if (loading || hasAnimated.current) return;
-    hasAnimated.current = true;
-
-    const ctx = gsap.context(() => {
-      // Background glows only - content renders instantly static
-      const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
-
-      // Ambient background glow animations
-      gsap.to(".hero-glow-1", {
-        x: 100,
-        y: -50,
-        scale: 1.2,
-        duration: 8,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
-      gsap.to(".hero-glow-2", {
-        x: -100,
-        y: 50,
-        scale: 1.1,
-        duration: 10,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
-    }, rootRef);
-
-    return () => ctx.revert();
-  }, [loading]);
 
   const visualSlugs = new Set(["creatine-tropical-tango", "pintola-protein-oats", "kapiva-shilajit-gold"]);
   const visualProducts = allProducts.filter((p) => visualSlugs.has(p.slug));
@@ -119,19 +83,19 @@ export function Hero() {
           <div className="fixed inset-0 z-[999] flex flex-col items-center justify-center pointer-events-none">
             {/* Layered vertical panels sliding away using clean, hardware-accelerated CSS transitions */}
             <div 
-              className={`absolute inset-0 bg-[#070b14] z-0 transition-transform duration-1000 ease-in-out origin-top ${
+              className={`absolute inset-0 bg-[#070b14] z-0 transition-transform duration-500 ease-in-out origin-top ${
                 animatingOut ? "scale-y-0" : "scale-y-100"
               }`} 
               style={{ transitionDelay: "150ms" }}
             />
             <div 
-              className={`absolute inset-0 bg-[#04060d] z-0 transition-transform duration-1000 ease-in-out origin-top ${
+              className={`absolute inset-0 bg-[#04060d] z-0 transition-transform duration-500 ease-in-out origin-top ${
                 animatingOut ? "scale-y-0" : "scale-y-100"
               }`}
             />
 
             <div 
-              className={`loader-content relative z-10 flex flex-col items-center max-w-md px-6 text-center transition-all duration-500 ease-out ${
+              className={`loader-content relative z-10 flex flex-col items-center max-w-md px-6 text-center transition-all duration-300 ease-out ${
                 animatingOut ? "opacity-0 -translate-y-12" : "opacity-100 translate-y-0"
               }`}
             >

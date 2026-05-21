@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/Header";
+import { PageLoading } from "@/components/PageLoading";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -133,7 +134,7 @@ export default function DashboardPage() {
     }
   }
 
-  if (loading || !user) return null;
+  if (loading || !user) return <PageLoading label="Loading account" />;
 
   const photoSrc = user.photo_url
     ? user.photo_url.startsWith("http")

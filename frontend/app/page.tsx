@@ -98,7 +98,7 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen bg-ink text-cream antialiased">
       <Header />
-      <Hero />
+      <Hero initialProducts={allProducts} />
 
       {/* Trust Strip */}
       <section id="trust" className="relative z-10 -mt-1 bg-ink">

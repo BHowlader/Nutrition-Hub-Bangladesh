@@ -7,6 +7,7 @@ import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
 import { Header } from "@/components/Header";
+import { PageLoading } from "@/components/PageLoading";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -66,7 +67,7 @@ export default function CartPage() {
     }
   }
 
-  if (authLoading || !user) return null;
+  if (authLoading || !user) return <PageLoading label="Loading cart" />;
 
   return (
     <div className="min-h-screen bg-ink pt-24 md:pt-28 pb-10">
