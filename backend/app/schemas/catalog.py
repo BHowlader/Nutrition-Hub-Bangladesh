@@ -13,6 +13,11 @@ class CategoryRead(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class CategoryCreate(BaseModel):
+    name: str = Field(min_length=2, max_length=120)
+    slug: str = Field(min_length=2, max_length=140)
+
+
 class ProductBase(BaseModel):
     name: str = Field(min_length=2, max_length=180)
     slug: str = Field(min_length=2, max_length=220)

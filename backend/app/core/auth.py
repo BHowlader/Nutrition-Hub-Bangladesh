@@ -1,6 +1,6 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Cookie, Depends, HTTPException, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -15,6 +15,7 @@ bearer_scheme = HTTPBearer(auto_error=False)
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_DAYS = 7
+AUTH_COOKIE_NAME = "nhb_session"
 
 
 def hash_password(password: str) -> str:
@@ -26,7 +27,7 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 
 def create_access_token(user_id: str) -> str:
-    expire = datetime.utcnow() + timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
+    expire = datetime.now(timezone.utc) + timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
     return jwt.encode({"sub": user_id, "exp": expire}, settings.jwt_secret, algorithm=ALGORITHM)
 
 
@@ -38,16 +39,68 @@ def decode_access_token(token: str) -> str | None:
         return None
 
 
+def set_auth_cookie(response: Response, token: str) -> None:
+    response.set_cookie(
+        key=AUTH_COOKIE_NAME,
+        value=token,
+        max_age=ACCESS_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
+        httponly=True,
+        secure=settings.cookie_secure,
+        samesite="lax",
+        domain=settings.cookie_domain,
+        path="/",
+    )
+
+
+def clear_auth_cookie(response: Response) -> None:
+    response.delete_cookie(
+        key=AUTH_COOKIE_NAME,
+        domain=settings.cookie_domain,
+        path="/",
+    )
+
+
+def _resolve_token(
+    creds: HTTPAuthorizationCredentials | None,
+    cookie_token: str | None,
+) -> str | None:
+    if creds is not None:
+        return creds.credentials
+    return cookie_token
+
+
 def get_current_user(
     creds: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+    cookie_token: str | None = Cookie(default=None, alias=AUTH_COOKIE_NAME),
     db: Session = Depends(get_db),
 ) -> User:
-    if creds is None:
+    token = _resolve_token(creds, cookie_token)
+    if not token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
-    user_id = decode_access_token(creds.credentials)
+    user_id = decode_access_token(token)
     if user_id is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+    return user
+
+
+def get_optional_user(
+    creds: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+    cookie_token: str | None = Cookie(default=None, alias=AUTH_COOKIE_NAME),
+    db: Session = Depends(get_db),
+) -> User | None:
+    token = _resolve_token(creds, cookie_token)
+    if not token:
+        return None
+    user_id = decode_access_token(token)
+    if user_id is None:
+        return None
+    return db.query(User).filter(User.id == user_id).first()
+
+
+def require_admin(user: User = Depends(get_current_user)) -> User:
+    if not user.is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
     return user
