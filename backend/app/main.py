@@ -165,15 +165,20 @@ def create_tables() -> None:
         conn.execute(text("CREATE INDEX IF NOT EXISTS ix_products_status_created_at ON products (status, created_at DESC)"))
         conn.execute(text("CREATE INDEX IF NOT EXISTS ix_products_category_status_created_at ON products (category_id, status, created_at DESC)"))
         conn.execute(text("CREATE INDEX IF NOT EXISTS ix_categories_name ON categories (name)"))
-        # Reconcile admin privileges against ADMIN_EMAIL on every boot. The .env list
-        # is the single source of truth: only emails present there may hold
-        # editor/admin/owner. Anyone else who somehow accrued a privileged role
-        # (manual SQL, legacy seeding, removed from the list) is demoted here,
-        # and their JWTs are revoked via token_version bump (M5).
-        if settings.admin_emails:
-            for email in settings.admin_emails:
+        # Reconcile CMS privileges against OWNER_EMAIL and ADMIN_EMAIL on every boot.
+        # OWNER_EMAIL receives owner, ADMIN_EMAIL receives admin. Anyone outside
+        # those lists is demoted and their JWTs are revoked via token_version bump.
+        if settings.privileged_emails:
+            for email in settings.owner_emails:
                 conn.execute(
                     text("UPDATE users SET is_admin = TRUE, role = 'owner' WHERE email = :email"),
+                    {"email": email},
+                )
+            for email in settings.admin_emails:
+                if email in settings.owner_emails:
+                    continue
+                conn.execute(
+                    text("UPDATE users SET is_admin = TRUE, role = 'admin' WHERE email = :email"),
                     {"email": email},
                 )
             conn.execute(
@@ -185,7 +190,7 @@ def create_tables() -> None:
                     "WHERE email NOT IN :emails "
                     "  AND (is_admin = TRUE OR role IN ('editor', 'admin', 'owner'))"
                 ).bindparams(bindparam("emails", expanding=True)),
-                {"emails": list(settings.admin_emails)},
+                {"emails": list(settings.privileged_emails)},
             )
         else:
             # No admin list configured — strip everyone (refuse to allow any admin to exist).

@@ -72,7 +72,7 @@ def _token_response(user: User, response: Response) -> TokenResponse:
 def register(request: Request, response: Response, body: UserCreate, db: Session = Depends(get_db)):
     email = body.email.lower().strip()
     # H1: prevent admin-email pre-registration lockout. Admin emails must onboard via Google OAuth only.
-    if email in settings.admin_emails:
+    if email in settings.privileged_emails:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="This email is reserved for administrators. Please sign in with Google.",
@@ -133,7 +133,8 @@ def _verify_google_id_token(id_token_str: str, expected_nonce: str | None) -> di
 
 def _upsert_google_user(db: Session, idinfo: dict) -> User:
     email = idinfo["email"].lower().strip()
-    is_admin_email = email in settings.admin_emails
+    configured_role = UserRole(settings.role_for_email(email))
+    is_admin_email = configured_role in {UserRole.admin, UserRole.owner}
     user = db.query(User).filter(User.email == email).first()
 
     if not user:
@@ -143,7 +144,7 @@ def _upsert_google_user(db: Session, idinfo: dict) -> User:
             photo_url=idinfo.get("picture"),
             auth_provider=AuthProvider.google,
             is_admin=is_admin_email,
-            role=UserRole.owner if is_admin_email else UserRole.customer,
+            role=configured_role,
         )
         db.add(user)
         db.commit()
@@ -155,9 +156,9 @@ def _upsert_google_user(db: Session, idinfo: dict) -> User:
             user.auth_provider = AuthProvider.google
             user.password_hash = None
             changed = True
-        if is_admin_email and not user.is_admin:
-            user.is_admin = True
-            user.role = UserRole.owner
+        if user.is_admin != is_admin_email or user.role != configured_role:
+            user.is_admin = is_admin_email
+            user.role = configured_role
             changed = True
         if changed:
             db.commit()
