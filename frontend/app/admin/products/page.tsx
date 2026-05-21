@@ -232,8 +232,15 @@ export default function AdminProductsPage() {
       await logout();
       clearAdminSession();
       router.replace("/admin/login");
+      window.setTimeout(() => {
+        if (window.location.pathname !== "/admin/login") {
+          window.location.replace("/admin/login");
+        }
+      }, 300);
     } catch (e) {
       console.error("Sign out failed", e);
+      clearAdminSession();
+      window.location.replace("/admin/login");
     }
   };
   const [categories, setCategories] = useState<Category[]>([]);

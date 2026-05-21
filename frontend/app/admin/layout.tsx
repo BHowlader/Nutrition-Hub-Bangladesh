@@ -15,6 +15,15 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   const isLoginPage = pathname === "/admin/login";
 
+  function redirectToAdminLogin() {
+    router.replace("/admin/login");
+    window.setTimeout(() => {
+      if (window.location.pathname !== "/admin/login") {
+        window.location.replace("/admin/login");
+      }
+    }, 600);
+  }
+
   // Disable browser-level overscroll/rubber-band on admin routes (rescinded on unmount).
   useEffect(() => {
     const html = document.documentElement;
@@ -37,7 +46,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     // Not logged in at all → redirect to admin login
     if (!user) {
       setRedirecting(true);
-      router.replace("/admin/login");
+      redirectToAdminLogin();
       return;
     }
 
@@ -46,7 +55,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     if (!isAdmin) {
       setRedirecting(true);
       logout().then(() => {
-        router.replace("/admin/login");
+        redirectToAdminLogin();
       });
       return;
     }
@@ -55,7 +64,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     if (user.auth_provider !== "google") {
       setRedirecting(true);
       logout().then(() => {
-        router.replace("/admin/login");
+        redirectToAdminLogin();
       });
       return;
     }
@@ -63,7 +72,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     // Session gate check: must have explicitly signed in at the admin portal
     if (!isAdminSessionActive()) {
       setRedirecting(true);
-      router.replace("/admin/login");
+      redirectToAdminLogin();
       return;
     }
   }, [user, loading, router, isLoginPage, logout, redirecting]);
