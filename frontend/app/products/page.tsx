@@ -72,7 +72,7 @@ export default function ProductsPage() {
     : filterCategories.find((category) => category.id === activeCategory)?.label;
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#04060d] text-cream selection:bg-gold selection:text-ink">
+    <div className="min-h-screen overflow-x-clip bg-[#04060d] text-cream selection:bg-gold selection:text-ink">
       <Header />
 
       {/* HERO */}
@@ -222,129 +222,102 @@ export default function ProductsPage() {
       {/* CATALOG */}
       <main
         ref={catalogRef}
-        className="relative scroll-mt-[66px] py-6 md:scroll-mt-28 md:py-16"
+        className="relative scroll-mt-[66px] py-8 md:scroll-mt-28 md:py-16"
       >
-        <div className="shell md:grid md:grid-cols-[240px_minmax(0,1fr)] md:items-start md:gap-8 xl:grid-cols-[260px_minmax(0,1fr)]">
-          {/* Desktop sidebar */}
-          <aside className="hidden md:sticky md:top-28 md:block md:self-start">
-            <div className="rounded-xl border border-white/[0.08] bg-[#0c1324]/55 p-4 backdrop-blur-md">
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-xs font-black uppercase tracking-[0.14em] text-cream/55">
-                  Categories
-                </h2>
-                <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] font-black text-cream/45">
-                  {filteredProducts.length}
-                </span>
-              </div>
-              <div className="space-y-1.5">
-                {filterCategories.map((category) => {
-                  const Icon = category.icon;
-                  const active = activeCategory === category.id;
-                  return (
-                    <button
-                      key={category.id}
-                      onClick={() => handleCategoryChange(category.id)}
-                      className={`flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2.5 text-left text-sm font-bold transition ${
-                        active
-                          ? "border-gold/55 bg-gold/10 text-cream"
-                          : "border-white/[0.06] bg-white/[0.02] text-cream/60 hover:border-white/15 hover:bg-white/[0.05] hover:text-cream"
-                      }`}
-                    >
-                      <span className="flex min-w-0 items-center gap-2">
-                        <Icon size={16} className={`shrink-0 ${active ? "text-gold" : "text-cream/40"}`} />
-                        <span className="truncate">{category.label}</span>
-                      </span>
-                      <span className="shrink-0 text-xs font-black text-cream/40">
-                        {categoryCounts[category.id]}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </aside>
-
-          {/* Catalog list */}
-          <section className="min-w-0">
-            {/* Filter bar — sticky on mobile, static on desktop */}
-            <div className="sticky top-[64px] z-30 -mx-3 mb-5 border-b border-white/[0.06] bg-[#04060d]/95 px-3 pb-3 pt-3 backdrop-blur-xl sm:-mx-5 sm:px-5 md:static md:top-auto md:mx-0 md:mb-8 md:border-b-0 md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none">
-              <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between md:gap-4 md:border-b md:border-white/[0.06] md:pb-6">
-                <div className="min-w-0">
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gold md:text-xs">
-                    Storefront
-                  </p>
-                  <h2 className="mt-1 truncate text-xl font-black tracking-tight text-cream md:mt-2 md:text-3xl lg:text-4xl">
-                    {activeCategoryLabel}
-                  </h2>
-                  <p className="mt-0.5 text-xs text-cream/50 md:mt-2 md:text-sm">
-                    {filteredProducts.length} of {products.length} items
-                  </p>
-                </div>
-
-                <label className="relative block w-full md:w-[300px] lg:w-[340px]">
-                  <Search
-                    size={16}
-                    className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-cream/40"
-                  />
-                  <input
-                    value={query}
-                    onChange={(event) => setQuery(event.target.value)}
-                    placeholder="Search products"
-                    className="h-11 w-full rounded-xl border border-white/[0.08] bg-[#0c1324]/75 pl-10 pr-3 text-sm font-semibold text-cream outline-none transition placeholder:text-cream/30 focus:border-gold/50 md:h-12"
-                  />
-                </label>
-              </div>
-
-              {/* Mobile category chips */}
-              <div className="-mx-3 mt-3 flex gap-2 overflow-x-auto px-3 pb-0.5 sm:-mx-5 sm:px-5 md:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {filterCategories.map((category) => {
-                  const Icon = category.icon;
-                  const active = activeCategory === category.id;
-                  return (
-                    <button
-                      key={category.id}
-                      onClick={() => handleCategoryChange(category.id)}
-                      className={`flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-xs font-bold transition ${
-                        active
-                          ? "border-gold/55 bg-gold/10 text-cream"
-                          : "border-white/[0.06] bg-white/[0.03] text-cream/60"
-                      }`}
-                    >
-                      <Icon size={13} className={active ? "text-gold" : "text-cream/40"} />
-                      <span className="whitespace-nowrap">{category.label}</span>
-                      <span className="text-[10px] text-cream/30">
-                        ({categoryCounts[category.id]})
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+        <div className="shell">
+          {/* Catalog header — title + search */}
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:gap-6">
+            <div className="min-w-0">
+              <p className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.28em] text-cream/40 sm:text-[11px]">
+                <span className="tabular-nums">02</span>
+                <span className="h-px w-10 bg-gold/50 sm:w-14" />
+                <span>Storefront</span>
+              </p>
+              <h2 className="mt-3 font-display text-2xl font-black tracking-tight text-cream sm:mt-4 sm:text-4xl lg:text-5xl">
+                {activeCategoryLabel}
+              </h2>
+              <p className="mt-2 text-xs uppercase tracking-[0.2em] text-cream/45 sm:text-[11px]">
+                <span className="tabular-nums">{String(filteredProducts.length).padStart(2, "0")}</span>
+                <span className="mx-2 text-cream/25">/</span>
+                <span className="tabular-nums">{String(products.length).padStart(2, "0")}</span>
+                <span className="ml-2">items</span>
+              </p>
             </div>
 
-            {/* Product grid */}
+            <label className="relative block w-full md:w-[320px] lg:w-[360px]">
+              <Search
+                size={15}
+                className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 text-cream/40"
+              />
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search the catalog"
+                className="h-11 w-full border-0 border-b border-white/15 bg-transparent pl-6 pr-2 text-sm font-semibold text-cream outline-none transition placeholder:text-cream/30 focus:border-gold sm:h-12"
+              />
+            </label>
+          </div>
+
+          {/* Category tab nav — full-width hairline, scrolls horizontally at every breakpoint */}
+          <nav className="relative mt-6 sm:mt-8">
+            <div className="-mx-3 overflow-x-auto sm:-mx-5 lg:mx-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <ul className="flex min-w-max items-end gap-7 border-b border-white/[0.08] px-3 sm:gap-9 sm:px-5 lg:px-0">
+                {filterCategories.map((category) => {
+                  const active = activeCategory === category.id;
+                  return (
+                    <li key={category.id}>
+                      <button
+                        onClick={() => handleCategoryChange(category.id)}
+                        className={`group relative -mb-px flex shrink-0 items-baseline gap-2 border-b-2 pb-3 pt-1 text-[11px] font-bold uppercase tracking-[0.2em] transition sm:text-xs ${
+                          active
+                            ? "border-gold text-cream"
+                            : "border-transparent text-cream/45 hover:text-cream/80"
+                        }`}
+                      >
+                        <span className="whitespace-nowrap">{category.label}</span>
+                        <span
+                          className={`text-[9px] tabular-nums transition ${
+                            active ? "text-gold" : "text-cream/30 group-hover:text-cream/45"
+                          }`}
+                        >
+                          {String(categoryCounts[category.id] ?? 0).padStart(2, "0")}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+            {/* Edge fades to telegraph scrollability */}
+            <span className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-[#04060d] to-transparent lg:hidden" />
+            <span className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-[#04060d] to-transparent lg:hidden" />
+          </nav>
+
+          {/* Product grid */}
+          <div className="mt-8 sm:mt-10">
             {filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
+              <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 xl:grid-cols-4">
                 {filteredProducts.map((product) => (
                   <ProductCard product={product} key={product.id} />
                 ))}
               </div>
             ) : (
-              <div className="rounded-xl border border-dashed border-white/[0.1] bg-[#0c1324]/35 px-5 py-12 text-center sm:py-20">
-                <p className="text-base font-bold text-cream/65 sm:text-lg">
-                  No products found.
+              <div className="border border-dashed border-white/[0.1] px-5 py-14 text-center sm:py-24">
+                <p className="font-display text-lg font-black tracking-tight text-cream/70 sm:text-2xl">
+                  No products match.
                 </p>
                 <button
                   onClick={() => {
                     setActiveCategory("all");
                     setQuery("");
                   }}
-                  className="mt-4 inline-flex h-11 items-center gap-2 rounded-lg bg-gold px-5 text-sm font-black text-ink active:scale-[0.98]"
+                  className="mt-5 inline-flex h-11 items-center gap-2 border border-cream px-5 text-[11px] font-black uppercase tracking-[0.22em] text-cream transition hover:bg-cream hover:text-ink"
                 >
-                  Reset catalog <ArrowRight size={16} />
+                  Reset catalog <ArrowRight size={14} />
                 </button>
               </div>
             )}
-          </section>
+          </div>
         </div>
       </main>
 
