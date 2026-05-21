@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from slowapi.errors import RateLimitExceeded
 from slowapi import _rate_limit_exceeded_handler
-from sqlalchemy import text
+from sqlalchemy import bindparam, text
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.api import admin, auth, cart, categories, orders, products, settings as settings_api
@@ -165,13 +165,39 @@ def create_tables() -> None:
         conn.execute(text("CREATE INDEX IF NOT EXISTS ix_products_status_created_at ON products (status, created_at DESC)"))
         conn.execute(text("CREATE INDEX IF NOT EXISTS ix_products_category_status_created_at ON products (category_id, status, created_at DESC)"))
         conn.execute(text("CREATE INDEX IF NOT EXISTS ix_categories_name ON categories (name)"))
+        # Reconcile admin privileges against ADMIN_EMAIL on every boot. The .env list
+        # is the single source of truth: only emails present there may hold
+        # editor/admin/owner. Anyone else who somehow accrued a privileged role
+        # (manual SQL, legacy seeding, removed from the list) is demoted here,
+        # and their JWTs are revoked via token_version bump (M5).
         if settings.admin_emails:
             for email in settings.admin_emails:
                 conn.execute(
                     text("UPDATE users SET is_admin = TRUE, role = 'owner' WHERE email = :email"),
                     {"email": email},
                 )
-        conn.execute(text("UPDATE users SET role = 'admin' WHERE is_admin = TRUE AND role = 'customer'"))
+            conn.execute(
+                text(
+                    "UPDATE users "
+                    "SET is_admin = FALSE, "
+                    "    role = 'customer', "
+                    "    token_version = token_version + 1 "
+                    "WHERE email NOT IN :emails "
+                    "  AND (is_admin = TRUE OR role IN ('editor', 'admin', 'owner'))"
+                ).bindparams(bindparam("emails", expanding=True)),
+                {"emails": list(settings.admin_emails)},
+            )
+        else:
+            # No admin list configured — strip everyone (refuse to allow any admin to exist).
+            conn.execute(
+                text(
+                    "UPDATE users "
+                    "SET is_admin = FALSE, "
+                    "    role = 'customer', "
+                    "    token_version = token_version + 1 "
+                    "WHERE is_admin = TRUE OR role IN ('editor', 'admin', 'owner')"
+                )
+            )
 
     from app.core.database import SessionLocal
     db = SessionLocal()
