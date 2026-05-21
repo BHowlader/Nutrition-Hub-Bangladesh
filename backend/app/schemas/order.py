@@ -14,6 +14,7 @@ class OrderCreate(BaseModel):
     phone: str = Field(min_length=8, max_length=40, pattern=r"^[+\d][\d\s\-()]{6,38}\d$")
     address: str = Field(min_length=8, max_length=500)
     payment_method: str = Field(default="cod", pattern=r"^(cod|bkash|nagad|rocket|card)$")
+    coupon_code: str | None = Field(default=None, min_length=3, max_length=40)
     items: list[OrderItemCreate] = Field(min_length=1, max_length=50)
 
 
@@ -32,6 +33,9 @@ class OrderRead(BaseModel):
     address: str
     payment_method: str
     status: str
+    subtotal: Decimal = Decimal("0")
+    discount_amount: Decimal = Decimal("0")
+    coupon_code: str | None = None
     total: Decimal
     items: list[OrderItemRead]
     created_at: datetime | None = None

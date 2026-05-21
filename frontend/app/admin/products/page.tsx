@@ -18,6 +18,7 @@ import {
   PackageCheck,
   Phone,
   Plus,
+  Percent,
   Search,
   ShieldCheck,
   ShoppingBag,
@@ -37,7 +38,7 @@ const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 type ProductStatus = "draft" | "published" | "archived";
 type StatusFilter = ProductStatus | "all";
-type AdminTab = "products" | "orders" | "customers" | "analytics" | "audit" | "users" | "hero";
+type AdminTab = "products" | "orders" | "customers" | "analytics" | "audit" | "users" | "hero" | "coupons";
 
 interface Customer {
   id: string;
@@ -105,6 +106,9 @@ interface Order {
   address: string;
   payment_method: string;
   status: OrderStatus;
+  subtotal: string;
+  discount_amount: string;
+  coupon_code: string | null;
   total: string;
   items: OrderItem[];
   created_at: string | null;
@@ -138,6 +142,24 @@ interface AdminUser {
   created_at: string;
 }
 
+interface Coupon {
+  id: string;
+  code: string;
+  description: string | null;
+  discount_type: "percent" | "fixed";
+  value: string;
+  min_order_amount: string;
+  max_discount_amount: string | null;
+  active: boolean;
+  starts_at: string | null;
+  ends_at: string | null;
+  usage_limit: number | null;
+  usage_count: number;
+  created_at: string;
+}
+
+type CouponForm = Omit<Coupon, "id" | "usage_count" | "created_at"> & { id?: string };
+
 type FormState = Omit<Product, "id" | "category"> & { id?: string };
 
 const EMPTY_FORM: FormState = {
@@ -157,6 +179,19 @@ const EMPTY_FORM: FormState = {
   subcategory: null,
   status: "draft",
   category_id: "",
+};
+
+const EMPTY_COUPON: CouponForm = {
+  code: "",
+  description: null,
+  discount_type: "percent",
+  value: "10",
+  min_order_amount: "0",
+  max_discount_amount: null,
+  active: true,
+  starts_at: null,
+  ends_at: null,
+  usage_limit: null,
 };
 
 const statusStyles: Record<ProductStatus, string> = {
@@ -248,6 +283,8 @@ export default function AdminProductsPage() {
   const [adminStats, setAdminStats] = useState<AdminStats | null>(null);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [editingCoupon, setEditingCoupon] = useState<CouponForm | null>(null);
   const [heroSettings, setHeroSettings] = useState<HeroSettings | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -267,7 +304,7 @@ export default function AdminProductsPage() {
   const load = useCallback(async () => {
     setError("");
     try {
-      const [p, c, s, o, a, u, h, cust] = await Promise.all([
+      const [p, c, s, o, a, u, h, cust, couponsData] = await Promise.all([
         api<Product[]>("/api/products/admin"),
         api<Category[]>("/api/categories"),
         api<AdminStats>("/api/admin/stats"),
@@ -276,6 +313,7 @@ export default function AdminProductsPage() {
         user?.role === "owner" ? api<AdminUser[]>("/api/admin/users") : Promise.resolve([]),
         api<HeroSettings>("/api/settings/hero"),
         api<Customer[]>("/api/admin/customers"),
+        api<Coupon[]>("/api/admin/coupons"),
       ]);
       setProducts(p);
       setCategories(c);
@@ -285,6 +323,7 @@ export default function AdminProductsPage() {
       setAdminUsers(u);
       setHeroSettings(h);
       setCustomers(cust);
+      setCoupons(couponsData);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load CMS data");
     } finally {
@@ -451,6 +490,56 @@ export default function AdminProductsPage() {
     }
   }
 
+  async function handleCouponSave(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingCoupon) return;
+    setSaving(true);
+    setError("");
+    try {
+      const payload = {
+        ...editingCoupon,
+        code: editingCoupon.code.trim().toUpperCase(),
+        description: editingCoupon.description || null,
+        max_discount_amount: editingCoupon.max_discount_amount || null,
+        starts_at: editingCoupon.starts_at || null,
+        ends_at: editingCoupon.ends_at || null,
+        usage_limit: editingCoupon.usage_limit || null,
+      };
+      if (editingCoupon.id) {
+        await api(`/api/admin/coupons/${editingCoupon.id}`, {
+          method: "PATCH",
+          body: JSON.stringify(payload),
+        });
+      } else {
+        await api("/api/admin/coupons", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+      }
+      setEditingCoupon(null);
+      setNotice(editingCoupon.id ? "Coupon updated" : "Coupon created");
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to save coupon");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleCouponDelete(couponId: string) {
+    setSaving(true);
+    setError("");
+    try {
+      await api(`/api/admin/coupons/${couponId}`, { method: "DELETE" });
+      setNotice("Coupon deleted");
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to delete coupon");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function handleImageUpload(file: File) {
     setUploading(true);
     setError("");
@@ -497,6 +586,7 @@ export default function AdminProductsPage() {
                 ["orders", ClipboardList, "Orders"],
                 ["customers", UserRound, "Customers"],
                 ["analytics", BarChart3, "Analytics"],
+                ["coupons", Percent, "Coupons"],
                 ["audit", History, "Audit Log"],
                 ["hero", Sparkles, "Hero Section"],
                 ...(user?.role === "owner" ? ([["users", Users, "Users"]] as const) : []),
@@ -568,6 +658,7 @@ export default function AdminProductsPage() {
               ["orders", ClipboardList, "Orders"],
               ["customers", UserRound, "Customers"],
               ["analytics", BarChart3, "Analytics"],
+              ["coupons", Percent, "Coupons"],
               ["audit", History, "Audit"],
               ["hero", Sparkles, "Hero"],
               ...(user?.role === "owner" ? ([["users", Users, "Users"]] as const) : []),
@@ -603,6 +694,7 @@ export default function AdminProductsPage() {
                 {activeTab === "orders" && "Track customer purchases, update fulfillment status, and inspect order details."}
                 {activeTab === "customers" && "Browse registered customers, their order history, lifetime spend, and delivery status."}
                 {activeTab === "analytics" && "Review sales, stock health, and performance snapshot metrics."}
+                {activeTab === "coupons" && "Create discount codes, control limits, and track coupon usage."}
                 {activeTab === "audit" && "Inspect security logs and administrative action history."}
                 {activeTab === "users" && "Manage administration access levels and roles."}
                 {activeTab === "hero" && "Edit the homepage hero description and the 3 floating product cards."}
@@ -627,6 +719,15 @@ export default function AdminProductsPage() {
                   Add product
                 </button>
               </div>
+            )}
+            {activeTab === "coupons" && (
+              <button
+                onClick={() => setEditingCoupon({ ...EMPTY_COUPON })}
+                className="btn-primary min-h-10 text-xs sm:text-sm py-2 px-4 rounded-xl"
+              >
+                <Plus size={16} />
+                New coupon
+              </button>
             )}
           </div>
 
@@ -670,6 +771,14 @@ export default function AdminProductsPage() {
           {activeTab === "orders" && <OrdersSection orders={orders} saving={saving} onStatusChange={handleOrderStatus} />}
           {activeTab === "customers" && <CustomersSection customers={customers} loading={loading} />}
           {activeTab === "analytics" && <AnalyticsSection stats={adminStats} products={products} orders={orders} />}
+          {activeTab === "coupons" && (
+            <CouponsSection
+              coupons={coupons}
+              saving={saving}
+              onEdit={(coupon) => setEditingCoupon(couponToForm(coupon))}
+              onDelete={handleCouponDelete}
+            />
+          )}
           {activeTab === "audit" && <AuditSection logs={auditLogs} />}
           {activeTab === "users" && <UsersSection users={adminUsers} saving={saving} onRoleChange={handleUserRole} />}
           {activeTab === "hero" && (
@@ -712,6 +821,16 @@ export default function AdminProductsPage() {
             <ModalActions saving={saving} submitLabel="Create category" onCancel={() => setShowCategoryForm(false)} />
           </form>
         </Modal>
+      )}
+
+      {editingCoupon && (
+        <CouponModal
+          coupon={editingCoupon}
+          saving={saving}
+          setCoupon={setEditingCoupon}
+          onSubmit={handleCouponSave}
+          onClose={() => setEditingCoupon(null)}
+        />
       )}
 
       {deleteTarget && (
@@ -915,6 +1034,75 @@ function productToForm(product: Product): FormState {
   const { category, ...form } = product;
   void category;
   return form;
+}
+
+function couponToForm(coupon: Coupon): CouponForm {
+  const { id, usage_count, created_at, ...form } = coupon;
+  void usage_count;
+  void created_at;
+  return { id, ...form };
+}
+
+function CouponsSection({
+  coupons,
+  saving,
+  onEdit,
+  onDelete,
+}: {
+  coupons: Coupon[];
+  saving: boolean;
+  onEdit: (coupon: Coupon) => void;
+  onDelete: (couponId: string) => void;
+}) {
+  return (
+    <div className="premium-card overflow-hidden">
+      <div className="border-b border-cream/[0.08] p-5">
+        <h2 className="text-lg font-black text-cream">Discount Coupons</h2>
+        <p className="mt-0.5 text-xs text-cream/40">{coupons.length} coupon(s) configured</p>
+      </div>
+      <div className="grid gap-3 p-4 md:grid-cols-2 xl:grid-cols-3">
+        {coupons.map((coupon) => {
+          const value = coupon.discount_type === "percent" ? `${Number(coupon.value)}%` : `Tk ${Number(coupon.value).toLocaleString("en-BD")}`;
+          return (
+            <article key={coupon.id} className="rounded-2xl border border-cream/[0.08] bg-cream/[0.025] p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <strong className="block font-mono text-lg font-black tracking-wider text-gold">{coupon.code}</strong>
+                  <p className="mt-1 line-clamp-2 text-xs text-cream/45">{coupon.description || "No description"}</p>
+                </div>
+                <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black ${coupon.active ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400" : "border-slate-500/20 bg-slate-500/10 text-slate-400"}`}>
+                  {coupon.active ? "Active" : "Inactive"}
+                </span>
+              </div>
+              <div className="mt-5 grid grid-cols-3 gap-2 text-xs">
+                <Metric label="Discount" value={value} />
+                <Metric label="Min order" value={`Tk ${Number(coupon.min_order_amount).toLocaleString("en-BD")}`} />
+                <Metric label="Used" value={`${coupon.usage_count}${coupon.usage_limit ? `/${coupon.usage_limit}` : ""}`} />
+              </div>
+              <div className="mt-5 flex gap-2 border-t border-cream/[0.06] pt-4">
+                <button onClick={() => onEdit(coupon)} className="btn-secondary min-h-10 flex-1 rounded-xl py-2 text-xs">
+                  <Edit3 size={14} />
+                  Edit
+                </button>
+                <button
+                  onClick={() => onDelete(coupon.id)}
+                  disabled={saving}
+                  className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-500/20 bg-red-500/5 px-4 text-xs font-black text-red-400 transition hover:bg-red-500/10 disabled:opacity-40"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            </article>
+          );
+        })}
+        {coupons.length === 0 && (
+          <div className="rounded-2xl border border-dashed border-cream/[0.1] p-12 text-center text-sm font-bold text-cream/35 md:col-span-2 xl:col-span-3">
+            No coupons yet. Create one to start offering discounts.
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 function OrdersSection({ orders, saving, onStatusChange }: { orders: Order[]; saving: boolean; onStatusChange: (id: string, status: OrderStatus) => void }) {
@@ -1525,6 +1713,66 @@ function ProductThumb({ product }: { product: Product }) {
       <Image src={src} alt={product.name} fill className="object-cover" sizes="56px" />
     </div>
   );
+}
+
+function CouponModal({
+  coupon,
+  saving,
+  setCoupon,
+  onSubmit,
+  onClose,
+}: {
+  coupon: CouponForm;
+  saving: boolean;
+  setCoupon: (coupon: CouponForm | null) => void;
+  onSubmit: (event: React.FormEvent) => void;
+  onClose: () => void;
+}) {
+  const update = (patch: Partial<CouponForm>) => setCoupon({ ...coupon, ...patch });
+  return (
+    <Modal title={coupon.id ? "Edit coupon" : "New coupon"} onClose={onClose} maxWidth="max-w-2xl">
+      <form onSubmit={onSubmit} className="space-y-4">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Code" value={coupon.code} onChange={(value) => update({ code: value.toUpperCase() })} />
+          <SelectField label="Discount type" value={coupon.discount_type} onChange={(value) => update({ discount_type: value as "percent" | "fixed" })}>
+            <option value="percent">Percent</option>
+            <option value="fixed">Fixed amount</option>
+          </SelectField>
+          <Field label={coupon.discount_type === "percent" ? "Discount percent" : "Discount amount"} type="number" step="0.01" value={String(coupon.value)} onChange={(value) => update({ value })} />
+          <Field label="Minimum order" type="number" step="0.01" value={String(coupon.min_order_amount)} onChange={(value) => update({ min_order_amount: value })} />
+          <Field label="Max discount" type="number" step="0.01" required={false} value={coupon.max_discount_amount || ""} onChange={(value) => update({ max_discount_amount: value || null })} />
+          <Field label="Usage limit" type="number" required={false} value={coupon.usage_limit ? String(coupon.usage_limit) : ""} onChange={(value) => update({ usage_limit: value ? Number(value) : null })} />
+          <Field label="Starts at" type="datetime-local" required={false} value={toDatetimeLocal(coupon.starts_at)} onChange={(value) => update({ starts_at: value ? new Date(value).toISOString() : null })} />
+          <Field label="Ends at" type="datetime-local" required={false} value={toDatetimeLocal(coupon.ends_at)} onChange={(value) => update({ ends_at: value ? new Date(value).toISOString() : null })} />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-black uppercase tracking-[0.08em] text-cream/40">Description</label>
+          <textarea
+            value={coupon.description || ""}
+            onChange={(e) => update({ description: e.target.value || null })}
+            className="min-h-[90px] w-full rounded-xl border border-cream/[0.12] bg-forest/60 px-3.5 py-2.5 text-xs font-bold text-cream outline-none transition-all duration-300 focus:border-gold/50 focus:ring-4 focus:ring-gold/10"
+          />
+        </div>
+        <label className="inline-flex items-center gap-3 rounded-xl border border-cream/[0.08] bg-cream/[0.02] px-4 py-3 text-xs font-black text-cream/70">
+          <input
+            type="checkbox"
+            checked={coupon.active}
+            onChange={(e) => update({ active: e.target.checked })}
+            className="h-4 w-4 accent-gold"
+          />
+          Active coupon
+        </label>
+        <ModalActions saving={saving} submitLabel={coupon.id ? "Update coupon" : "Create coupon"} onCancel={onClose} />
+      </form>
+    </Modal>
+  );
+}
+
+function toDatetimeLocal(value: string | null) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toISOString().slice(0, 16);
 }
 
 function ProductModal({

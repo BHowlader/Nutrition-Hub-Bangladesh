@@ -10,9 +10,11 @@ from app.core.database import get_db
 from app.core.limiter import limiter
 from app.models.audit import AuditLog
 from app.models.catalog import Product, ProductStatus
+from app.models.coupon import Coupon
 from app.models.order import Order, OrderStatus
 from app.models.user import User, UserRole
 from app.schemas.admin import AdminStats, AuditLogRead, CustomerSummary, UserAdminRead, UserRoleUpdate
+from app.schemas.coupon import CouponCreate, CouponRead, CouponUpdate
 from app.schemas.order import OrderRead
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -43,6 +45,99 @@ def audit_logs(
 ) -> list[AuditLog]:
     stmt = select(AuditLog).order_by(AuditLog.created_at.desc()).offset(offset).limit(limit)
     return list(db.scalars(stmt))
+
+
+@router.get("/coupons", response_model=list[CouponRead])
+def admin_coupons(
+    db: Session = Depends(get_db),
+    _admin: User = Depends(require_admin_google),
+    limit: int = Query(default=200, ge=1, le=500),
+) -> list[Coupon]:
+    return list(db.scalars(select(Coupon).order_by(Coupon.created_at.desc()).limit(limit)))
+
+
+@router.post("/coupons", response_model=CouponRead)
+@limiter.limit("30/minute")
+def create_coupon(
+    request: Request,
+    payload: CouponCreate,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin_google),
+) -> Coupon:
+    require_trusted_admin_origin(request)
+    coupon = Coupon(**payload.model_dump())
+    db.add(coupon)
+    write_audit_log(
+        db,
+        actor=admin,
+        action="coupon.create",
+        entity_type="coupon",
+        entity_id=coupon.id,
+        summary=f"Created coupon {coupon.code}",
+        request=request,
+    )
+    db.commit()
+    db.refresh(coupon)
+    return coupon
+
+
+@router.patch("/coupons/{coupon_id}", response_model=CouponRead)
+@limiter.limit("30/minute")
+def update_coupon(
+    request: Request,
+    coupon_id: str,
+    payload: CouponUpdate,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin_google),
+) -> Coupon:
+    require_trusted_admin_origin(request)
+    coupon = db.get(Coupon, coupon_id)
+    if coupon is None:
+        from fastapi import HTTPException, status
+
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Coupon not found")
+    for key, value in payload.model_dump(exclude_unset=True).items():
+        setattr(coupon, key, value)
+    write_audit_log(
+        db,
+        actor=admin,
+        action="coupon.update",
+        entity_type="coupon",
+        entity_id=coupon.id,
+        summary=f"Updated coupon {coupon.code}",
+        request=request,
+    )
+    db.commit()
+    db.refresh(coupon)
+    return coupon
+
+
+@router.delete("/coupons/{coupon_id}", status_code=204)
+@limiter.limit("30/minute")
+def delete_coupon(
+    request: Request,
+    coupon_id: str,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin_google),
+) -> None:
+    require_trusted_admin_origin(request)
+    coupon = db.get(Coupon, coupon_id)
+    if coupon is None:
+        from fastapi import HTTPException, status
+
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Coupon not found")
+    code = coupon.code
+    db.delete(coupon)
+    write_audit_log(
+        db,
+        actor=admin,
+        action="coupon.delete",
+        entity_type="coupon",
+        entity_id=coupon_id,
+        summary=f"Deleted coupon {code}",
+        request=request,
+    )
+    db.commit()
 
 
 @router.get("/users", response_model=list[UserAdminRead])

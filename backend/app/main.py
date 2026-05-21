@@ -14,7 +14,7 @@ from app.core.config import settings
 from app.core.database import Base, engine
 from app.core.limiter import limiter
 from app.core.seed import seed_if_empty
-from app.models import audit, cart as cart_model, catalog, order, settings as settings_model, user  # noqa: F401
+from app.models import audit, cart as cart_model, catalog, coupon, order, settings as settings_model, user  # noqa: F401
 
 if settings.jwt_secret in {"", "development-secret", "local-development-secret", "change-me"} or len(settings.jwt_secret) < 32:
     raise RuntimeError(
@@ -159,7 +159,14 @@ def create_tables() -> None:
         conn.execute(
             text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS user_id VARCHAR(36) REFERENCES users(id)")
         )
+        conn.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS subtotal NUMERIC(10, 2) NOT NULL DEFAULT 0"))
+        conn.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS discount_amount NUMERIC(10, 2) NOT NULL DEFAULT 0"))
+        conn.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS coupon_code VARCHAR(40)"))
+        conn.execute(text("UPDATE orders SET subtotal = total WHERE subtotal = 0 AND total > 0"))
         conn.execute(text("CREATE INDEX IF NOT EXISTS ix_orders_user_id ON orders (user_id)"))
+        conn.execute(text("CREATE INDEX IF NOT EXISTS ix_orders_coupon_code ON orders (coupon_code)"))
+        conn.execute(text("CREATE INDEX IF NOT EXISTS ix_coupons_code ON coupons (code)"))
+        conn.execute(text("CREATE INDEX IF NOT EXISTS ix_coupons_active_code ON coupons (active, code)"))
         conn.execute(text("CREATE INDEX IF NOT EXISTS ix_products_created_at ON products (created_at)"))
         conn.execute(text("CREATE INDEX IF NOT EXISTS ix_products_category_id ON products (category_id)"))
         conn.execute(text("CREATE INDEX IF NOT EXISTS ix_products_status_created_at ON products (status, created_at DESC)"))

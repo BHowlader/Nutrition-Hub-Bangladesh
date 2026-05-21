@@ -6,11 +6,13 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.core.audit import write_audit_log
 from app.core.auth import get_current_user, get_optional_user, require_admin_google, require_trusted_admin_origin
+from app.core.coupons import get_valid_coupon, money, normalize_coupon_code
 from app.core.database import get_db
 from app.core.limiter import limiter
 from app.models.catalog import Product
 from app.models.order import Order, OrderItem, OrderStatus
 from app.models.user import User
+from app.schemas.coupon import CouponValidateRequest, CouponValidateResponse
 from app.schemas.order import OrderCreate, OrderRead, OrderStatusUpdate
 
 router = APIRouter(prefix="/orders", tags=["orders"])
@@ -64,7 +66,14 @@ def create_order(
                 OrderItem(product_id=product_id, quantity=quantity, unit_price=product.price)
             )
 
-        order.total = total
+        discount = Decimal("0")
+        if payload.coupon_code:
+            coupon, discount = get_valid_coupon(db, payload.coupon_code, total)
+            coupon.usage_count += 1
+            order.coupon_code = normalize_coupon_code(payload.coupon_code)
+            order.discount_amount = discount
+        order.subtotal = total
+        order.total = money(total - discount)
         db.add(order)
         db.commit()
         db.refresh(order)
@@ -77,6 +86,24 @@ def create_order(
     except Exception:
         db.rollback()
         raise
+
+
+@router.post("/coupon/validate", response_model=CouponValidateResponse)
+@limiter.limit("30/minute")
+def validate_coupon(
+    request: Request,
+    payload: CouponValidateRequest,
+    db: Session = Depends(get_db),
+    _user: User | None = Depends(get_optional_user),
+) -> CouponValidateResponse:
+    _coupon, discount = get_valid_coupon(db, payload.code, payload.subtotal)
+    total = money(payload.subtotal - discount)
+    return CouponValidateResponse(
+        code=normalize_coupon_code(payload.code),
+        discount_amount=discount,
+        total=total,
+        message="Coupon applied",
+    )
 
 
 @router.get("/my", response_model=list[OrderRead])

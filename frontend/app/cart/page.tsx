@@ -19,6 +19,9 @@ export default function CartPage() {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [couponCode, setCouponCode] = useState("");
+  const [couponApplying, setCouponApplying] = useState(false);
+  const [coupon, setCoupon] = useState<{ code: string; discount_amount: string; total: string; message: string } | null>(null);
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -36,6 +39,10 @@ export default function CartPage() {
     }
   }, [user]);
 
+  useEffect(() => {
+    setCoupon(null);
+  }, [totalPrice]);
+
   async function handleCheckout(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -50,6 +57,7 @@ export default function CartPage() {
           phone,
           address,
           payment_method: "cod",
+          coupon_code: coupon?.code || undefined,
           items: items.map((it) => ({ product_id: it.product_id, quantity: it.quantity })),
         }),
       });
@@ -66,6 +74,36 @@ export default function CartPage() {
       setSubmitting(false);
     }
   }
+
+  async function applyCoupon() {
+    const code = couponCode.trim();
+    if (!code) return;
+    setError("");
+    setCouponApplying(true);
+    try {
+      const res = await fetch(`${API}/api/orders/coupon/validate`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", ...csrfHeader("POST") },
+        body: JSON.stringify({ code, subtotal: String(totalPrice) }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || "Coupon could not be applied");
+      }
+      const data = await res.json();
+      setCoupon(data);
+      setCouponCode(data.code);
+    } catch (e) {
+      setCoupon(null);
+      setError(e instanceof Error ? e.message : "Coupon could not be applied");
+    } finally {
+      setCouponApplying(false);
+    }
+  }
+
+  const discountAmount = coupon ? Number(coupon.discount_amount) : 0;
+  const payableTotal = Math.max(totalPrice - discountAmount, 0);
 
   if (authLoading || !user) return <PageLoading label="Loading cart" />;
 
@@ -176,6 +214,40 @@ export default function CartPage() {
                   <span>Subtotal</span>
                   <span>৳{totalPrice.toLocaleString()}</span>
                 </div>
+                <div className="rounded-xl border border-cream/10 bg-cream/[0.03] p-2.5">
+                  <label className="mb-2 block text-[10px] font-black uppercase tracking-wider text-cream/35">Discount coupon</label>
+                  <div className="flex gap-2">
+                    <input
+                      value={couponCode}
+                      onChange={(e) => {
+                        setCouponCode(e.target.value.toUpperCase());
+                        setCoupon(null);
+                      }}
+                      placeholder="SAVE10"
+                      className="min-w-0 flex-1 rounded-lg border border-cream/10 bg-ink/60 px-3 py-2 text-xs font-black uppercase tracking-wider text-cream outline-none focus:border-gold/50"
+                    />
+                    <button
+                      type="button"
+                      onClick={applyCoupon}
+                      disabled={couponApplying || !couponCode.trim()}
+                      className="rounded-lg bg-gold px-3 text-xs font-black text-ink disabled:opacity-40"
+                    >
+                      {couponApplying ? "..." : "Apply"}
+                    </button>
+                  </div>
+                  {coupon && (
+                    <div className="mt-2 flex items-center justify-between text-xs text-mint">
+                      <span>{coupon.code} applied</span>
+                      <button type="button" onClick={() => setCoupon(null)} className="font-bold text-cream/45 hover:text-cream">Remove</button>
+                    </div>
+                  )}
+                </div>
+                {discountAmount > 0 && (
+                  <div className="flex justify-between text-mint">
+                    <span>Discount</span>
+                    <span>-৳{discountAmount.toLocaleString()}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-xs text-cream/40">
                   <span>Delivery</span>
                   <span>Calculated at next step</span>
@@ -183,7 +255,7 @@ export default function CartPage() {
               </div>
               <div className="mt-4 flex items-center justify-between">
                 <span className="text-sm font-bold text-cream">Total</span>
-                <span className="text-2xl font-black text-cream">৳{totalPrice.toLocaleString()}</span>
+                <span className="text-2xl font-black text-cream">৳{payableTotal.toLocaleString()}</span>
               </div>
               <button
                 onClick={() => setCheckoutOpen(true)}
@@ -200,7 +272,7 @@ export default function CartPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/80 p-4">
           <div className="w-full max-w-md rounded-xl border border-cream/10 bg-ink p-6 shadow-2xl">
             <h2 className="text-xl font-black text-cream">Delivery details</h2>
-            <p className="mt-1 text-xs text-cream/50">Cash on delivery · Total ৳{totalPrice.toLocaleString()}</p>
+            <p className="mt-1 text-xs text-cream/50">Cash on delivery · Total ৳{payableTotal.toLocaleString()}</p>
 
             {error && (
               <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-400">
