@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Shield, AlertCircle, Lock, ShieldCheck, Fingerprint } from "lucide-react";
+import { Shield, AlertCircle, Lock, ShieldCheck, Fingerprint, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { PageLoading } from "@/components/PageLoading";
+import { activateAdminSession, clearAdminSession } from "../layout";
 
 declare global {
   interface Window {
@@ -34,17 +35,10 @@ export default function AdminLoginPage() {
 
   useEffect(() => {
     setMounted(true);
+    // Always clear admin session when visiting the login page
+    // This forces a fresh Google sign-in
+    clearAdminSession();
   }, []);
-
-  // Redirect if already logged in as admin
-  useEffect(() => {
-    if (!loading && user) {
-      const isAdmin = user.is_admin || ["admin", "owner", "editor"].includes(user.role);
-      if (isAdmin && user.auth_provider === "google") {
-        router.replace("/admin/products");
-      }
-    }
-  }, [loading, user, router]);
 
   // Load Google Identity Services SDK
   useEffect(() => {
@@ -61,6 +55,11 @@ export default function AdminLoginPage() {
           setError("");
           setAuthenticating(true);
           try {
+            // If already logged in with a different account, logout first
+            if (user) {
+              await logout();
+            }
+
             await googleLogin(response.credential);
 
             // Verify admin role immediately via /api/auth/me
@@ -74,18 +73,23 @@ export default function AdminLoginPage() {
 
             if (!isAdmin) {
               await logout();
+              clearAdminSession();
               setError(
                 "Access Denied — Your Google account does not have administrative privileges. Contact the site owner."
               );
             } else if (loggedUser.auth_provider !== "google") {
               await logout();
+              clearAdminSession();
               setError(
                 "Security Policy — Admin accounts must authenticate with Google. Email/password login is not permitted."
               );
             } else {
+              // Success! Activate admin session gate and redirect
+              activateAdminSession();
               router.replace("/admin/products");
             }
           } catch (err) {
+            clearAdminSession();
             setError(
               err instanceof Error ? err.message : "Google authentication failed. Please try again."
             );
@@ -110,7 +114,7 @@ export default function AdminLoginPage() {
     return () => {
       script.remove();
     };
-  }, [googleLogin, logout, router]);
+  }, [googleLogin, logout, user, router]);
 
   if (loading) return <PageLoading label="Verifying session" />;
 
@@ -149,6 +153,44 @@ export default function AdminLoginPage() {
             Authorized personnel only • Google authentication required
           </p>
         </div>
+
+        {/* If user has existing session, show who they are and prompt re-auth */}
+        {user && !authenticating && (
+          <div className="mb-6 rounded-xl border border-cream/10 bg-cream/[0.03] p-4">
+            <div className="flex items-center gap-3">
+              {user.photo_url ? (
+                <Image
+                  src={user.photo_url}
+                  alt={user.name}
+                  width={40}
+                  height={40}
+                  className="rounded-full border border-cream/10"
+                />
+              ) : (
+                <div className="h-10 w-10 rounded-full bg-gold/20 border border-gold/30 flex items-center justify-center text-sm font-black text-gold">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-cream truncate">{user.name}</p>
+                <p className="text-[11px] text-cream/40 truncate">{user.email}</p>
+              </div>
+              <button
+                onClick={async () => {
+                  await logout();
+                  clearAdminSession();
+                }}
+                className="shrink-0 p-2 rounded-lg text-cream/30 hover:text-red-400 hover:bg-red-500/10 transition"
+                title="Sign out"
+              >
+                <LogOut size={16} />
+              </button>
+            </div>
+            <p className="text-[11px] text-cream/40 mt-3 leading-relaxed">
+              You have an existing session. Please sign in with Google below to access the admin portal.
+            </p>
+          </div>
+        )}
 
         {/* Security badges */}
         <div className="grid grid-cols-3 gap-2 mb-6">
