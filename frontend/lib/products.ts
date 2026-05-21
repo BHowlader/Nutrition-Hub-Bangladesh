@@ -164,6 +164,27 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
   return res.json();
 }
 
+export interface HeroSettings {
+  hero_description: string;
+  hero_product_slug_1: string | null;
+  hero_product_slug_2: string | null;
+  hero_product_slug_3: string | null;
+}
+
+export async function fetchHeroSettings(): Promise<HeroSettings | null> {
+  try {
+    const init: RequestInit & { next?: { revalidate: number; tags: string[] } } =
+      typeof window === "undefined"
+        ? { next: { revalidate: 60, tags: ["hero-settings"] } }
+        : {};
+    const res = await fetch(`${API}/api/settings/hero`, init);
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
 export function warmProductCache() {
   if (typeof window === "undefined") return;
   void fetchProducts();

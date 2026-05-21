@@ -14,7 +14,34 @@ function shouldSkipHomeLoader() {
   );
 }
 
-export function Hero({ initialProducts = [] }: { initialProducts?: Product[] }) {
+export interface HeroSettings {
+  hero_description: string;
+  hero_product_slug_1: string | null;
+  hero_product_slug_2: string | null;
+  hero_product_slug_3: string | null;
+}
+
+const DEFAULT_HERO_DESCRIPTION =
+  "Elevate your training with 100% verified authentic supplements. Batch-checked, sealed, and delivered nationwide with uncompromising trust.";
+const DEFAULT_HERO_SLUGS = [
+  "creatine-tropical-tango",
+  "pintola-protein-oats",
+  "kapiva-shilajit-gold",
+] as const;
+
+export function Hero({
+  initialProducts = [],
+  settings,
+}: {
+  initialProducts?: Product[];
+  settings?: HeroSettings | null;
+}) {
+  const heroDescription = settings?.hero_description?.trim() || DEFAULT_HERO_DESCRIPTION;
+  const heroSlugs = [
+    settings?.hero_product_slug_1 || DEFAULT_HERO_SLUGS[0],
+    settings?.hero_product_slug_2 || DEFAULT_HERO_SLUGS[1],
+    settings?.hero_product_slug_3 || DEFAULT_HERO_SLUGS[2],
+  ];
   const rootRef = useRef<HTMLElement>(null);
   const [loading, setLoading] = useState(() => !shouldSkipHomeLoader());
   const [progress, setProgress] = useState(() => (shouldSkipHomeLoader() ? 100 : 0));
@@ -69,8 +96,9 @@ export function Hero({ initialProducts = [] }: { initialProducts?: Product[] }) 
     }
   }, [loading, progress]);
 
-  const visualSlugs = new Set(["creatine-tropical-tango", "pintola-protein-oats", "kapiva-shilajit-gold"]);
-  const visualProducts = allProducts.filter((p) => visualSlugs.has(p.slug));
+  const visualProducts = heroSlugs
+    .map((slug) => allProducts.find((p) => p.slug === slug))
+    .filter((p): p is Product => Boolean(p));
 
   return (
     <>
@@ -227,7 +255,7 @@ export function Hero({ initialProducts = [] }: { initialProducts?: Product[] }) 
             </h1>
 
             <p className="hero-desc mt-6 max-w-xl text-base leading-relaxed text-cream/60 sm:text-lg lg:mt-7">
-              Elevate your training with 100% verified authentic supplements. Batch-checked, sealed, and delivered nationwide with uncompromising trust.
+              {heroDescription}
             </p>
 
             <div className="mt-7 flex w-full flex-nowrap items-center gap-3 sm:mt-8 sm:gap-4">

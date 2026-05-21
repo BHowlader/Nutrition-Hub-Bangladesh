@@ -18,6 +18,7 @@ import {
   Plus,
   Search,
   ShieldCheck,
+  Sparkles,
   Trash2,
   Upload,
   Users,
@@ -32,7 +33,14 @@ const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 type ProductStatus = "draft" | "published" | "archived";
 type StatusFilter = ProductStatus | "all";
-type AdminTab = "products" | "orders" | "analytics" | "audit" | "users";
+type AdminTab = "products" | "orders" | "analytics" | "audit" | "users" | "hero";
+
+interface HeroSettings {
+  hero_description: string;
+  hero_product_slug_1: string | null;
+  hero_product_slug_2: string | null;
+  hero_product_slug_3: string | null;
+}
 type OrderStatus = "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
 
 interface Category {
@@ -205,6 +213,7 @@ export default function AdminProductsPage() {
   const [adminStats, setAdminStats] = useState<AdminStats | null>(null);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
+  const [heroSettings, setHeroSettings] = useState<HeroSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -222,13 +231,14 @@ export default function AdminProductsPage() {
   const load = useCallback(async () => {
     setError("");
     try {
-      const [p, c, s, o, a, u] = await Promise.all([
+      const [p, c, s, o, a, u, h] = await Promise.all([
         api<Product[]>("/api/products/admin"),
         api<Category[]>("/api/categories"),
         api<AdminStats>("/api/admin/stats"),
         api<Order[]>("/api/orders/admin"),
         api<AuditLog[]>("/api/admin/audit-logs"),
         user?.role === "owner" ? api<AdminUser[]>("/api/admin/users") : Promise.resolve([]),
+        api<HeroSettings>("/api/settings/hero"),
       ]);
       setProducts(p);
       setCategories(c);
@@ -236,6 +246,7 @@ export default function AdminProductsPage() {
       setOrders(o);
       setAuditLogs(a);
       setAdminUsers(u);
+      setHeroSettings(h);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load CMS data");
     } finally {
@@ -385,6 +396,23 @@ export default function AdminProductsPage() {
     }
   }
 
+  async function handleHeroSave(payload: HeroSettings) {
+    setSaving(true);
+    setError("");
+    try {
+      const updated = await api<HeroSettings>("/api/admin/hero", {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      });
+      setHeroSettings(updated);
+      setNotice("Hero section updated");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to update hero");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function handleImageUpload(file: File) {
     setUploading(true);
     setError("");
@@ -431,6 +459,7 @@ export default function AdminProductsPage() {
                 ["orders", ClipboardList, "Orders"],
                 ["analytics", BarChart3, "Analytics"],
                 ["audit", History, "Audit Log"],
+                ["hero", Sparkles, "Hero Section"],
                 ...(user?.role === "owner" ? ([["users", Users, "Users"]] as const) : []),
               ] as const).map(([tab, Icon, label]) => {
                 const active = activeTab === tab;
@@ -500,6 +529,7 @@ export default function AdminProductsPage() {
               ["orders", ClipboardList, "Orders"],
               ["analytics", BarChart3, "Analytics"],
               ["audit", History, "Audit"],
+              ["hero", Sparkles, "Hero"],
               ...(user?.role === "owner" ? ([["users", Users, "Users"]] as const) : []),
             ] as const).map(([tab, Icon, label]) => {
               const active = activeTab === tab;
@@ -534,6 +564,7 @@ export default function AdminProductsPage() {
                 {activeTab === "analytics" && "Review sales, stock health, and performance snapshot metrics."}
                 {activeTab === "audit" && "Inspect security logs and administrative action history."}
                 {activeTab === "users" && "Manage administration access levels and roles."}
+                {activeTab === "hero" && "Edit the homepage hero description and the 3 floating product cards."}
               </p>
             </div>
             
@@ -599,6 +630,14 @@ export default function AdminProductsPage() {
           {activeTab === "analytics" && <AnalyticsSection stats={adminStats} products={products} orders={orders} />}
           {activeTab === "audit" && <AuditSection logs={auditLogs} />}
           {activeTab === "users" && <UsersSection users={adminUsers} saving={saving} onRoleChange={handleUserRole} />}
+          {activeTab === "hero" && (
+            <HeroSection
+              settings={heroSettings}
+              products={products}
+              saving={saving}
+              onSave={handleHeroSave}
+            />
+          )}
         </main>
       </div>
 
@@ -1013,6 +1052,139 @@ function UsersSection({ users, saving, onRoleChange }: { users: AdminUser[]; sav
         {users.length === 0 && <div className="p-16 text-center text-xs font-bold text-cream/30">Only owners can view users.</div>}
       </div>
     </div>
+  );
+}
+
+function HeroSection({
+  settings,
+  products,
+  saving,
+  onSave,
+}: {
+  settings: HeroSettings | null;
+  products: Product[];
+  saving: boolean;
+  onSave: (payload: HeroSettings) => void;
+}) {
+  const [description, setDescription] = useState(settings?.hero_description ?? "");
+  const [slug1, setSlug1] = useState(settings?.hero_product_slug_1 ?? "");
+  const [slug2, setSlug2] = useState(settings?.hero_product_slug_2 ?? "");
+  const [slug3, setSlug3] = useState(settings?.hero_product_slug_3 ?? "");
+
+  useEffect(() => {
+    if (settings) {
+      setDescription(settings.hero_description ?? "");
+      setSlug1(settings.hero_product_slug_1 ?? "");
+      setSlug2(settings.hero_product_slug_2 ?? "");
+      setSlug3(settings.hero_product_slug_3 ?? "");
+    }
+  }, [settings]);
+
+  const sortedProducts = useMemo(
+    () => [...products].sort((a, b) => a.name.localeCompare(b.name)),
+    [products]
+  );
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    onSave({
+      hero_description: description,
+      hero_product_slug_1: slug1 || null,
+      hero_product_slug_2: slug2 || null,
+      hero_product_slug_3: slug3 || null,
+    });
+  }
+
+  const productBySlug = (slug: string) => products.find((p) => p.slug === slug);
+
+  return (
+    <form onSubmit={handleSubmit} className="premium-card p-6 space-y-6">
+      <div>
+        <h2 className="text-lg font-black text-cream">Homepage Hero</h2>
+        <p className="text-xs text-cream/40 mt-0.5">
+          Changes appear immediately on the storefront homepage.
+        </p>
+      </div>
+
+      <div>
+        <label className="mb-1 block text-xs font-black uppercase tracking-[0.08em] text-cream/40">
+          Description
+        </label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          maxLength={1000}
+          className="min-h-[110px] w-full rounded-xl border border-cream/[0.12] bg-forest/60 px-3.5 py-2.5 text-sm font-bold text-cream outline-none focus:border-gold/50 focus:ring-4 focus:ring-gold/10 transition-all duration-300"
+          required
+        />
+        <p className="mt-1.5 text-[10px] font-bold text-cream/30">
+          {description.length} / 1000 characters
+        </p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        {[
+          { label: "Floating product 1 (center)", value: slug1, setValue: setSlug1 },
+          { label: "Floating product 2 (left)", value: slug2, setValue: setSlug2 },
+          { label: "Floating product 3 (right)", value: slug3, setValue: setSlug3 },
+        ].map(({ label, value, setValue }, idx) => {
+          const preview = productBySlug(value);
+          return (
+            <div key={idx}>
+              <label className="mb-1 block text-xs font-black uppercase tracking-[0.08em] text-cream/40">
+                {label}
+              </label>
+              <div className="relative">
+                <select
+                  value={value}
+                  onChange={(e) => setValue(e.target.value)}
+                  className="h-10 w-full appearance-none rounded-xl border border-cream/[0.12] bg-forest/60 px-3.5 pr-8 text-xs font-bold text-cream outline-none focus:border-gold/50 focus:ring-4 focus:ring-gold/10 transition-all duration-300 cursor-pointer"
+                >
+                  <option value="">— None —</option>
+                  {sortedProducts.map((p) => (
+                    <option key={p.id} value={p.slug}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-cream/40">
+                  <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                    <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                  </svg>
+                </div>
+              </div>
+              {preview && (
+                <div className="mt-3 flex items-center gap-3 rounded-xl border border-cream/[0.06] bg-cream/[0.02] p-2.5">
+                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-cream/[0.04]">
+                    {preview.image_url ? (
+                      <Image src={preview.image_url} alt={preview.name} fill className="object-cover" sizes="48px" />
+                    ) : (
+                      <div className="grid h-full w-full place-items-center text-cream/30">
+                        <ImageIcon size={16} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <strong className="block truncate text-xs text-cream font-bold">{preview.name}</strong>
+                    <span className="block text-[10px] text-cream/40">Tk {Number(preview.price).toLocaleString("en-BD")}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="flex justify-end gap-3 pt-4 border-t border-cream/[0.06]">
+        <button
+          type="submit"
+          disabled={saving}
+          className="btn-primary min-h-11 text-sm rounded-xl py-2 px-6 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {saving ? "Saving..." : "Save changes"}
+        </button>
+      </div>
+    </form>
   );
 }
 

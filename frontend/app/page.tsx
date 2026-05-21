@@ -20,7 +20,7 @@ import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { ProductCard } from "@/components/ProductCard";
 import { Reveal } from "@/components/Reveal";
-import { fetchProducts } from "@/lib/products";
+import { fetchHeroSettings, fetchProducts } from "@/lib/products";
 
 const FEATURED_SLUGS = new Set([
   "creatine-tropical-tango",
@@ -93,12 +93,12 @@ const deliveryOptions: { icon: LucideIcon; title: string; text: string }[] = [
 ];
 
 export default async function HomePage() {
-  const allProducts = await fetchProducts();
+  const [allProducts, heroSettings] = await Promise.all([fetchProducts(), fetchHeroSettings()]);
   const featured = allProducts.filter((p) => FEATURED_SLUGS.has(p.slug));
   return (
     <main className="min-h-screen bg-ink text-cream antialiased">
       <Header />
-      <Hero initialProducts={allProducts} />
+      <Hero initialProducts={allProducts} settings={heroSettings} />
 
       {/* Trust Strip */}
       <section id="trust" className="relative z-10 -mt-1 bg-ink">

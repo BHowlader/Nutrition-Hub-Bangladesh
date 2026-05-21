@@ -5,12 +5,12 @@ from slowapi.errors import RateLimitExceeded
 from slowapi import _rate_limit_exceeded_handler
 from sqlalchemy import text
 
-from app.api import admin, auth, cart, categories, orders, products
+from app.api import admin, auth, cart, categories, orders, products, settings as settings_api
 from app.core.config import settings
 from app.core.database import Base, engine
 from app.core.limiter import limiter
 from app.core.seed import seed_if_empty
-from app.models import audit, cart as cart_model, catalog, order, user  # noqa: F401
+from app.models import audit, cart as cart_model, catalog, order, settings as settings_model, user  # noqa: F401
 
 if settings.jwt_secret in {"", "development-secret", "local-development-secret", "change-me"} or len(settings.jwt_secret) < 32:
     raise RuntimeError(
@@ -79,6 +79,7 @@ app.include_router(orders.router, prefix="/api")
 app.include_router(cart.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
+app.include_router(settings_api.router, prefix="/api")
 
 import os
 static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
