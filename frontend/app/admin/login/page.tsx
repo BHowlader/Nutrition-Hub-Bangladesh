@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Shield, AlertCircle, Lock, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { PageLoading } from "@/components/PageLoading";
-import { activateAdminSession, clearAdminSession } from "@/lib/adminSession";
+import { activateAdminSession, clearAdminSession, isAdminSessionActive } from "@/lib/adminSession";
 
 declare global {
   interface Window {
@@ -75,11 +75,9 @@ export default function AdminLoginPage() {
     [googleLogin, logout, router]
   );
 
-  // Force session clearing on mount to ensure user must explicitly authenticate
-  // Also parse hash from URL redirects (Google OAuth Implicit Flow)
+  // Force mounted state on load & parse hash from URL redirects (Google OAuth Implicit Flow)
   useEffect(() => {
     setMounted(true);
-    clearAdminSession();
 
     if (typeof window === "undefined") return;
 
@@ -104,6 +102,42 @@ export default function AdminLoginPage() {
       window.removeEventListener("hashchange", handleHashChange);
     };
   }, [handleGoogleSignIn]);
+
+  // Session verification and redirection logic
+  useEffect(() => {
+    if (loading || authenticating) return;
+
+    // If returning from Google OAuth (hash has id_token/credential), let that flow complete
+    const hasHashToken = typeof window !== "undefined" && 
+      (window.location.hash.includes("id_token") || window.location.hash.includes("credential"));
+    if (hasHashToken) return;
+
+    if (user) {
+      const isAdmin = user.is_admin || ["editor", "admin", "owner"].includes(user.role);
+      const isGoogle = user.auth_provider === "google";
+      const isSessionActive = isAdminSessionActive();
+
+      if (isAdmin && isGoogle && isSessionActive) {
+        // Fully authorized admin with active session -> redirect to dashboard
+        router.replace("/admin/products");
+      } else if (!isAdmin) {
+        // Logged in user is not an admin -> clear session and log out storefront session
+        clearAdminSession();
+        logout();
+      } else if (!isGoogle) {
+        // Admin user but signed in with incorrect provider -> clear session and log out
+        clearAdminSession();
+        logout();
+        setError("Security Policy: Admin accounts must authenticate using Google OAuth.");
+      } else {
+        // Admin user but session is not active -> clear session state (already inactive, but reset cleanly)
+        clearAdminSession();
+      }
+    } else {
+      // Guest user -> clear session state cleanly
+      clearAdminSession();
+    }
+  }, [user, loading, authenticating, router, logout]);
 
   const handleCustomGoogleLogin = () => {
     setError("");

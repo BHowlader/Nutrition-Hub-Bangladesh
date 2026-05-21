@@ -31,7 +31,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     const isAdmin = user.is_admin || ["editor", "admin", "owner"].includes(user.role);
     if (!isAdmin) {
       setRedirecting(true);
-      router.replace("/");
+      logout().then(() => {
+        router.replace("/admin/login");
+      });
       return;
     }
 
