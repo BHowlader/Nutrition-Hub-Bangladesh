@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
-from app.core.auth import require_admin
+from app.core.auth import require_admin, require_trusted_admin_origin
 from app.core.cache import cache_delete_prefix, cache_get_json, cache_set_json
 from app.core.database import get_db
+from app.core.limiter import limiter
 from app.models.catalog import Category, Product, ProductStatus
 from app.models.user import User
 from app.schemas.catalog import ProductCreate, ProductRead, ProductUpdate
@@ -79,16 +80,19 @@ def admin_list_products(
     db: Session = Depends(get_db),
     _admin: User = Depends(require_admin),
 ) -> list[Product]:
-    stmt = select(Product).order_by(Product.created_at.desc())
+    stmt = select(Product).options(selectinload(Product.category)).order_by(Product.created_at.desc())
     return list(db.scalars(stmt))
 
 
 @router.post("", response_model=ProductRead, status_code=status.HTTP_201_CREATED)
+@limiter.limit("30/minute")
 def create_product(
+    request: Request,
     payload: ProductCreate,
     db: Session = Depends(get_db),
     _admin: User = Depends(require_admin),
 ) -> Product:
+    require_trusted_admin_origin(request)
     product = Product(**payload.model_dump())
     db.add(product)
     db.commit()
@@ -98,12 +102,15 @@ def create_product(
 
 
 @router.patch("/{product_id}", response_model=ProductRead)
+@limiter.limit("60/minute")
 def update_product(
+    request: Request,
     product_id: str,
     payload: ProductUpdate,
     db: Session = Depends(get_db),
     _admin: User = Depends(require_admin),
 ) -> Product:
+    require_trusted_admin_origin(request)
     product = db.get(Product, product_id)
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
@@ -118,11 +125,14 @@ def update_product(
 
 
 @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit("20/minute")
 def delete_product(
+    request: Request,
     product_id: str,
     db: Session = Depends(get_db),
     _admin: User = Depends(require_admin),
 ) -> None:
+    require_trusted_admin_origin(request)
     product = db.get(Product, product_id)
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")

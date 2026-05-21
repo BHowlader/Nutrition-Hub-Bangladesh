@@ -43,15 +43,21 @@ class ProductCreate(ProductBase):
 
 class ProductUpdate(BaseModel):
     name: str | None = None
+    slug: str | None = None
+    sku: str | None = None
     description: str | None = None
     price: Decimal | None = None
+    compare_at_price: Decimal | None = None
     stock: int | None = Field(default=None, ge=0)
+    batch_no: str | None = None
+    expiry_date: str | None = None
     badge: str | None = None
     detail: str | None = None
     accent: str | None = None
     subcategory: str | None = None
     image_url: str | None = None
     status: ProductStatus | None = None
+    category_id: str | None = None
 
 
 class ProductRead(ProductBase):

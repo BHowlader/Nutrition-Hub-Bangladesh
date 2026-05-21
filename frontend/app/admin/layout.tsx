@@ -3,6 +3,7 @@
 import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
+import { PageLoading } from "@/components/PageLoading";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -20,11 +21,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   }, [user, loading, router]);
 
   if (loading || !user || !user.is_admin) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#eef0e8] text-ink/60 text-sm">
-        Checking access…
-      </div>
-    );
+    return <PageLoading label="Checking admin access" />;
   }
 
   return <>{children}</>;

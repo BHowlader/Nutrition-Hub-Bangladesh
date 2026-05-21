@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from fastapi import Cookie, Depends, HTTPException, Response, status
+from fastapi import Cookie, Depends, HTTPException, Request, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -104,3 +104,12 @@ def require_admin(user: User = Depends(get_current_user)) -> User:
     if not user.is_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
     return user
+
+
+def require_trusted_admin_origin(request: Request) -> None:
+    origin = request.headers.get("origin")
+    if not origin:
+        return
+    allowed = {item.strip().rstrip("/") for item in settings.backend_cors_origins.split(",") if item.strip()}
+    if origin.rstrip("/") not in allowed:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Untrusted admin origin")
