@@ -147,12 +147,12 @@ export default async function HomePage() {
             </div>
           </Reveal>
 
-          <div className="relative grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="relative grid auto-rows-fr gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {categories.map(({ title, text, icon: Icon, accent }, index) => (
-              <Reveal delay={index * 0.06} key={title}>
+              <Reveal className="h-full" delay={index * 0.06} key={title}>
                 <Link
                   href={`/products?category=${encodeURIComponent(title)}`}
-                  className="group relative flex min-h-[210px] overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0c1324]/58 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.2)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-gold/30 hover:bg-[#0c1324]/80 sm:min-h-[250px] sm:p-6"
+                  className="group relative flex h-full min-h-[210px] overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0c1324]/58 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.2)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-gold/30 hover:bg-[#0c1324]/80 sm:min-h-[250px] sm:p-6 lg:min-h-[300px]"
                 >
                   <div className={`absolute inset-x-0 top-0 h-28 bg-gradient-to-b ${accent} opacity-80`} />
                   <Icon size={130} className="absolute -right-8 -top-8 text-white/[0.025] transition duration-300 group-hover:scale-110 group-hover:text-gold/[0.08]" />
