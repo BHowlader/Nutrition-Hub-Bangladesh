@@ -5,8 +5,6 @@ import {
   BadgeCheck,
   Banknote,
   CheckCircle2,
-  Dumbbell,
-  HeartPulse,
   MapPin,
   Pill,
   ShieldCheck,
@@ -414,54 +412,122 @@ export default async function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#0c1324] pt-14 pb-8 text-cream border-t border-white/[0.05]">
+      <footer className="border-t border-white/[0.05] bg-[#0c1324] pb-8 pt-12 text-cream sm:pt-14 md:pt-16">
         <div className="shell">
-          <div className="grid gap-10 md:grid-cols-[1.2fr_0.8fr_0.8fr]">
-            <div>
-              <div className="flex items-center gap-3 mb-4">
-                <Image
-                  src="/images/logo.png"
-                  alt="Nutrition Hub Bangladesh Logo"
-                  width={40}
-                  height={40}
-                  className="rounded-lg object-contain border border-white/5 shadow-md"
-                />
-                <strong className="text-xl font-black leading-tight text-cream">
-                  Nutrition Hub
-                  <span className="block text-xs font-bold text-cream/40 tracking-wider uppercase mt-0.5">Bangladesh</span>
-                </strong>
-              </div>
-              <p className="max-w-sm text-sm leading-relaxed text-cream/50">
-                Premium supplement storefront for authentic sports nutrition, wellness,
-                and goal-based product guidance in Bangladesh.
-              </p>
-            </div>
-            <div>
-              <strong className="text-sm font-black uppercase tracking-[0.12em] text-cream/40">Store Categories</strong>
-              <ul className="mt-4 space-y-3 text-sm text-cream/60">
-                <li><Link href="/products?category=Gym Supplements" className="transition hover:text-cream">Gym Supplements</Link></li>
-                <li><Link href="/products?category=Vitamins & Supplements" className="transition hover:text-cream">Vitamins & Supplements</Link></li>
-                <li><Link href="/products?category=Protein Oats" className="transition hover:text-cream">Protein Oats</Link></li>
-                <li><Link href="/products?category=Peanut Butter" className="transition hover:text-cream">Peanut Butter</Link></li>
+          {/* Brand block — centered on mobile/sm, left-aligned on md+ */}
+          <div className="text-center md:text-left">
+            <span className="inline-flex items-center gap-3 text-left">
+              <Image
+                src="/images/logo.png"
+                alt="Nutrition Hub Bangladesh Logo"
+                width={44}
+                height={44}
+                className="h-10 w-10 shrink-0 rounded-lg border border-white/5 object-contain shadow-md sm:h-11 sm:w-11"
+              />
+              <strong className="text-base font-black leading-tight text-cream sm:text-xl">
+                Nutrition Hub
+                <span className="mt-0.5 block text-[10px] font-bold uppercase tracking-wider text-cream/40 sm:text-xs">
+                  Bangladesh
+                </span>
+              </strong>
+            </span>
+            <p className="mx-auto mt-5 max-w-md text-[13px] leading-relaxed text-cream/55 sm:text-sm md:mx-0">
+              Premium supplement storefront for authentic sports nutrition, wellness,
+              and goal-based product guidance in Bangladesh.
+            </p>
+          </div>
+
+          {/* Divider — visible only on mobile/sm to separate brand from links */}
+          <div className="mx-auto my-9 h-px w-24 bg-white/[0.08] sm:my-10 md:hidden" />
+
+          {/* Link columns — 3-col from sm+, all centered until md, left-aligned at md+ */}
+          <div className="grid grid-cols-1 gap-y-9 text-center sm:grid-cols-3 sm:gap-x-6 sm:gap-y-10 md:mt-12 md:gap-x-12 md:text-left">
+            <nav className="min-w-0">
+              <strong className="text-[11px] font-black uppercase tracking-[0.18em] text-cream/45 sm:text-xs">
+                Store Categories
+              </strong>
+              <ul className="mt-4 space-y-2.5 text-[13px] text-cream/60 sm:space-y-3 sm:text-sm">
+                <li>
+                  <Link href="/products?category=Gym Supplements" className="inline-block transition hover:text-cream">
+                    Gym Supplements
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/products?category=Vitamins & Supplements" className="inline-block transition hover:text-cream">
+                    Vitamins &amp; Supplements
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/products?category=Protein Oats" className="inline-block transition hover:text-cream">
+                    Protein Oats
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/products?category=Peanut Butter" className="inline-block transition hover:text-cream">
+                    Peanut Butter
+                  </Link>
+                </li>
               </ul>
-            </div>
-            <div>
-              <strong className="text-sm font-black uppercase tracking-[0.12em] text-cream/40">Trust Metrics</strong>
-              <ul className="mt-4 space-y-3 text-sm text-cream/60">
-                <li className="flex items-center gap-2"><ShieldCheck size={14} className="text-gold" /> Authenticity checks</li>
-                <li className="flex items-center gap-2"><PackageCheck size={14} className="text-gold" /> Sealed stock</li>
-                <li className="flex items-center gap-2"><Truck size={14} className="text-gold" /> Bangladesh delivery</li>
+            </nav>
+
+            <nav className="min-w-0">
+              <strong className="text-[11px] font-black uppercase tracking-[0.18em] text-cream/45 sm:text-xs">
+                Quick Links
+              </strong>
+              <ul className="mt-4 space-y-2.5 text-[13px] text-cream/60 sm:space-y-3 sm:text-sm">
+                <li>
+                  <Link href="/products" className="inline-block transition hover:text-cream">
+                    All products
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/#authenticity" className="inline-block transition hover:text-cream">
+                    Authenticity
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/#delivery" className="inline-block transition hover:text-cream">
+                    Delivery &amp; payment
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/login" className="inline-block transition hover:text-cream">
+                    Sign in
+                  </Link>
+                </li>
+              </ul>
+            </nav>
+
+            <div className="min-w-0">
+              <strong className="text-[11px] font-black uppercase tracking-[0.18em] text-cream/45 sm:text-xs">
+                Trust Metrics
+              </strong>
+              <ul className="mt-4 space-y-2.5 text-[13px] text-cream/60 sm:space-y-3 sm:text-sm">
+                <li className="flex items-center justify-center gap-2 md:justify-start">
+                  <ShieldCheck size={13} className="shrink-0 text-gold" />
+                  <span>Authenticity checks</span>
+                </li>
+                <li className="flex items-center justify-center gap-2 md:justify-start">
+                  <PackageCheck size={13} className="shrink-0 text-gold" />
+                  <span>Sealed stock</span>
+                </li>
+                <li className="flex items-center justify-center gap-2 md:justify-start">
+                  <Truck size={13} className="shrink-0 text-gold" />
+                  <span>Bangladesh delivery</span>
+                </li>
               </ul>
             </div>
           </div>
-          <div className="mt-12 border-t border-white/[0.05] pt-8 text-center text-xs text-cream/30 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <span>Nutrition Hub Bangladesh. All rights reserved.</span>
+
+          {/* Bottom strip */}
+          <div className="mt-10 flex flex-col items-center gap-2 border-t border-white/[0.05] pt-6 text-center text-[11px] text-cream/35 sm:mt-14 sm:flex-row sm:justify-between sm:gap-4 sm:pt-7 sm:text-xs">
+            <span>© {new Date().getFullYear()} Nutrition Hub Bangladesh. All rights reserved.</span>
             <span>
               Built by{" "}
-              <a 
-                href="https://mindrona.com" 
-                target="_blank" 
-                rel="noopener noreferrer" 
+              <a
+                href="https://mindrona.com"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="mindrona-link"
               >
                 Mindrona
