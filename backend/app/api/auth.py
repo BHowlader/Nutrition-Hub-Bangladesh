@@ -135,13 +135,14 @@ def _upsert_google_user(db: Session, idinfo: dict) -> User:
     email = idinfo["email"].lower().strip()
     configured_role = UserRole(settings.role_for_email(email))
     is_admin_email = configured_role in {UserRole.admin, UserRole.owner}
+    google_photo = idinfo.get("picture")
     user = db.query(User).filter(User.email == email).first()
 
     if not user:
         user = User(
             name=idinfo.get("name", email.split("@")[0]),
             email=email,
-            photo_url=idinfo.get("picture"),
+            photo_url=google_photo,
             auth_provider=AuthProvider.google,
             is_admin=is_admin_email,
             role=configured_role,
@@ -159,6 +160,10 @@ def _upsert_google_user(db: Session, idinfo: dict) -> User:
         if user.is_admin != is_admin_email or user.role != configured_role:
             user.is_admin = is_admin_email
             user.role = configured_role
+            changed = True
+        # Sync Google profile photo on every login so it stays current.
+        if google_photo and user.photo_url != google_photo:
+            user.photo_url = google_photo
             changed = True
         if changed:
             db.commit()
