@@ -26,7 +26,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/auth";
+import { csrfHeader, useAuth } from "@/lib/auth";
 import { clearAdminSession } from "@/lib/adminSession";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -144,10 +144,15 @@ const statusStyles: Record<ProductStatus, string> = {
 };
 
 async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const method = (init.method || "GET").toUpperCase();
   const res = await fetch(`${API}${path}`, {
     credentials: "include",
     ...init,
-    headers: { "Content-Type": "application/json", ...init.headers },
+    headers: {
+      "Content-Type": "application/json",
+      ...csrfHeader(method),
+      ...init.headers,
+    },
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
@@ -161,6 +166,7 @@ async function uploadApi<T>(path: string, formData: FormData): Promise<T> {
   const res = await fetch(`${API}${path}`, {
     method: "POST",
     credentials: "include",
+    headers: csrfHeader("POST"),
     body: formData,
   });
   if (!res.ok) {

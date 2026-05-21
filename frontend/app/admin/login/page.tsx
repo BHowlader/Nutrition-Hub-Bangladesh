@@ -22,24 +22,61 @@ declare global {
   }
 }
 
+// --- PKCE helpers ---
+const PKCE_VERIFIER_KEY = "google_oauth_code_verifier";
+const PKCE_STATE_KEY = "google_oauth_state";
+const PKCE_NONCE_KEY = "google_oauth_nonce";
+
+function base64UrlEncode(buf: ArrayBuffer): string {
+  const bytes = new Uint8Array(buf);
+  let str = "";
+  for (let i = 0; i < bytes.byteLength; i++) str += String.fromCharCode(bytes[i]);
+  return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function randomUrlSafe(byteLength: number): string {
+  const bytes = new Uint8Array(byteLength);
+  crypto.getRandomValues(bytes);
+  return base64UrlEncode(bytes.buffer);
+}
+
+async function sha256Base64Url(input: string): Promise<string> {
+  const data = new TextEncoder().encode(input);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return base64UrlEncode(digest);
+}
+
 export default function AdminLoginPage() {
-  const { googleLogin, logout, user, loading } = useAuth();
+  const { googleCodeExchange, logout, user, loading } = useAuth();
   const router = useRouter();
 
   const [error, setError] = useState("");
   const [authenticating, setAuthenticating] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  const handleGoogleSignIn = useCallback(
-    async (credential: string) => {
+  const handleAuthorizationCode = useCallback(
+    async (code: string, returnedState: string) => {
       setError("");
       setAuthenticating(true);
       try {
-        const nonce = typeof window !== "undefined"
-          ? sessionStorage.getItem("google_oauth_nonce") || undefined
-          : undefined;
-        if (typeof window !== "undefined") sessionStorage.removeItem("google_oauth_nonce");
-        await googleLogin(credential, nonce);
+        if (typeof window === "undefined") return;
+
+        const expectedState = sessionStorage.getItem(PKCE_STATE_KEY);
+        const codeVerifier = sessionStorage.getItem(PKCE_VERIFIER_KEY);
+        const nonce = sessionStorage.getItem(PKCE_NONCE_KEY) || undefined;
+        sessionStorage.removeItem(PKCE_STATE_KEY);
+        sessionStorage.removeItem(PKCE_VERIFIER_KEY);
+        sessionStorage.removeItem(PKCE_NONCE_KEY);
+
+        if (!expectedState || expectedState !== returnedState) {
+          throw new Error("OAuth state mismatch. Please try signing in again.");
+        }
+        if (!codeVerifier) {
+          throw new Error("Missing PKCE verifier. Please try signing in again.");
+        }
+
+        const redirectUri = window.location.origin + "/admin/login";
+        await googleCodeExchange({ code, code_verifier: codeVerifier, redirect_uri: redirectUri, nonce });
 
         // Verify admin role immediately via /api/auth/me
         const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -61,7 +98,6 @@ export default function AdminLoginPage() {
           clearAdminSession();
           setError("Security Policy: Admin accounts must authenticate using Google OAuth.");
         } else {
-          // Explicitly activate the session-gate flag on successful login interaction
           activateAdminSession();
           router.replace("/admin/products");
         }
@@ -76,45 +112,42 @@ export default function AdminLoginPage() {
         setAuthenticating(false);
       }
     },
-    [googleLogin, logout, router]
+    [googleCodeExchange, logout, router]
   );
 
-  // Force mounted state on load & parse hash from URL redirects (Google OAuth Implicit Flow)
+  // Parse ?code=&state= from the OAuth redirect (Authorization Code flow).
   useEffect(() => {
     setMounted(true);
-
     if (typeof window === "undefined") return;
 
-    // Check URL hash for id_token / credential from Google Auth redirect
-    const handleHashChange = () => {
-      const hash = window.location.hash;
-      if (hash) {
-        const params = new URLSearchParams(hash.substring(1)); // remove '#'
-        const idToken = params.get("id_token") || params.get("credential");
-        if (idToken) {
-          // Clear URL hash & replace state so it doesn't linger in browser history
-          window.location.hash = "";
-          window.history.replaceState(null, "", window.location.pathname);
-          handleGoogleSignIn(idToken);
-        }
-      }
-    };
+    const url = new URL(window.location.href);
+    const code = url.searchParams.get("code");
+    const state = url.searchParams.get("state");
+    const oauthError = url.searchParams.get("error");
 
-    handleHashChange();
-    window.addEventListener("hashchange", handleHashChange);
-    return () => {
-      window.removeEventListener("hashchange", handleHashChange);
-    };
-  }, [handleGoogleSignIn]);
+    if (oauthError) {
+      // Strip the params and surface the message.
+      window.history.replaceState(null, "", url.pathname);
+      setError(`Google returned an error: ${oauthError}`);
+      return;
+    }
+
+    if (code && state) {
+      // Strip the sensitive params from the URL before anything else can read them.
+      window.history.replaceState(null, "", url.pathname);
+      handleAuthorizationCode(code, state);
+    }
+  }, [handleAuthorizationCode]);
 
   // Session verification and redirection logic
   useEffect(() => {
     if (loading || authenticating) return;
 
-    // If returning from Google OAuth (hash has id_token/credential), let that flow complete
-    const hasHashToken = typeof window !== "undefined" && 
-      (window.location.hash.includes("id_token") || window.location.hash.includes("credential"));
-    if (hasHashToken) return;
+    // If returning from Google OAuth (?code=&state=), let that flow complete
+    if (typeof window !== "undefined") {
+      const u = new URL(window.location.href);
+      if (u.searchParams.has("code") && u.searchParams.has("state")) return;
+    }
 
     if (user) {
       const isAdmin = user.is_admin || ["editor", "admin", "owner"].includes(user.role);
@@ -143,7 +176,7 @@ export default function AdminLoginPage() {
     }
   }, [user, loading, authenticating, router, logout]);
 
-  const handleCustomGoogleLogin = () => {
+  const handleCustomGoogleLogin = async () => {
     setError("");
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     if (!clientId) {
@@ -151,16 +184,28 @@ export default function AdminLoginPage() {
       return;
     }
 
-    const redirectUri = window.location.origin + "/admin/login";
-    const nonce = Math.random().toString(36).substring(2) + Date.now().toString(36);
-    sessionStorage.setItem("google_oauth_nonce", nonce);
+    // PKCE: generate a high-entropy verifier, derive S256 challenge, plus state+nonce.
+    const codeVerifier = randomUrlSafe(48); // ≥ 43 base64url chars
+    const codeChallenge = await sha256Base64Url(codeVerifier);
+    const state = randomUrlSafe(24);
+    const nonce = randomUrlSafe(24);
 
+    sessionStorage.setItem(PKCE_VERIFIER_KEY, codeVerifier);
+    sessionStorage.setItem(PKCE_STATE_KEY, state);
+    sessionStorage.setItem(PKCE_NONCE_KEY, nonce);
+
+    const redirectUri = window.location.origin + "/admin/login";
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
       `client_id=${encodeURIComponent(clientId)}` +
       `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-      `&response_type=id_token` +
+      `&response_type=code` +
       `&scope=${encodeURIComponent("openid profile email")}` +
-      `&nonce=${encodeURIComponent(nonce)}`;
+      `&access_type=online` +
+      `&include_granted_scopes=true` +
+      `&state=${encodeURIComponent(state)}` +
+      `&nonce=${encodeURIComponent(nonce)}` +
+      `&code_challenge=${encodeURIComponent(codeChallenge)}` +
+      `&code_challenge_method=S256`;
 
     window.location.href = googleAuthUrl;
   };

@@ -1,6 +1,8 @@
 import os
+from urllib.parse import urlparse
 from uuid import uuid4
 
+import requests
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, UploadFile, status
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token as google_id_token
@@ -19,7 +21,15 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.core.limiter import limiter
 from app.models.user import AuthProvider, User, UserRole
-from app.schemas.user import GoogleAuth, TokenResponse, UserCreate, UserLogin, UserOut, UserUpdate
+from app.schemas.user import (
+    GoogleAuth,
+    GoogleCodeExchange,
+    TokenResponse,
+    UserCreate,
+    UserLogin,
+    UserOut,
+    UserUpdate,
+)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -98,21 +108,18 @@ def login(request: Request, response: Response, body: UserLogin, db: Session = D
     return _token_response(user, response)
 
 
-@router.post("/google", response_model=TokenResponse)
-@limiter.limit("10/minute")
-def google_auth(request: Request, response: Response, body: GoogleAuth, db: Session = Depends(get_db)):
+def _verify_google_id_token(id_token_str: str, expected_nonce: str | None) -> dict:
     try:
         idinfo = google_id_token.verify_oauth2_token(
-            body.credential, google_requests.Request(), settings.google_client_id
+            id_token_str, google_requests.Request(), settings.google_client_id
         )
     except ValueError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Google token")
 
-    # H2: if the client supplied a nonce, the id_token must echo the same nonce.
-    # This blocks replay of captured id_tokens that lack the nonce binding.
-    if body.nonce is not None:
+    # H2: if the client bound a nonce, the id_token must echo it.
+    if expected_nonce is not None:
         token_nonce = idinfo.get("nonce")
-        if not token_nonce or token_nonce != body.nonce:
+        if not token_nonce or token_nonce != expected_nonce:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Google token nonce mismatch",
@@ -121,6 +128,10 @@ def google_auth(request: Request, response: Response, body: GoogleAuth, db: Sess
     if not idinfo.get("email_verified", False):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Google email not verified")
 
+    return idinfo
+
+
+def _upsert_google_user(db: Session, idinfo: dict) -> User:
     email = idinfo["email"].lower().strip()
     is_admin_email = email in settings.admin_emails
     user = db.query(User).filter(User.email == email).first()
@@ -138,13 +149,11 @@ def google_auth(request: Request, response: Response, body: GoogleAuth, db: Sess
         db.commit()
         db.refresh(user)
     else:
-        # H1: upgrade an existing email/password account to Google when the verified
-        # Google identity matches. This prevents permanent lockout if an admin email
-        # was registered via password before Google sign-in.
+        # H1: upgrade an existing email/password account on verified Google sign-in.
         changed = False
         if user.auth_provider != AuthProvider.google:
             user.auth_provider = AuthProvider.google
-            user.password_hash = None  # disable password login on this account
+            user.password_hash = None
             changed = True
         if is_admin_email and not user.is_admin:
             user.is_admin = True
@@ -153,7 +162,91 @@ def google_auth(request: Request, response: Response, body: GoogleAuth, db: Sess
         if changed:
             db.commit()
             db.refresh(user)
+    return user
 
+
+@router.post("/google", response_model=TokenResponse)
+@limiter.limit("10/minute")
+def google_auth(request: Request, response: Response, body: GoogleAuth, db: Session = Depends(get_db)):
+    """Implicit-style flow used by the Google Identity Services button on the storefront."""
+    idinfo = _verify_google_id_token(body.credential, expected_nonce=body.nonce)
+    user = _upsert_google_user(db, idinfo)
+    return _token_response(user, response)
+
+
+@router.post("/google/exchange", response_model=TokenResponse)
+@limiter.limit("10/minute")
+def google_code_exchange(
+    request: Request,
+    response: Response,
+    body: GoogleCodeExchange,
+    db: Session = Depends(get_db),
+):
+    """OAuth Authorization Code flow with PKCE (admin login).
+
+    The browser obtained an authorization `code` from Google after redirecting with
+    a `code_challenge`. We exchange the code server-side at the Google token endpoint,
+    presenting the `code_verifier` to prove the same client started the flow, plus
+    the confidential client_secret. The returned id_token is then verified as usual.
+    """
+    if not settings.google_client_id or not settings.google_client_secret:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Google OAuth code flow is not configured on this server",
+        )
+
+    # Defense in depth: only accept redirect_uris whose origin we already trust.
+    parsed = urlparse(body.redirect_uri)
+    if not parsed.scheme or not parsed.netloc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Malformed redirect_uri")
+    redirect_origin = f"{parsed.scheme}://{parsed.netloc}".rstrip("/")
+    allowed_origins = {
+        item.strip().rstrip("/")
+        for item in settings.backend_cors_origins.split(",")
+        if item.strip()
+    }
+    if redirect_origin not in allowed_origins:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="redirect_uri is not on the allow-list",
+        )
+
+    try:
+        token_res = requests.post(
+            "https://oauth2.googleapis.com/token",
+            data={
+                "code": body.code,
+                "client_id": settings.google_client_id,
+                "client_secret": settings.google_client_secret,
+                "redirect_uri": body.redirect_uri,
+                "grant_type": "authorization_code",
+                "code_verifier": body.code_verifier,
+            },
+            timeout=15,
+        )
+    except requests.RequestException:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Could not reach Google token endpoint",
+        )
+
+    if not token_res.ok:
+        # Don't echo Google's error body to the client — log-equivalent only.
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Google token exchange failed",
+        )
+
+    payload = token_res.json()
+    id_token_str = payload.get("id_token")
+    if not id_token_str:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Google response missing id_token",
+        )
+
+    idinfo = _verify_google_id_token(id_token_str, expected_nonce=body.nonce)
+    user = _upsert_google_user(db, idinfo)
     return _token_response(user, response)
 
 

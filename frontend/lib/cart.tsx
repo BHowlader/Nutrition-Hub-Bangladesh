@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
-import { useAuth } from "@/lib/auth";
+import { csrfHeader, useAuth } from "@/lib/auth";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -40,10 +40,15 @@ export function useCart() {
 }
 
 async function api(path: string, init: RequestInit = {}) {
+  const method = (init.method || "GET").toUpperCase();
   const res = await fetch(`${API}${path}`, {
     credentials: "include",
     ...init,
-    headers: { "Content-Type": "application/json", ...init.headers },
+    headers: {
+      "Content-Type": "application/json",
+      ...csrfHeader(method),
+      ...init.headers,
+    },
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));

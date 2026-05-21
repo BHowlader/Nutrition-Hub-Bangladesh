@@ -3,6 +3,21 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const CSRF_COOKIE_NAME = "nhb_csrf";
+const CSRF_HEADER_NAME = "X-CSRF-Token";
+const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
+
+export function readCsrfToken(): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${CSRF_COOKIE_NAME}=([^;]+)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+export function csrfHeader(method: string = "POST"): Record<string, string> {
+  if (SAFE_METHODS.has(method.toUpperCase())) return {};
+  const token = readCsrfToken();
+  return token ? { [CSRF_HEADER_NAME]: token } : {};
+}
 
 export interface User {
   id: string;
@@ -22,6 +37,12 @@ interface AuthState {
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   googleLogin: (credential: string, nonce?: string) => Promise<void>;
+  googleCodeExchange: (params: {
+    code: string;
+    code_verifier: string;
+    redirect_uri: string;
+    nonce?: string;
+  }) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (data: { name?: string; phone?: string; address?: string }) => Promise<void>;
   uploadPhoto: (file: File) => Promise<void>;
@@ -37,10 +58,15 @@ export function useAuth() {
 }
 
 async function apiFetch(path: string, opts: RequestInit = {}) {
+  const method = (opts.method || "GET").toUpperCase();
   const res = await fetch(`${API}${path}`, {
     credentials: "include",
     ...opts,
-    headers: { "Content-Type": "application/json", ...opts.headers },
+    headers: {
+      "Content-Type": "application/json",
+      ...csrfHeader(method),
+      ...opts.headers,
+    },
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
@@ -91,6 +117,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(data.user);
   }, []);
 
+  const googleCodeExchange = useCallback(
+    async (params: { code: string; code_verifier: string; redirect_uri: string; nonce?: string }) => {
+      const data = await apiFetch("/api/auth/google/exchange", {
+        method: "POST",
+        body: JSON.stringify(params),
+      });
+      setUser(data.user);
+    },
+    []
+  );
+
   const logout = useCallback(async () => {
     try {
       await apiFetch("/api/auth/logout", { method: "POST" });
@@ -114,6 +151,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const res = await fetch(`${API}/api/auth/me/photo`, {
       method: "POST",
       credentials: "include",
+      headers: csrfHeader("POST"),
       body: formData,
     });
     if (!res.ok) throw new Error("Upload failed");
@@ -127,7 +165,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, login, register, googleLogin, logout, updateProfile, uploadPhoto, refreshUser }}
+      value={{ user, loading, login, register, googleLogin, googleCodeExchange, logout, updateProfile, uploadPhoto, refreshUser }}
     >
       {children}
     </AuthContext.Provider>

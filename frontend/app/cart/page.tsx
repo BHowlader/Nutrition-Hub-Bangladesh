@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
-import { useAuth } from "@/lib/auth";
+import { csrfHeader, useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
 import { Header } from "@/components/Header";
 import { PageLoading } from "@/components/PageLoading";
@@ -44,7 +44,7 @@ export default function CartPage() {
       const res = await fetch(`${API}/api/orders`, {
         method: "POST",
         credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...csrfHeader("POST") },
         body: JSON.stringify({
           customer_name: name,
           phone,

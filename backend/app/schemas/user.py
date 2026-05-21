@@ -17,6 +17,13 @@ class GoogleAuth(BaseModel):
     nonce: str | None = None  # optional client-generated nonce for replay protection
 
 
+class GoogleCodeExchange(BaseModel):
+    code: str = Field(min_length=10, max_length=512)
+    code_verifier: str = Field(min_length=43, max_length=128, pattern=r"^[A-Za-z0-9\-._~]+$")
+    redirect_uri: str = Field(min_length=8, max_length=512)
+    nonce: str | None = None
+
+
 class UserUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=160)
     phone: str | None = Field(default=None, min_length=8, max_length=40, pattern=r"^[+\d][\d\s\-()]{6,38}\d$")

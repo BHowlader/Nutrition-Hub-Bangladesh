@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     jwt_secret: str = "development-secret"
     admin_email: str = "admin@nutritionhubbangladesh.com"
     google_client_id: str = ""
+    google_client_secret: str = ""  # required for PKCE code-flow exchange (admin login)
     backend_cors_origins: str = "http://localhost:3000"
     cookie_secure: bool = False  # set true in production (https only)
     cookie_domain: str | None = None  # e.g. ".nutritionhubbangladesh.com" in prod

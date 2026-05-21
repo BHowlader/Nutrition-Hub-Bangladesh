@@ -1,5 +1,8 @@
+import secrets
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from slowapi.errors import RateLimitExceeded
 from slowapi import _rate_limit_exceeded_handler
@@ -39,6 +42,69 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
+CSRF_COOKIE_NAME = "nhb_csrf"
+CSRF_HEADER_NAME = "X-CSRF-Token"
+CSRF_TOKEN_LENGTH = 32  # bytes → 43-char base64url
+
+# Bootstrap endpoints that must work before a CSRF cookie has been issued,
+# OR that have their own out-of-band integrity guarantees (Google id_token,
+# PKCE code+verifier, server-side login rate limit, plus the strict Origin check
+# enforced on admin routes).
+CSRF_EXEMPT_PATHS: set[str] = {
+    "/api/auth/login",
+    "/api/auth/register",
+    "/api/auth/google",
+    "/api/auth/google/exchange",
+    "/api/auth/logout",
+}
+
+
+class CSRFMiddleware(BaseHTTPMiddleware):
+    """Double-submit cookie pattern:
+      * Server sets a non-httponly cookie (nhb_csrf) on every response if missing.
+      * For unsafe methods on protected paths, the request must include the same value
+        in an X-CSRF-Token header. Same-origin JS can read the cookie; cross-origin
+        attackers cannot (Same-Origin Policy), so the header check defeats CSRF.
+    """
+
+    async def dispatch(self, request: Request, call_next):
+        method = request.method.upper()
+        path = request.url.path
+        cookie_token = request.cookies.get(CSRF_COOKIE_NAME)
+
+        needs_check = (
+            method not in {"GET", "HEAD", "OPTIONS"}
+            and path.startswith("/api/")
+            and path not in CSRF_EXEMPT_PATHS
+        )
+
+        if needs_check:
+            header_token = request.headers.get(CSRF_HEADER_NAME)
+            if not cookie_token or not header_token or not secrets.compare_digest(cookie_token, header_token):
+                return JSONResponse(
+                    status_code=403,
+                    content={"detail": "CSRF token missing or invalid"},
+                )
+
+        response = await call_next(request)
+
+        # Mint a fresh CSRF token if the client doesn't have one yet. Same lifetime
+        # semantics as the auth cookie. Non-httponly on purpose so the SPA can read it.
+        if not cookie_token:
+            new_token = secrets.token_urlsafe(CSRF_TOKEN_LENGTH)
+            response.set_cookie(
+                key=CSRF_COOKIE_NAME,
+                value=new_token,
+                max_age=7 * 24 * 60 * 60,
+                httponly=False,
+                secure=settings.cookie_secure,
+                samesite="lax",
+                domain=settings.cookie_domain,
+                path="/",
+            )
+        return response
+
+
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     """M6: defensive HTTP headers — clickjacking, MIME sniffing, referrer scope, HSTS in prod."""
 
@@ -61,6 +127,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 
 app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(CSRFMiddleware)
 
 origins = [origin.strip() for origin in settings.backend_cors_origins.split(",") if origin.strip()]
 app.add_middleware(
