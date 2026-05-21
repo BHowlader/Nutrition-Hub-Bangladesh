@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
-  ArrowLeft,
   Camera,
   Package,
   Save,
@@ -145,14 +144,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-ink px-4 pb-16 pt-28">
       <div className="mx-auto max-w-6xl">
-        {/* Back link */}
-        <Link
-          href="/"
-          className="mb-8 inline-flex items-center gap-2 text-sm font-bold text-cream/50 transition hover:text-cream"
-        >
-          <ArrowLeft size={16} />
-          Back to store
-        </Link>
+
 
         <h1 className="mb-8 text-3xl font-black text-cream">My Dashboard</h1>
 
