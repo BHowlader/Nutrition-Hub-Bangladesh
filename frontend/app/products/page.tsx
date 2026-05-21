@@ -10,16 +10,12 @@ import {
   ArrowRight,
   CookingPot,
   Dumbbell,
-  Package,
   PackageCheck,
   Pill,
   Search,
   ShieldCheck,
-  Sparkles,
-  Star,
   Truck,
-  UtensilsCrossed,
-  Wallet
+  UtensilsCrossed
 } from "lucide-react";
 
 const filterCategories = [
@@ -80,171 +76,144 @@ export default function ProductsPage() {
       <Header />
 
       {/* HERO */}
-      <section className="relative overflow-hidden border-b border-white/[0.06] pb-10 pt-20 sm:pb-14 sm:pt-28 md:pb-20 md:pt-32">
-        {/* Background layers */}
+      <section className="relative overflow-hidden border-b border-white/[0.06] pb-12 pt-24 sm:pb-16 sm:pt-32 md:pb-24 md:pt-36">
+        {/* Background */}
         <div className="absolute inset-0 z-0 pointer-events-none">
           <Image
             src="/images/gym-bg.png"
             alt=""
             fill
-            className="object-cover opacity-[0.16]"
+            className="object-cover opacity-[0.12]"
             sizes="100vw"
             quality={55}
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#04060d] via-[#04060d]/85 to-[#04060d]/55" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#04060d] via-[#04060d]/90 to-[#04060d]/60" />
           <div className="absolute inset-0 bg-gradient-to-b from-[#04060d] via-transparent to-[#04060d]" />
-          {/* Radial accent glow */}
-          <div className="absolute -left-24 top-1/3 h-72 w-72 rounded-full bg-gold/20 blur-[120px] sm:h-96 sm:w-96" />
-          <div className="absolute right-0 top-0 h-72 w-72 rounded-full bg-mint/10 blur-[100px] sm:h-96 sm:w-96" />
-          {/* Subtle grid pattern */}
-          <div
-            className="absolute inset-0 opacity-[0.04]"
-            style={{
-              backgroundImage:
-                "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)",
-              backgroundSize: "44px 44px"
-            }}
-          />
+          <div className="absolute left-[10%] top-1/3 h-[420px] w-[420px] rounded-full bg-gold/[0.07] blur-[140px]" />
         </div>
 
-        <div className="shell relative z-10 grid items-center gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.85fr)] lg:gap-12">
-          {/* LEFT — copy */}
+        <div className="shell relative z-10 grid items-center gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(340px,0.9fr)] lg:gap-16">
+          {/* LEFT — editorial copy */}
           <div className="min-w-0">
-            {/* Live status chip */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#0c1324]/65 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-cream/70 backdrop-blur-md sm:text-[11px]">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-mint/70 opacity-75" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-mint" />
-              </span>
-              Live · {products.length || "—"} SKUs restocked weekly
+            {/* Meta rule */}
+            <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.28em] text-cream/40 sm:text-[11px]">
+              <span className="tabular-nums">01</span>
+              <span className="h-px w-10 bg-gold/50 sm:w-14" />
+              <span>Premium Catalog</span>
             </div>
 
-            <p className="mt-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-gold sm:text-xs">
-              <Sparkles size={12} className="text-gold" /> Premium Catalog
-            </p>
-
-            <h1 className="mt-2 break-words text-[2.1rem] font-black leading-[1.04] tracking-tight text-cream sm:mt-3 sm:text-5xl md:text-6xl lg:text-[4.4rem] lg:leading-[1]">
-              Verified{" "}
-              <span className="bg-gradient-to-r from-gold via-champagne to-mint bg-clip-text text-transparent">
-                supplements
-              </span>
-              ,<br className="hidden sm:block" /> organized for{" "}
-              <span className="relative inline-block">
-                <span className="relative z-10">serious buyers.</span>
-                <span className="absolute inset-x-0 bottom-1 -z-0 h-2 bg-gold/25 sm:h-3" />
-              </span>
+            {/* Editorial headline */}
+            <h1 className="mt-6 font-display text-[2.4rem] font-black leading-[1.02] tracking-[-0.035em] text-cream sm:mt-7 sm:text-[3.4rem] md:text-[4.2rem] lg:text-[4.8rem]">
+              Verified supplements,
+              <br className="hidden sm:block" />{" "}
+              <span className="italic font-light text-cream/70">for those who</span>
+              <br className="hidden sm:block" />{" "}
+              train with intent.
             </h1>
 
-            <p className="mt-4 max-w-xl text-sm leading-relaxed text-cream/60 sm:mt-5 sm:text-base md:text-lg">
-              Authentic <strong className="font-bold text-cream/80">sports nutrition</strong>,
-              wellness essentials, breakfast staples, and herbal formulas with clear stock and pricing.
+            {/* Lede */}
+            <p className="mt-6 max-w-md text-[15px] leading-[1.7] text-cream/55 sm:mt-7 sm:text-base lg:text-lg">
+              Authentic sports nutrition, wellness essentials, breakfast staples, and herbal
+              formulas — curated for Bangladesh, dispatched in sealed condition.
             </p>
 
-            {/* Stat cards with icons */}
-            <dl className="mt-6 grid grid-cols-3 gap-2 sm:mt-8 sm:max-w-xl sm:gap-3">
-              {[
-                { Icon: Package, label: "Products", value: String(products.length || "—"), tone: "from-gold/15 to-gold/0", iconColor: "text-gold" },
-                { Icon: PackageCheck, label: "In stock", value: String(availableCount || "—"), tone: "from-mint/15 to-mint/0", iconColor: "text-mint" },
-                { Icon: Wallet, label: "Payment", value: "COD", tone: "from-champagne/15 to-champagne/0", iconColor: "text-champagne" }
-              ].map(({ Icon, label, value, tone, iconColor }) => (
-                <div
-                  key={label}
-                  className="group relative overflow-hidden rounded-xl border border-white/[0.08] bg-[#0c1324]/70 p-2.5 backdrop-blur-md transition hover:border-white/15 sm:p-4"
-                >
-                  <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${tone} opacity-60`} />
-                  <div className="relative flex items-center gap-2 sm:gap-2.5">
-                    <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] ${iconColor} sm:h-9 sm:w-9`}>
-                      <Icon size={14} className="sm:hidden" />
-                      <Icon size={18} className="hidden sm:block" />
-                    </div>
-                    <div className="min-w-0">
-                      <dd className="text-base font-black leading-none text-cream sm:text-2xl">{value}</dd>
-                      <dt className="mt-1 text-[8px] font-bold uppercase tracking-wider text-cream/45 sm:mt-1.5 sm:text-[10px]">
-                        {label}
-                      </dt>
-                    </div>
-                  </div>
-                </div>
-              ))}
+            {/* Figures with hairline rules */}
+            <dl className="mt-9 grid grid-cols-3 border-y border-white/[0.08] sm:mt-12">
+              <div className="border-r border-white/[0.06] py-5 pr-4 sm:py-6">
+                <dd className="font-display text-3xl font-black leading-none tracking-tight text-cream tabular-nums sm:text-5xl">
+                  {String(products.length || 0).padStart(2, "0")}
+                </dd>
+                <dt className="mt-3 text-[9px] font-bold uppercase tracking-[0.2em] text-cream/40 sm:mt-4 sm:text-[10px]">
+                  Products
+                </dt>
+              </div>
+              <div className="border-r border-white/[0.06] px-4 py-5 sm:px-5 sm:py-6">
+                <dd className="font-display text-3xl font-black leading-none tracking-tight text-cream tabular-nums sm:text-5xl">
+                  {String(availableCount || 0).padStart(2, "0")}
+                </dd>
+                <dt className="mt-3 text-[9px] font-bold uppercase tracking-[0.2em] text-cream/40 sm:mt-4 sm:text-[10px]">
+                  In stock
+                </dt>
+              </div>
+              <div className="py-5 pl-4 sm:py-6 sm:pl-5">
+                <dd className="font-display text-3xl font-black leading-none tracking-tight text-cream sm:text-5xl">
+                  COD
+                </dd>
+                <dt className="mt-3 text-[9px] font-bold uppercase tracking-[0.2em] text-cream/40 sm:mt-4 sm:text-[10px]">
+                  Payment
+                </dt>
+              </div>
             </dl>
 
-            {/* CTAs */}
-            <div className="mt-6 flex flex-wrap items-center gap-3 sm:mt-8">
+            {/* CTA row */}
+            <div className="mt-8 flex flex-col gap-4 sm:mt-10 sm:flex-row sm:items-center">
               <button
                 type="button"
                 onClick={() => catalogRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
-                className="group inline-flex h-12 items-center gap-2 rounded-xl bg-gradient-to-r from-gold to-champagne px-5 text-sm font-black text-ink shadow-[0_18px_40px_-12px_rgba(96,165,250,0.55)] transition hover:shadow-[0_24px_50px_-12px_rgba(96,165,250,0.7)] active:scale-[0.98] sm:px-6"
+                className="group inline-flex h-12 w-full items-center justify-center gap-3 rounded-none border border-cream bg-cream px-6 text-[11px] font-black uppercase tracking-[0.22em] text-ink transition hover:bg-transparent hover:text-cream sm:w-auto sm:px-8"
               >
-                Browse catalog
-                <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+                Explore catalog
+                <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
               </button>
-              <div className="hidden items-center gap-2 text-xs font-bold text-cream/55 sm:flex">
-                <ShieldCheck size={14} className="text-mint" /> 100% authentic, sealed packaging
+              <div className="flex items-center gap-2.5 text-[10px] font-bold uppercase tracking-[0.18em] text-cream/45 sm:text-[11px]">
+                <ShieldCheck size={13} className="text-gold" />
+                100% Authentic · Sealed packaging
               </div>
             </div>
           </div>
 
-          {/* RIGHT — Featured spotlight (lg+) */}
+          {/* RIGHT — quiet product portrait (lg+) */}
           {featuredProduct && (
             <div className="relative hidden lg:block">
-              {/* Decorative orbits */}
-              <div className="pointer-events-none absolute inset-0 -z-10">
-                <div className="absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/[0.06]" />
-                <div className="absolute left-1/2 top-1/2 h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/[0.04]" />
-                <div className="absolute left-1/2 top-1/2 h-[220px] w-[220px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gold/15 blur-3xl" />
-              </div>
-
-              <div className="relative mx-auto w-full max-w-[420px]">
-                {/* Floating badge top */}
-                <div className="absolute -left-4 top-6 z-20 flex items-center gap-1.5 rounded-full border border-white/10 bg-[#0c1324]/85 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-mint backdrop-blur-md">
-                  <Sparkles size={11} className="text-mint" /> Spotlight
-                </div>
-                {/* Floating badge right */}
-                <div className="absolute -right-2 top-20 z-20 flex items-center gap-1.5 rounded-full border border-gold/30 bg-gold/15 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-gold backdrop-blur-md">
-                  <Star size={11} className="fill-gold" /> 4.9
+              <Link
+                href={`/products/${featuredProduct.slug}`}
+                className="group relative block"
+              >
+                {/* Vertical label */}
+                <div className="absolute -left-12 top-0 z-10 flex h-full items-start pt-2">
+                  <span className="rotate-180 text-[10px] font-bold uppercase tracking-[0.4em] text-cream/35 [writing-mode:vertical-rl]">
+                    Featured · {featuredProduct.category?.name || "In stock"}
+                  </span>
                 </div>
 
-                <Link
-                  href={`/products/${featuredProduct.slug}`}
-                  className="group relative block overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0c1324]/70 backdrop-blur-md transition hover:border-gold/35"
-                >
-                  <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#050811]">
-                    <Image
-                      src={featuredProduct.image_url || "/images/logo.png"}
-                      alt={featuredProduct.name}
-                      fill
-                      className="object-cover transition duration-700 group-hover:scale-105"
-                      sizes="420px"
-                      quality={72}
-                      priority
-                    />
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0c1324] via-[#0c1324]/70 to-transparent" />
-                  </div>
+                {/* Thin gold corner accents */}
+                <div className="pointer-events-none absolute -left-2 -top-2 h-10 w-10 border-l border-t border-gold/60" />
+                <div className="pointer-events-none absolute -bottom-2 -right-2 h-10 w-10 border-b border-r border-gold/60" />
 
-                  <div className="absolute inset-x-0 bottom-0 p-5">
-                    <span className="text-[10px] font-black uppercase tracking-[0.18em] text-cream/50">
-                      {featuredProduct.category?.name || "Featured"}
+                <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#050811]">
+                  <Image
+                    src={featuredProduct.image_url || "/images/logo.png"}
+                    alt={featuredProduct.name}
+                    fill
+                    className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.04]"
+                    sizes="420px"
+                    quality={72}
+                    priority
+                  />
+                  {/* Subtle vignette */}
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(4,6,13,0.55)_100%)]" />
+                </div>
+
+                {/* Meta strip */}
+                <div className="mt-5 flex items-end justify-between gap-4 border-t border-white/[0.1] pt-5">
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-cream/40">
+                      Now showing
                     </span>
-                    <h3 className="mt-1 line-clamp-2 text-xl font-black leading-tight text-cream">
+                    <h3 className="mt-1.5 truncate font-display text-lg font-black leading-tight tracking-tight text-cream">
                       {featuredProduct.name}
                     </h3>
-                    <div className="mt-3 flex items-end justify-between gap-3">
-                      <div>
-                        <span className="text-[9px] font-bold uppercase tracking-widest text-cream/35">
-                          From
-                        </span>
-                        <strong className="block text-2xl font-black leading-tight text-cream">
-                          {formatTaka(featuredProduct.price)}
-                        </strong>
-                      </div>
-                      <span className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.06] px-3.5 text-xs font-black text-cream transition group-hover:border-gold/50 group-hover:bg-gold group-hover:text-ink">
-                        View
-                        <ArrowRight size={14} />
-                      </span>
-                    </div>
                   </div>
-                </Link>
-              </div>
+                  <div className="shrink-0 text-right">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-cream/40">
+                      From
+                    </span>
+                    <strong className="mt-1.5 block font-display text-xl font-black leading-none tracking-tight text-gold tabular-nums">
+                      {formatTaka(featuredProduct.price)}
+                    </strong>
+                  </div>
+                </div>
+              </Link>
             </div>
           )}
         </div>
