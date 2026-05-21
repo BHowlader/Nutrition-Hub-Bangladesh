@@ -148,20 +148,17 @@ export default function AdminLoginPage() {
       const isSessionActive = isAdminSessionActive();
 
       if (isAdmin && isGoogle && isSessionActive) {
-        // Fully authorized admin with active session -> redirect to dashboard
         router.replace("/admin/products");
       } else if (!isAdmin) {
-        // Logged in user is not an admin -> clear session and log out storefront session
         clearAdminSession();
         logout();
       } else if (!isGoogle) {
-        // Admin user but signed in with incorrect provider -> clear session and log out
         clearAdminSession();
         logout();
         setError("Security Policy: Admin accounts must authenticate using Google OAuth.");
       } else {
-        // Admin user but session is not active -> clear session state (already inactive, but reset cleanly)
-        clearAdminSession();
+        activateAdminSession();
+        router.replace("/admin/products");
       }
     } else {
       // Guest user -> clear session state cleanly
