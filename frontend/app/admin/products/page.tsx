@@ -127,9 +127,9 @@ const EMPTY_FORM: FormState = {
 };
 
 const statusStyles: Record<ProductStatus, string> = {
-  draft: "border-amber-500/25 bg-amber-500/10 text-amber-700",
-  published: "border-emerald-600/25 bg-emerald-600/10 text-emerald-700",
-  archived: "border-slate-500/25 bg-slate-500/10 text-slate-600",
+  draft: "border-amber-500/20 bg-amber-500/10 text-amber-400",
+  published: "border-emerald-500/20 bg-emerald-500/10 text-emerald-400",
+  archived: "border-slate-500/20 bg-slate-500/10 text-slate-400",
 };
 
 async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
@@ -388,97 +388,205 @@ export default function AdminProductsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#eef0e8] text-ink">
-      <section className="mx-auto w-[min(1440px,calc(100%-32px))] py-8">
-        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div className="relative min-h-screen bg-ink text-cream font-sans overflow-x-hidden">
+      {/* Background glow effects */}
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <div className="absolute -left-[10%] -top-[10%] h-[50vw] w-[50vw] rounded-full bg-gold/5 blur-[120px] animate-aurora-1" />
+        <div className="absolute -right-[10%] -bottom-[10%] h-[50vw] w-[50vw] rounded-full bg-mint/5 blur-[120px] animate-aurora-2" />
+      </div>
+
+      <div className="relative z-10 flex flex-col lg:flex-row min-h-screen">
+        {/* Sidebar for Desktop */}
+        <aside className="hidden lg:flex lg:flex-col lg:w-48 xl:w-56 shrink-0 border-r border-cream/[0.08] bg-forest/40 backdrop-blur-md p-5 sticky top-0 h-screen justify-between">
           <div>
-            <Link className="mb-4 inline-flex items-center gap-2 text-sm font-black text-ink/55 hover:text-ink" href="/">
-              <ArrowLeft size={16} />
-              Storefront
+            {/* Header/Branding */}
+            <div className="mb-8 flex items-center gap-3">
+              <div className="relative h-9 w-9 overflow-hidden rounded-xl bg-gold/10 flex items-center justify-center border border-gold/20">
+                <Image src="/images/logo.png" alt="Logo" width={28} height={28} className="object-contain" style={{ width: "auto", height: "auto" }} />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-xs font-black uppercase tracking-[0.15em] text-gold truncate">CMS Panel</span>
+                <strong className="block text-sm font-black text-cream truncate">Nutrition Hub</strong>
+              </div>
+            </div>
+
+            {/* Navigation Links */}
+            <nav className="space-y-1.5">
+              {([
+                ["products", Boxes, "Products"],
+                ["orders", ClipboardList, "Orders"],
+                ["analytics", BarChart3, "Analytics"],
+                ["audit", History, "Audit Log"],
+                ...(user?.role === "owner" ? ([["users", Users, "Users"]] as const) : []),
+              ] as const).map(([tab, Icon, label]) => {
+                const active = activeTab === tab;
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-black transition-all duration-300 ${
+                      active
+                        ? "bg-gradient-to-r from-gold/15 to-champagne/5 text-gold border border-gold/20 shadow-[0_0_20px_rgba(96,165,250,0.08)]"
+                        : "text-cream/60 border border-transparent hover:text-cream hover:bg-cream/[0.03]"
+                    }`}
+                  >
+                    <Icon size={18} className={active ? "text-gold" : "text-cream/50"} />
+                    <span className="truncate">{label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* Footer of Sidebar */}
+          <div className="pt-4 border-t border-cream/[0.06]">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-8 w-8 rounded-full bg-cream/[0.08] flex items-center justify-center text-xs font-bold text-cream shrink-0">
+                {user?.name?.slice(0, 1).toUpperCase() || "A"}
+              </div>
+              <div className="min-w-0">
+                <span className="block text-xs font-bold text-cream truncate">{user?.name || "Admin"}</span>
+                <span className="block text-[10px] text-cream/40 uppercase font-black tracking-wider truncate">{user?.role || "Editor"}</span>
+              </div>
+            </div>
+            <Link
+              href="/"
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-cream/10 bg-cream/[0.02] text-xs font-black text-cream/60 hover:text-cream hover:border-cream/20 transition-all duration-300"
+            >
+              <ArrowLeft size={14} />
+              Exit to Store
             </Link>
-            <h1 className="text-3xl font-black tracking-tight md:text-4xl">CMS Panel</h1>
-            <p className="mt-1 text-sm text-ink/55">
-              Manage catalog data, inventory, publishing status, and storefront product metadata.
-            </p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={() => setShowCategoryForm(true)}
-              className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-ink/15 bg-white px-4 text-sm font-black shadow-sm hover:border-ink/30"
+        </aside>
+
+        {/* Top bar for Mobile */}
+        <header className="lg:hidden border-b border-cream/[0.08] bg-forest/80 backdrop-blur-md sticky top-0 z-20 px-4 py-3 flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="relative h-8 w-8 overflow-hidden rounded-lg bg-gold/10 flex items-center justify-center border border-gold/20">
+                <Image src="/images/logo.png" alt="Logo" width={22} height={22} className="object-contain" style={{ width: "auto", height: "auto" }} />
+              </div>
+              <div>
+                <span className="block text-[10px] font-black uppercase tracking-[0.12em] text-gold">CMS Panel</span>
+                <strong className="block text-xs font-black text-cream">Nutrition Hub</strong>
+              </div>
+            </div>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 text-xs font-black text-cream/60 hover:text-cream"
             >
-              <Plus size={16} />
-              New category
-            </button>
-            <button
-              onClick={startNewProduct}
-              disabled={categories.length === 0}
-              className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-ink px-4 text-sm font-black text-cream shadow-sm disabled:cursor-not-allowed disabled:opacity-45"
-            >
-              <Plus size={17} />
-              Add product
-            </button>
+              <ArrowLeft size={13} />
+              Exit
+            </Link>
           </div>
-        </div>
+          {/* Horizontal Scrollable Tabs */}
+          <div className="flex gap-2 overflow-x-auto scrollbar-thin pb-1">
+            {([
+              ["products", Boxes, "Products"],
+              ["orders", ClipboardList, "Orders"],
+              ["analytics", BarChart3, "Analytics"],
+              ["audit", History, "Audit"],
+              ...(user?.role === "owner" ? ([["users", Users, "Users"]] as const) : []),
+            ] as const).map(([tab, Icon, label]) => {
+              const active = activeTab === tab;
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-black shrink-0 transition-all ${
+                    active
+                      ? "bg-gold text-ink"
+                      : "text-cream/60 bg-cream/[0.03] hover:text-cream"
+                  }`}
+                >
+                  <Icon size={14} />
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </header>
 
-        {error && (
-          <Alert tone="error" onClose={() => setError("")}>
-            {error}
-          </Alert>
-        )}
-        {notice && (
-          <Alert tone="success" onClose={() => setNotice("")}>
-            {notice}
-          </Alert>
-        )}
+        {/* Main Content Area */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto max-w-full z-10">
+          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-cream">
+                {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Dashboard
+              </h1>
+              <p className="mt-1 text-xs sm:text-sm text-cream/50">
+                {activeTab === "products" && "Manage catalog data, inventory, publishing status, and storefront product metadata."}
+                {activeTab === "orders" && "Track customer purchases, update fulfillment status, and inspect order details."}
+                {activeTab === "analytics" && "Review sales, stock health, and performance snapshot metrics."}
+                {activeTab === "audit" && "Inspect security logs and administrative action history."}
+                {activeTab === "users" && "Manage administration access levels and roles."}
+              </p>
+            </div>
+            
+            {activeTab === "products" && (
+              <div className="flex flex-wrap gap-2.5 shrink-0">
+                <button
+                  onClick={() => setShowCategoryForm(true)}
+                  className="btn-secondary min-h-10 text-xs sm:text-sm py-2 px-4 rounded-xl"
+                >
+                  <Plus size={15} />
+                  New category
+                </button>
+                <button
+                  onClick={startNewProduct}
+                  disabled={categories.length === 0}
+                  className="btn-primary min-h-10 text-xs sm:text-sm py-2 px-4 rounded-xl disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <Plus size={16} />
+                  Add product
+                </button>
+              </div>
+            )}
+          </div>
 
-        <div className="mb-6 flex flex-wrap gap-2">
-          {([
-            ["products", Boxes, "Products"],
-            ["orders", ClipboardList, "Orders"],
-            ["analytics", BarChart3, "Analytics"],
-            ["audit", History, "Audit log"],
-            ...(user?.role === "owner" ? ([["users", Users, "Users"]] as const) : []),
-          ] as const).map(([tab, Icon, label]) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`inline-flex min-h-10 items-center gap-2 rounded-lg border px-4 text-sm font-black ${
-                activeTab === tab ? "border-ink bg-ink text-cream" : "border-ink/12 bg-white text-ink/65 hover:text-ink"
-              }`}
-            >
-              <Icon size={16} />
-              {label}
-            </button>
-          ))}
-        </div>
+          {error && (
+            <Alert tone="error" onClose={() => setError("")}>
+              {error}
+            </Alert>
+          )}
+          {notice && (
+            <Alert tone="success" onClose={() => setNotice("")}>
+              {notice}
+            </Alert>
+          )}
 
-        <div className="mb-6 grid gap-3 md:grid-cols-4">
-          <StatCard icon={Boxes} label="Total products" value={stats.total} />
-          <StatCard icon={PackageCheck} label="Published" value={stats.published} />
-          <StatCard icon={AlertTriangle} label="Low stock" value={stats.lowStock} />
-          <StatCard icon={ShieldCheck} label="Out of stock" value={stats.outOfStock} />
-        </div>
+          {activeTab === "products" && (
+            <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <StatCard icon={Boxes} label="Total products" value={stats.total} />
+              <StatCard icon={PackageCheck} label="Published" value={stats.published} />
+              <StatCard icon={AlertTriangle} label="Low stock" value={stats.lowStock} />
+              <StatCard icon={ShieldCheck} label="Out of stock" value={stats.outOfStock} />
+            </div>
+          )}
 
-        {activeTab === "products" && <ProductsSection
-          loading={loading}
-          products={products}
-          categories={categories}
-          filteredProducts={filteredProducts}
-          query={query}
-          statusFilter={statusFilter}
-          categoryFilter={categoryFilter}
-          setQuery={setQuery}
-          setStatusFilter={setStatusFilter}
-          setCategoryFilter={setCategoryFilter}
-          setEditing={setEditing}
-          setDeleteTarget={setDeleteTarget}
-        />}
+          {activeTab === "products" && (
+            <ProductsSection
+              loading={loading}
+              products={products}
+              categories={categories}
+              filteredProducts={filteredProducts}
+              query={query}
+              statusFilter={statusFilter}
+              categoryFilter={categoryFilter}
+              setQuery={setQuery}
+              setStatusFilter={setStatusFilter}
+              setCategoryFilter={setCategoryFilter}
+              setEditing={setEditing}
+              setDeleteTarget={setDeleteTarget}
+            />
+          )}
 
-        {activeTab === "orders" && <OrdersSection orders={orders} saving={saving} onStatusChange={handleOrderStatus} />}
-        {activeTab === "analytics" && <AnalyticsSection stats={adminStats} products={products} orders={orders} />}
-        {activeTab === "audit" && <AuditSection logs={auditLogs} />}
-        {activeTab === "users" && <UsersSection users={adminUsers} saving={saving} onRoleChange={handleUserRole} />}
-      </section>
+          {activeTab === "orders" && <OrdersSection orders={orders} saving={saving} onStatusChange={handleOrderStatus} />}
+          {activeTab === "analytics" && <AnalyticsSection stats={adminStats} products={products} orders={orders} />}
+          {activeTab === "audit" && <AuditSection logs={auditLogs} />}
+          {activeTab === "users" && <UsersSection users={adminUsers} saving={saving} onRoleChange={handleUserRole} />}
+        </main>
+      </div>
 
       {editing && (
         <ProductModal
@@ -513,27 +621,27 @@ export default function AdminProductsPage() {
 
       {deleteTarget && (
         <Modal title="Delete product" onClose={() => setDeleteTarget(null)} maxWidth="max-w-md">
-          <div className="rounded-lg border border-red-500/20 bg-red-50 p-4 text-sm text-red-800">
+          <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
             This permanently deletes <strong>{deleteTarget.name}</strong>. Orders that reference this product may lose catalog context.
           </div>
           <div className="mt-5 flex gap-3">
             <button
               onClick={handleDelete}
               disabled={saving}
-              className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg bg-red-600 px-4 text-sm font-black text-white disabled:opacity-50"
+              className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-red-600 hover:bg-red-700 px-4 text-sm font-black text-white disabled:opacity-50 transition-colors"
             >
               Delete product
             </button>
             <button
               onClick={() => setDeleteTarget(null)}
-              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-ink/15 px-4 text-sm font-black"
+              className="btn-secondary min-h-11 text-sm rounded-xl py-2 flex-1"
             >
               Cancel
             </button>
           </div>
         </Modal>
       )}
-    </main>
+    </div>
   );
 }
 
@@ -565,126 +673,126 @@ function ProductsSection({
   setDeleteTarget: (value: Product) => void;
 }) {
   return (
-    <div className="rounded-xl border border-ink/10 bg-white shadow-sm">
-          <div className="border-b border-ink/10 p-4">
-            <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-              <div>
-                <h2 className="text-xl font-black">Product catalog</h2>
-                <p className="text-sm text-ink/50">
-                  {loading ? "Loading products..." : `${filteredProducts.length} of ${products.length} products shown`}
-                </p>
-              </div>
-              <div className="grid gap-2 md:grid-cols-[minmax(260px,1fr)_180px_220px]">
-                <label className="relative block">
-                  <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink/35" />
-                  <input
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search name, SKU, slug"
-                    className="h-11 w-full rounded-lg border border-ink/12 bg-[#f8f8f4] pl-10 pr-3 text-sm font-semibold outline-none focus:border-ink/35"
-                  />
-                </label>
-                <Select value={statusFilter} onChange={(value) => setStatusFilter(value as StatusFilter)} icon={Filter}>
-                  <option value="all">All statuses</option>
-                  <option value="published">Published</option>
-                  <option value="draft">Draft</option>
-                  <option value="archived">Archived</option>
-                </Select>
-                <Select value={categoryFilter} onChange={setCategoryFilter} icon={Filter}>
-                  <option value="all">All categories</option>
-                  {categories.map((category) => (
-                    <option value={category.id} key={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-            </div>
+    <div className="premium-card overflow-hidden">
+      <div className="border-b border-cream/[0.08] p-5">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div>
+            <h2 className="text-lg font-black text-cream">Product Catalog</h2>
+            <p className="text-xs text-cream/40 mt-0.5">
+              {loading ? "Loading products..." : `${filteredProducts.length} of ${products.length} products shown`}
+            </p>
           </div>
+          <div className="grid gap-2.5 md:grid-cols-[minmax(240px,1fr)_180px_220px]">
+            <label className="relative block">
+              <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-cream/40" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search name, SKU, slug..."
+                className="h-11 w-full rounded-xl border border-cream/[0.12] bg-forest/60 pl-10 pr-4 text-xs font-semibold text-cream outline-none focus:border-gold/50 focus:ring-4 focus:ring-gold/10 transition-all duration-300"
+              />
+            </label>
+            <Select value={statusFilter} onChange={(value) => setStatusFilter(value as StatusFilter)} icon={Filter}>
+              <option value="all">All Statuses</option>
+              <option value="published">Published</option>
+              <option value="draft">Draft</option>
+              <option value="archived">Archived</option>
+            </Select>
+            <Select value={categoryFilter} onChange={setCategoryFilter} icon={Filter}>
+              <option value="all">All Categories</option>
+              {categories.map((category) => (
+                <option value={category.id} key={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+        </div>
+      </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[1040px] border-collapse text-left">
-              <thead>
-                <tr className="border-b border-ink/10 bg-[#f8f8f4] text-[11px] uppercase tracking-[0.14em] text-ink/45">
-                  <th className="px-4 py-3">Product</th>
-                  <th>Category</th>
-                  <th>SKU</th>
-                  <th>Price</th>
-                  <th>Stock</th>
-                  <th>Status</th>
-                  <th className="pr-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredProducts.map((product) => (
-                  <tr className="border-b border-ink/[0.06] align-middle hover:bg-[#f8f8f4]" key={product.id}>
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-3">
-                        <ProductThumb product={product} />
-                        <div className="min-w-0">
-                          <strong className="block max-w-[360px] truncate text-sm">{product.name}</strong>
-                          <span className="block max-w-[420px] truncate text-xs text-ink/48">{product.description}</span>
-                          <span className="mt-1 block text-[11px] font-bold text-ink/35">/{product.slug}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="text-sm font-bold text-ink/65">{product.category?.name || "Unassigned"}</td>
-                    <td className="text-xs font-black text-ink/55">{product.sku}</td>
-                    <td>
-                      <div className="font-black">Tk {Number(product.price).toLocaleString("en-BD")}</div>
-                      {product.compare_at_price && (
-                        <div className="text-xs text-ink/40 line-through">
-                          Tk {Number(product.compare_at_price).toLocaleString("en-BD")}
-                        </div>
-                      )}
-                    </td>
-                    <td>
-                      <span className={`font-black ${product.stock === 0 ? "text-red-600" : product.stock < 10 ? "text-amber-700" : "text-ink"}`}>
-                        {product.stock}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-black capitalize ${statusStyles[product.status]}`}>
-                        {product.status}
-                      </span>
-                    </td>
-                    <td className="pr-4">
-                      <div className="flex justify-end gap-2">
-                        <Link
-                          href={`/products/${product.slug}`}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-ink/10 text-ink/55 hover:border-ink/25 hover:text-ink"
-                          title="Preview"
-                        >
-                          <Eye size={15} />
-                        </Link>
-                        <button
-                          onClick={() => setEditing(productToForm(product))}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-ink text-cream"
-                          title="Edit"
-                        >
-                          <Edit3 size={15} />
-                        </button>
-                        <button
-                          onClick={() => setDeleteTarget(product)}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-500/25 text-red-600 hover:bg-red-50"
-                          title="Delete"
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {!loading && filteredProducts.length === 0 && (
-                  <tr>
-                    <td colSpan={7} className="px-4 py-14 text-center text-sm font-semibold text-ink/45">
-                      No products match the current filters.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+      <div className="overflow-x-auto scrollbar-thin">
+        <table className="w-full min-w-[1040px] border-collapse text-left">
+          <thead>
+            <tr className="border-b border-cream/[0.08] bg-forest/40 text-[10px] uppercase tracking-wider font-black text-cream/40">
+              <th className="px-5 py-3.5">Product</th>
+              <th className="py-3.5">Category</th>
+              <th className="py-3.5">SKU</th>
+              <th className="py-3.5">Price</th>
+              <th className="py-3.5">Stock</th>
+              <th className="py-3.5">Status</th>
+              <th className="pr-5 py-3.5 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredProducts.map((product) => (
+              <tr className="border-b border-cream/[0.04] align-middle hover:bg-cream/[0.02] transition-colors duration-150" key={product.id}>
+                <td className="px-5 py-4">
+                  <div className="flex items-center gap-3.5">
+                    <ProductThumb product={product} />
+                    <div className="min-w-0">
+                      <strong className="block max-w-[340px] truncate text-sm text-cream font-bold">{product.name}</strong>
+                      <span className="block max-w-[400px] truncate text-xs text-cream/40 mt-0.5">{product.description}</span>
+                      <span className="mt-1 block text-[10px] font-black text-cream/30">/{product.slug}</span>
+                    </div>
+                  </div>
+                </td>
+                <td className="text-xs font-bold text-cream/70">{product.category?.name || "Unassigned"}</td>
+                <td className="text-xs font-black text-cream/50 tracking-wider">{product.sku}</td>
+                <td>
+                  <div className="text-sm font-black text-cream">Tk {Number(product.price).toLocaleString("en-BD")}</div>
+                  {product.compare_at_price && (
+                    <div className="text-xs text-cream/35 line-through mt-0.5">
+                      Tk {Number(product.compare_at_price).toLocaleString("en-BD")}
+                    </div>
+                  )}
+                </td>
+                <td>
+                  <span className={`text-xs font-black ${product.stock === 0 ? "text-red-400 bg-red-500/10 px-2 py-0.5 rounded-md" : product.stock < 10 ? "text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md animate-pulse" : "text-cream"}`}>
+                    {product.stock}
+                  </span>
+                </td>
+                <td>
+                  <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-black capitalize tracking-wider ${statusStyles[product.status]}`}>
+                    {product.status}
+                  </span>
+                </td>
+                <td className="pr-5">
+                  <div className="flex justify-end gap-2">
+                    <Link
+                      href={`/products/${product.slug}`}
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-cream/[0.12] bg-cream/[0.02] text-cream/60 hover:text-cream hover:border-cream/30 hover:bg-cream/[0.05] transition-all duration-200"
+                      title="Preview"
+                    >
+                      <Eye size={15} />
+                    </Link>
+                    <button
+                      onClick={() => setEditing(productToForm(product))}
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gold text-ink hover:opacity-90 shadow-[0_0_15px_rgba(96,165,250,0.2)] hover:scale-105 transition-all duration-200"
+                      title="Edit"
+                    >
+                      <Edit3 size={15} />
+                    </button>
+                    <button
+                      onClick={() => setDeleteTarget(product)}
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-red-500/20 bg-red-500/5 text-red-400 hover:bg-red-500/10 hover:border-red-500/30 transition-all duration-200"
+                      title="Delete"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+            {!loading && filteredProducts.length === 0 && (
+              <tr>
+                <td colSpan={7} className="px-5 py-16 text-center text-xs font-bold text-cream/30">
+                  No products match the current filters.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -697,59 +805,66 @@ function productToForm(product: Product): FormState {
 
 function OrdersSection({ orders, saving, onStatusChange }: { orders: Order[]; saving: boolean; onStatusChange: (id: string, status: OrderStatus) => void }) {
   return (
-    <div className="rounded-xl border border-ink/10 bg-white shadow-sm">
-      <div className="border-b border-ink/10 p-4">
-        <h2 className="text-xl font-black">Order management</h2>
-        <p className="text-sm text-ink/50">{orders.length} order(s)</p>
+    <div className="premium-card overflow-hidden">
+      <div className="border-b border-cream/[0.08] p-5">
+        <h2 className="text-lg font-black text-cream">Order Management</h2>
+        <p className="text-xs text-cream/40 mt-0.5">{orders.length} order(s) logged</p>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[980px] text-left">
+      <div className="overflow-x-auto scrollbar-thin">
+        <table className="w-full min-w-[980px] border-collapse text-left">
           <thead>
-            <tr className="border-b border-ink/10 bg-[#f8f8f4] text-[11px] uppercase tracking-[0.14em] text-ink/45">
-              <th className="px-4 py-3">Order</th>
-              <th>Customer</th>
-              <th>Items</th>
-              <th>Total</th>
-              <th>Status</th>
-              <th>Created</th>
+            <tr className="border-b border-cream/[0.08] bg-forest/40 text-[10px] uppercase tracking-wider font-black text-cream/40">
+              <th className="px-5 py-3.5">Order</th>
+              <th className="py-3.5">Customer</th>
+              <th className="py-3.5">Items</th>
+              <th className="py-3.5">Total</th>
+              <th className="py-3.5">Status</th>
+              <th className="pr-5 py-3.5">Created</th>
             </tr>
           </thead>
           <tbody>
             {orders.map((order) => (
-              <tr key={order.id} className="border-b border-ink/[0.06]">
-                <td className="px-4 py-4">
-                  <strong className="block text-sm">#{order.id.slice(0, 8)}</strong>
-                  <span className="text-xs text-ink/45">{order.payment_method.toUpperCase()}</span>
+              <tr key={order.id} className="border-b border-cream/[0.04] align-middle hover:bg-cream/[0.02] transition-colors duration-150">
+                <td className="px-5 py-4">
+                  <strong className="block text-sm text-cream font-bold">#{order.id.slice(0, 8)}</strong>
+                  <span className="text-[10px] font-black tracking-wider text-cream/35 mt-0.5">{order.payment_method.toUpperCase()}</span>
                 </td>
                 <td>
-                  <strong className="block text-sm">{order.customer_name}</strong>
-                  <span className="block text-xs text-ink/50">{order.phone}</span>
-                  <span className="block max-w-[260px] truncate text-xs text-ink/35">{order.address}</span>
+                  <strong className="block text-sm text-cream font-bold">{order.customer_name}</strong>
+                  <span className="block text-xs text-cream/50 mt-0.5">{order.phone}</span>
+                  <span className="block max-w-[260px] truncate text-xs text-cream/30 mt-0.5">{order.address}</span>
                 </td>
-                <td className="text-sm font-semibold">{order.items.reduce((sum, item) => sum + item.quantity, 0)}</td>
-                <td className="font-black">Tk {Number(order.total).toLocaleString("en-BD")}</td>
+                <td className="text-xs font-bold text-cream/70">{order.items.reduce((sum, item) => sum + item.quantity, 0)}</td>
+                <td className="text-sm font-black text-cream">Tk {Number(order.total).toLocaleString("en-BD")}</td>
                 <td>
-                  <select
-                    value={order.status}
-                    disabled={saving}
-                    onChange={(e) => onStatusChange(order.id, e.target.value as OrderStatus)}
-                    className="h-9 rounded-lg border border-ink/12 bg-white px-2 text-xs font-black capitalize"
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="confirmed">Confirmed</option>
-                    <option value="shipped">Shipped</option>
-                    <option value="delivered">Delivered</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
+                  <div className="relative inline-block">
+                    <select
+                      value={order.status}
+                      disabled={saving}
+                      onChange={(e) => onStatusChange(order.id, e.target.value as OrderStatus)}
+                      className="h-9 appearance-none rounded-xl border border-cream/[0.12] bg-forest/60 pl-3 pr-8 text-xs font-bold text-cream outline-none focus:border-gold/50 focus:ring-4 focus:ring-gold/10 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed capitalize cursor-pointer"
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="confirmed">Confirmed</option>
+                      <option value="shipped">Shipped</option>
+                      <option value="delivered">Delivered</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                    <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-cream/40">
+                      <svg className="h-3.5 w-3.5 fill-current" viewBox="0 0 20 20">
+                        <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                      </svg>
+                    </div>
+                  </div>
                 </td>
-                <td className="text-xs font-semibold text-ink/45">
+                <td className="pr-5 text-xs font-semibold text-cream/40">
                   {order.created_at ? new Date(order.created_at).toLocaleString() : "Unknown"}
                 </td>
               </tr>
             ))}
             {orders.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-12 text-center text-sm font-semibold text-ink/45">No orders yet.</td>
+                <td colSpan={6} className="px-5 py-16 text-center text-xs font-bold text-cream/30">No orders logged yet.</td>
               </tr>
             )}
           </tbody>
@@ -762,19 +877,19 @@ function OrdersSection({ orders, saving, onStatusChange }: { orders: Order[]; sa
 function AnalyticsSection({ stats, products, orders }: { stats: AdminStats | null; products: Product[]; orders: Order[] }) {
   const avgOrder = orders.length ? orders.reduce((sum, order) => sum + Number(order.total), 0) / orders.length : 0;
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
-      <div className="rounded-xl border border-ink/10 bg-white p-5 shadow-sm">
-        <h2 className="text-xl font-black">Business snapshot</h2>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+    <div className="grid gap-6 lg:grid-cols-2">
+      <div className="premium-card p-6">
+        <h2 className="text-lg font-black text-cream">Business Snapshot</h2>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Metric label="Revenue" value={`Tk ${Number(stats?.revenue || 0).toLocaleString("en-BD")}`} />
           <Metric label="Orders" value={String(stats?.orders || 0)} />
           <Metric label="Pending orders" value={String(stats?.pending_orders || 0)} />
           <Metric label="Average order" value={`Tk ${Math.round(avgOrder).toLocaleString("en-BD")}`} />
         </div>
       </div>
-      <div className="rounded-xl border border-ink/10 bg-white p-5 shadow-sm">
-        <h2 className="text-xl font-black">Inventory health</h2>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+      <div className="premium-card p-6">
+        <h2 className="text-lg font-black text-cream">Inventory Health</h2>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Metric label="Products" value={String(stats?.products || products.length)} />
           <Metric label="Published" value={String(stats?.published_products || 0)} />
           <Metric label="Low stock" value={String(stats?.low_stock_products || 0)} />
@@ -787,23 +902,23 @@ function AnalyticsSection({ stats, products, orders }: { stats: AdminStats | nul
 
 function AuditSection({ logs }: { logs: AuditLog[] }) {
   return (
-    <div className="rounded-xl border border-ink/10 bg-white shadow-sm">
-      <div className="border-b border-ink/10 p-4">
-        <h2 className="text-xl font-black">Audit log</h2>
-        <p className="text-sm text-ink/50">Recent CMS-sensitive actions</p>
+    <div className="premium-card overflow-hidden">
+      <div className="border-b border-cream/[0.08] p-5">
+        <h2 className="text-lg font-black text-cream">Audit Log</h2>
+        <p className="text-xs text-cream/40 mt-0.5">Recent CMS-sensitive actions</p>
       </div>
-      <div className="divide-y divide-ink/[0.06]">
+      <div className="divide-y divide-cream/[0.04]">
         {logs.map((log) => (
-          <div key={log.id} className="grid gap-2 p-4 md:grid-cols-[180px_1fr_220px]">
-            <span className="text-xs font-black uppercase tracking-wider text-ink/45">{log.action}</span>
+          <div key={log.id} className="grid gap-3 p-5 md:grid-cols-[180px_1fr_220px] hover:bg-cream/[0.01] transition-colors duration-150">
+            <span className="text-xs font-black uppercase tracking-wider text-gold/80">{log.action}</span>
             <div>
-              <p className="text-sm font-bold">{log.summary}</p>
-              <p className="text-xs text-ink/45">{log.actor_email || "System"} · {log.entity_type}</p>
+              <p className="text-sm font-bold text-cream">{log.summary}</p>
+              <p className="text-xs text-cream/40 mt-1">{log.actor_email || "System"} · {log.entity_type}</p>
             </div>
-            <span className="text-xs font-semibold text-ink/45 md:text-right">{new Date(log.created_at).toLocaleString()}</span>
+            <span className="text-xs font-semibold text-cream/35 md:text-right">{new Date(log.created_at).toLocaleString()}</span>
           </div>
         ))}
-        {logs.length === 0 && <div className="p-12 text-center text-sm font-semibold text-ink/45">No audit events yet.</div>}
+        {logs.length === 0 && <div className="p-16 text-center text-xs font-bold text-cream/30">No audit events logged yet.</div>}
       </div>
     </div>
   );
@@ -811,33 +926,42 @@ function AuditSection({ logs }: { logs: AuditLog[] }) {
 
 function UsersSection({ users, saving, onRoleChange }: { users: AdminUser[]; saving: boolean; onRoleChange: (id: string, role: string) => void }) {
   return (
-    <div className="rounded-xl border border-ink/10 bg-white shadow-sm">
-      <div className="border-b border-ink/10 p-4">
-        <h2 className="text-xl font-black">Admin users</h2>
-        <p className="text-sm text-ink/50">Owner-only role management</p>
+    <div className="premium-card overflow-hidden">
+      <div className="border-b border-cream/[0.08] p-5">
+        <h2 className="text-lg font-black text-cream">Admin Users</h2>
+        <p className="text-xs text-cream/40 mt-0.5">Owner-only role management</p>
       </div>
-      <div className="divide-y divide-ink/[0.06]">
+      <div className="divide-y divide-cream/[0.04]">
         {users.map((adminUser) => (
-          <div key={adminUser.id} className="grid items-center gap-3 p-4 md:grid-cols-[1fr_220px_180px]">
+          <div key={adminUser.id} className="grid items-center gap-4 p-5 md:grid-cols-[1fr_220px_180px] hover:bg-cream/[0.01] transition-colors duration-150">
             <div>
-              <strong className="block text-sm">{adminUser.name}</strong>
-              <span className="text-xs text-ink/45">{adminUser.email}</span>
+              <strong className="block text-sm text-cream font-bold">{adminUser.name}</strong>
+              <span className="text-xs text-cream/45 mt-0.5">{adminUser.email}</span>
             </div>
-            <span className="text-xs font-black uppercase tracking-wider text-ink/45">{adminUser.is_admin ? "CMS access" : "Customer"}</span>
-            <select
-              value={adminUser.role}
-              disabled={saving}
-              onChange={(e) => onRoleChange(adminUser.id, e.target.value)}
-              className="h-10 rounded-lg border border-ink/12 bg-white px-3 text-sm font-black"
-            >
-              <option value="customer">Customer</option>
-              <option value="editor">Editor</option>
-              <option value="admin">Admin</option>
-              <option value="owner">Owner</option>
-            </select>
+            <span className={`text-xs font-black uppercase tracking-wider ${adminUser.is_admin ? "text-gold" : "text-cream/35"}`}>
+              {adminUser.is_admin ? "CMS access" : "Customer"}
+            </span>
+            <div className="relative">
+              <select
+                value={adminUser.role}
+                disabled={saving}
+                onChange={(e) => onRoleChange(adminUser.id, e.target.value)}
+                className="h-10 w-full appearance-none rounded-xl border border-cream/[0.12] bg-forest/60 px-3.5 pr-8 text-xs font-bold text-cream outline-none focus:border-gold/50 focus:ring-4 focus:ring-gold/10 transition-all duration-300 cursor-pointer"
+              >
+                <option value="customer">Customer</option>
+                <option value="editor">Editor</option>
+                <option value="admin">Admin</option>
+                <option value="owner">Owner</option>
+              </select>
+              <div className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-cream/40">
+                <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                  <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                </svg>
+              </div>
+            </div>
           </div>
         ))}
-        {users.length === 0 && <div className="p-12 text-center text-sm font-semibold text-ink/45">Only owners can view users.</div>}
+        {users.length === 0 && <div className="p-16 text-center text-xs font-bold text-cream/30">Only owners can view users.</div>}
       </div>
     </div>
   );
@@ -845,9 +969,9 @@ function UsersSection({ users, saving, onRoleChange }: { users: AdminUser[]; sav
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-ink/10 bg-[#f8f8f4] p-4">
-      <strong className="block text-2xl font-black">{value}</strong>
-      <span className="text-xs font-bold uppercase tracking-wider text-ink/45">{label}</span>
+    <div className="rounded-xl border border-cream/[0.08] bg-cream/[0.02] p-4 hover:border-cream/20 hover:bg-cream/[0.04] transition-all duration-300">
+      <strong className="block text-xl sm:text-2xl font-black text-cream">{value}</strong>
+      <span className="text-[10px] font-black uppercase tracking-wider text-cream/40 mt-1 block">{label}</span>
     </div>
   );
 }
@@ -855,7 +979,7 @@ function Metric({ label, value }: { label: string; value: string }) {
 function ProductThumb({ product }: { product: Product }) {
   if (!product.image_url) {
     return (
-      <div className="grid h-14 w-14 shrink-0 place-items-center rounded-lg bg-ink/5 text-ink/35">
+      <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-cream/[0.04] border border-cream/[0.08] text-cream/30">
         <ImageIcon size={20} />
       </div>
     );
@@ -863,7 +987,7 @@ function ProductThumb({ product }: { product: Product }) {
 
   const src = product.image_url.startsWith("http") ? product.image_url : product.image_url;
   return (
-    <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-ink/5">
+    <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-cream/[0.02] border border-cream/[0.08]">
       <Image src={src} alt={product.name} fill className="object-cover" sizes="56px" />
     </div>
   );
@@ -917,11 +1041,11 @@ function ProductModal({
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-black uppercase tracking-wider text-ink/45">Description</label>
+          <label className="mb-1 block text-xs font-black uppercase tracking-[0.08em] text-cream/40">Description</label>
           <textarea
             value={editing.description}
             onChange={(e) => setEditing({ ...editing, description: e.target.value })}
-            className="min-h-[110px] w-full rounded-lg border border-ink/12 bg-white px-3 py-2 text-sm outline-none focus:border-ink/35"
+            className="min-h-[110px] w-full rounded-xl border border-cream/[0.12] bg-forest/60 px-3.5 py-2.5 text-xs font-bold text-cream outline-none focus:border-gold/50 focus:ring-4 focus:ring-gold/10 transition-all duration-300"
             required
           />
         </div>
@@ -955,9 +1079,9 @@ function ProductModal({
               onChange={(value) => setEditing({ ...editing, image_url: value })}
               required={false}
             />
-            <label className="mt-2 inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-lg border border-ink/12 bg-white px-3 text-xs font-black hover:border-ink/30">
-              <Upload size={14} />
-              {uploading ? "Uploading..." : "Upload image"}
+            <label className="mt-2.5 inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-xl border border-cream/[0.12] bg-cream/[0.02] px-4 text-xs font-black text-cream/70 hover:text-cream hover:border-cream/20 hover:bg-cream/[0.04] transition-all duration-300 select-none">
+              <Upload size={14} className="text-gold" />
+              <span>{uploading ? "Uploading..." : "Upload image"}</span>
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
@@ -979,12 +1103,12 @@ function ProductModal({
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-black uppercase tracking-wider text-ink/45">Detail chips</label>
+          <label className="mb-1 block text-xs font-black uppercase tracking-[0.08em] text-cream/40">Detail chips</label>
           <input
             value={editing.detail || ""}
             onChange={(e) => setEditing({ ...editing, detail: e.target.value })}
             placeholder="Example: 83 servings · 307g"
-            className="w-full rounded-lg border border-ink/12 bg-white px-3 py-2 text-sm outline-none focus:border-ink/35"
+            className="w-full rounded-xl border border-cream/[0.12] bg-forest/60 px-3.5 py-2.5 text-xs font-bold text-cream outline-none focus:border-gold/50 focus:ring-4 focus:ring-gold/10 transition-all duration-300"
           />
         </div>
 
@@ -997,12 +1121,12 @@ function ProductModal({
 function Alert({ children, tone, onClose }: { children: React.ReactNode; tone: "error" | "success"; onClose: () => void }) {
   const classes =
     tone === "error"
-      ? "border-red-500/25 bg-red-50 text-red-800"
-      : "border-emerald-600/25 bg-emerald-50 text-emerald-800";
+      ? "border-red-500/20 bg-red-500/10 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.05)]"
+      : "border-emerald-500/20 bg-emerald-500/10 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.05)]";
   return (
-    <div className={`mb-4 flex items-center justify-between gap-3 rounded-lg border px-4 py-3 text-sm font-semibold ${classes}`}>
+    <div className={`mb-5 flex items-center justify-between gap-3.5 rounded-xl border px-4 py-3.5 text-sm font-bold backdrop-blur-md transition-all duration-300 ${classes}`}>
       <span>{children}</span>
-      <button onClick={onClose} className="shrink-0 opacity-60 hover:opacity-100">
+      <button onClick={onClose} className="shrink-0 text-cream/50 hover:text-cream transition-colors duration-200">
         <X size={16} />
       </button>
     </div>
@@ -1011,12 +1135,12 @@ function Alert({ children, tone, onClose }: { children: React.ReactNode; tone: "
 
 function StatCard({ icon: Icon, label, value }: { icon: typeof Boxes; label: string; value: number }) {
   return (
-    <article className="rounded-xl border border-ink/10 bg-white p-5 shadow-sm">
-      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-ink text-cream">
+    <article className="premium-card p-6 group hover:border-cream/20 hover:shadow-[0_0_30px_rgba(96,165,250,0.04)] hover:-translate-y-0.5 transition-all duration-300">
+      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gold/10 text-gold border border-gold/20 group-hover:scale-110 transition-transform duration-300">
         <Icon size={18} />
       </div>
-      <strong className="block text-3xl font-black">{value}</strong>
-      <span className="text-sm font-semibold text-ink/50">{label}</span>
+      <strong className="block text-3xl font-black text-cream">{value}</strong>
+      <span className="text-xs font-bold uppercase tracking-wider text-cream/40 mt-1 block">{label}</span>
     </article>
   );
 }
@@ -1024,14 +1148,19 @@ function StatCard({ icon: Icon, label, value }: { icon: typeof Boxes; label: str
 function Select({ children, value, onChange, icon: Icon }: { children: React.ReactNode; value: string; onChange: (value: string) => void; icon: typeof Filter }) {
   return (
     <label className="relative block">
-      <Icon size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink/35" />
+      <Icon size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-cream/45" />
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-11 w-full appearance-none rounded-lg border border-ink/12 bg-[#f8f8f4] pl-10 pr-3 text-sm font-black outline-none focus:border-ink/35"
+        className="h-11 w-full appearance-none rounded-xl border border-cream/[0.12] bg-forest/60 pl-10 pr-8 text-xs font-semibold text-cream outline-none focus:border-gold/50 focus:ring-4 focus:ring-gold/10 transition-all duration-300 cursor-pointer"
       >
         {children}
       </select>
+      <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-cream/40">
+        <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
+          <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+        </svg>
+      </div>
     </label>
   );
 }
@@ -1039,27 +1168,34 @@ function Select({ children, value, onChange, icon: Icon }: { children: React.Rea
 function SelectField({ label, children, value, onChange }: { label: string; children: React.ReactNode; value: string; onChange: (value: string) => void }) {
   return (
     <div>
-      <label className="mb-1 block text-xs font-black uppercase tracking-wider text-ink/45">{label}</label>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="h-10 w-full rounded-lg border border-ink/12 bg-white px-3 text-sm font-semibold outline-none focus:border-ink/35"
-        required
-      >
-        {children}
-      </select>
+      <label className="mb-1 block text-xs font-black uppercase tracking-[0.08em] text-cream/40">{label}</label>
+      <div className="relative">
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-10 w-full appearance-none rounded-xl border border-cream/[0.12] bg-forest/60 px-3.5 pr-8 text-xs font-bold text-cream outline-none focus:border-gold/50 focus:ring-4 focus:ring-gold/10 transition-all duration-300 cursor-pointer"
+          required
+        >
+          {children}
+        </select>
+        <div className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-cream/40">
+          <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
+            <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+          </svg>
+        </div>
+      </div>
     </div>
   );
 }
 
 function Modal({ title, children, onClose, maxWidth = "max-w-lg" }: { title: string; children: React.ReactNode; onClose: () => void; maxWidth?: string }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/55 p-4 backdrop-blur-sm">
-      <div className={`max-h-[90vh] w-full ${maxWidth} overflow-y-auto rounded-xl bg-[#f4f3ed] p-6 shadow-2xl`}>
-        <div className="mb-5 flex items-center justify-between gap-4">
-          <h3 className="text-xl font-black">{title}</h3>
-          <button onClick={onClose} className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-ink/50 hover:bg-ink/5 hover:text-ink">
-            <X size={19} />
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
+      <div className={`max-h-[90vh] w-full ${maxWidth} overflow-y-auto rounded-2xl border border-cream/[0.08] bg-forest/95 backdrop-blur-md p-6 shadow-[0_0_50px_rgba(0,0,0,0.5)] text-cream`}>
+        <div className="mb-6 flex items-center justify-between gap-4 border-b border-cream/[0.06] pb-4">
+          <h3 className="text-lg font-black text-cream">{title}</h3>
+          <button onClick={onClose} className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-cream/10 bg-cream/[0.02] text-cream/60 hover:text-cream hover:border-cream/20 transition-all duration-200">
+            <X size={16} />
           </button>
         </div>
         {children}
@@ -1070,18 +1206,18 @@ function Modal({ title, children, onClose, maxWidth = "max-w-lg" }: { title: str
 
 function ModalActions({ saving, submitLabel, onCancel }: { saving: boolean; submitLabel: string; onCancel: () => void }) {
   return (
-    <div className="flex gap-3 pt-2">
+    <div className="flex gap-3 pt-4 border-t border-cream/[0.06] mt-6">
       <button
         type="submit"
         disabled={saving}
-        className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg bg-ink px-4 text-sm font-black text-cream disabled:opacity-50"
+        className="btn-primary min-h-11 flex-1 text-sm rounded-xl py-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {saving ? "Saving..." : submitLabel}
       </button>
       <button
         type="button"
         onClick={onCancel}
-        className="inline-flex min-h-11 items-center justify-center rounded-lg border border-ink/15 px-4 text-sm font-black"
+        className="btn-secondary min-h-11 text-sm rounded-xl py-2 flex-1"
       >
         Cancel
       </button>
@@ -1106,13 +1242,13 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-xs font-black uppercase tracking-wider text-ink/45">{label}</label>
+      <label className="mb-1 block text-xs font-black uppercase tracking-[0.08em] text-cream/40">{label}</label>
       <input
         type={type}
         step={step}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-10 w-full rounded-lg border border-ink/12 bg-white px-3 text-sm font-semibold outline-none focus:border-ink/35"
+        className="h-10 w-full rounded-xl border border-cream/[0.12] bg-forest/60 px-3.5 text-xs font-bold text-cream outline-none focus:border-gold/50 focus:ring-4 focus:ring-gold/10 transition-all duration-300"
         required={required}
       />
     </div>
