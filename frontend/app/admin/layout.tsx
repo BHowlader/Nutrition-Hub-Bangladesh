@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { PageLoading } from "@/components/PageLoading";
@@ -28,15 +28,20 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [redirecting, setRedirecting] = useState(false);
+
+  // The login page always renders without any guard
+  const isLoginPage = pathname === "/admin/login";
 
   useEffect(() => {
-    // Allow the login page to render freely
-    if (pathname === "/admin/login") return;
+    if (isLoginPage) return;
     if (loading) return;
+    if (redirecting) return;
 
     // Not logged in at all → redirect to admin login
     if (!user) {
       clearAdminSession();
+      setRedirecting(true);
       router.replace("/admin/login");
       return;
     }
@@ -45,6 +50,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     const isAdmin = user.is_admin || ["editor", "admin", "owner"].includes(user.role);
     if (!isAdmin) {
       clearAdminSession();
+      setRedirecting(true);
       router.replace("/");
       return;
     }
@@ -52,6 +58,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     // Security enforcement: admin must have used Google auth
     if (user.auth_provider !== "google") {
       clearAdminSession();
+      setRedirecting(true);
       logout().then(() => {
         router.replace("/admin/login");
       });
@@ -60,23 +67,24 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
     // Session gate: must have gone through admin login page explicitly
     if (!isAdminSessionActive()) {
+      setRedirecting(true);
       router.replace("/admin/login");
       return;
     }
-  }, [user, loading, router, pathname, logout]);
+  }, [user, loading, router, isLoginPage, logout, redirecting]);
 
-  // The login page renders without any guard
-  if (pathname === "/admin/login") {
+  // Login page renders freely — no guards
+  if (isLoginPage) {
     return <>{children}</>;
   }
 
-  // While loading → show spinner
+  // While loading auth → show spinner
   if (loading) {
     return <PageLoading label="Checking admin access" />;
   }
 
-  // No user → show redirect spinner (useEffect will redirect)
-  if (!user) {
+  // Redirecting or no user → show spinner (useEffect handles redirect)
+  if (redirecting || !user) {
     return <PageLoading label="Redirecting to login" />;
   }
 

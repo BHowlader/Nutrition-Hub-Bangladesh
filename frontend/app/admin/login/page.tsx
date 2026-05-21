@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -32,16 +32,64 @@ export default function AdminLoginPage() {
 
   const googleBtnRef = useRef<HTMLDivElement>(null);
   const [gsiReady, setGsiReady] = useState(false);
+  const gsiInitialized = useRef(false);
 
   useEffect(() => {
     setMounted(true);
     // Always clear admin session when visiting the login page
-    // This forces a fresh Google sign-in
     clearAdminSession();
   }, []);
 
-  // Load Google Identity Services SDK
+  // Stable callback for Google sign-in
+  const handleGoogleSignIn = useCallback(
+    async (credential: string) => {
+      setError("");
+      setAuthenticating(true);
+      try {
+        await googleLogin(credential);
+
+        // Verify admin role immediately via /api/auth/me
+        const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const res = await fetch(`${API}/api/auth/me`, { credentials: "include" });
+        if (!res.ok) throw new Error("Failed to verify credentials");
+
+        const loggedUser = await res.json();
+        const isAdmin =
+          loggedUser.is_admin || ["admin", "owner", "editor"].includes(loggedUser.role);
+
+        if (!isAdmin) {
+          await logout();
+          clearAdminSession();
+          setError(
+            "Access Denied — Your Google account does not have administrative privileges. Contact the site owner."
+          );
+        } else if (loggedUser.auth_provider !== "google") {
+          await logout();
+          clearAdminSession();
+          setError(
+            "Security Policy — Admin accounts must authenticate with Google."
+          );
+        } else {
+          // Success! Activate admin session gate and redirect
+          activateAdminSession();
+          router.replace("/admin/products");
+        }
+      } catch (err) {
+        clearAdminSession();
+        setError(
+          err instanceof Error ? err.message : "Google authentication failed. Please try again."
+        );
+      } finally {
+        setAuthenticating(false);
+      }
+    },
+    [googleLogin, logout, router]
+  );
+
+  // Load Google Identity Services SDK — initialize only once
   useEffect(() => {
+    if (gsiInitialized.current) return;
+
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     if (!clientId) return;
 
@@ -49,54 +97,16 @@ export default function AdminLoginPage() {
     script.src = "https://accounts.google.com/gsi/client?hl=en";
     script.async = true;
     script.onload = () => {
+      if (gsiInitialized.current) return;
+      gsiInitialized.current = true;
+
       window.google?.accounts.id.initialize({
         client_id: clientId,
-        callback: async (response: { credential: string }) => {
-          setError("");
-          setAuthenticating(true);
-          try {
-            // If already logged in with a different account, logout first
-            if (user) {
-              await logout();
-            }
-
-            await googleLogin(response.credential);
-
-            // Verify admin role immediately via /api/auth/me
-            const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-            const res = await fetch(`${API}/api/auth/me`, { credentials: "include" });
-            if (!res.ok) throw new Error("Failed to verify credentials");
-
-            const loggedUser = await res.json();
-            const isAdmin =
-              loggedUser.is_admin || ["admin", "owner", "editor"].includes(loggedUser.role);
-
-            if (!isAdmin) {
-              await logout();
-              clearAdminSession();
-              setError(
-                "Access Denied — Your Google account does not have administrative privileges. Contact the site owner."
-              );
-            } else if (loggedUser.auth_provider !== "google") {
-              await logout();
-              clearAdminSession();
-              setError(
-                "Security Policy — Admin accounts must authenticate with Google. Email/password login is not permitted."
-              );
-            } else {
-              // Success! Activate admin session gate and redirect
-              activateAdminSession();
-              router.replace("/admin/products");
-            }
-          } catch (err) {
-            clearAdminSession();
-            setError(
-              err instanceof Error ? err.message : "Google authentication failed. Please try again."
-            );
-          } finally {
-            setAuthenticating(false);
-          }
+        callback: (response: { credential: string }) => {
+          handleGoogleSignIn(response.credential);
         },
+        auto_select: false,
+        cancel_on_tap_outside: true,
       });
       if (googleBtnRef.current) {
         window.google?.accounts.id.renderButton(googleBtnRef.current, {
@@ -111,10 +121,11 @@ export default function AdminLoginPage() {
       setGsiReady(true);
     };
     document.head.appendChild(script);
+
     return () => {
       script.remove();
     };
-  }, [googleLogin, logout, user, router]);
+  }, [handleGoogleSignIn]);
 
   if (loading) return <PageLoading label="Verifying session" />;
 
@@ -139,6 +150,7 @@ export default function AdminLoginPage() {
               width={56}
               height={56}
               className="rounded-xl border border-cream/5 shadow-lg"
+              style={{ width: 56, height: 56 }}
               priority
             />
           </Link>
@@ -154,17 +166,19 @@ export default function AdminLoginPage() {
           </p>
         </div>
 
-        {/* If user has existing session, show who they are and prompt re-auth */}
+        {/* If user has existing session, show who they are */}
         {user && !authenticating && (
           <div className="mb-6 rounded-xl border border-cream/10 bg-cream/[0.03] p-4">
             <div className="flex items-center gap-3">
               {user.photo_url ? (
-                <Image
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
                   src={user.photo_url}
                   alt={user.name}
                   width={40}
                   height={40}
-                  className="rounded-full border border-cream/10"
+                  className="rounded-full border border-cream/10 object-cover"
+                  referrerPolicy="no-referrer"
                 />
               ) : (
                 <div className="h-10 w-10 rounded-full bg-gold/20 border border-gold/30 flex items-center justify-center text-sm font-black text-gold">
@@ -187,7 +201,7 @@ export default function AdminLoginPage() {
               </button>
             </div>
             <p className="text-[11px] text-cream/40 mt-3 leading-relaxed">
-              You have an existing session. Please sign in with Google below to access the admin portal.
+              Sign in with Google below to access the admin portal.
             </p>
           </div>
         )}
@@ -232,13 +246,11 @@ export default function AdminLoginPage() {
 
         {/* Google Sign-In Button */}
         <div className="space-y-4">
-          {/* GSI rendered button */}
           <div
             ref={googleBtnRef}
             className={gsiReady && !authenticating ? "flex justify-center" : "hidden"}
           />
 
-          {/* Fallback styled button when GSI not loaded */}
           {!gsiReady && !authenticating && (
             <button
               type="button"
