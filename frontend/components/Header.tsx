@@ -89,15 +89,18 @@ export function Header() {
         <div className="flex items-center gap-3">
           <button
             onClick={handleCartClick}
+            aria-label={`Cart with ${totalCount} ${totalCount === 1 ? "item" : "items"}`}
             className="relative inline-flex min-h-11 items-center gap-2 rounded-lg bg-cream px-4 font-black text-ink"
           >
             <ShoppingBag size={18} />
             Cart
-            {totalCount > 0 && (
-              <span className="absolute -right-2 -top-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-gold px-1 text-[10px] font-black text-ink ring-2 ring-ink">
-                {totalCount}
-              </span>
-            )}
+            <span
+              className={`absolute -right-2 -top-2 flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-[10px] font-black ring-2 ring-ink ${
+                totalCount > 0 ? "bg-gold text-ink" : "bg-ink text-cream/70"
+              }`}
+            >
+              {totalCount}
+            </span>
           </button>
 
           {!loading && (
