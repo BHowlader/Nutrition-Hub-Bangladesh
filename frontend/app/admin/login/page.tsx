@@ -76,14 +76,7 @@ export default function AdminLoginPage() {
         }
 
         const redirectUri = window.location.origin + "/admin/login";
-        await googleCodeExchange({ code, code_verifier: codeVerifier, redirect_uri: redirectUri, nonce });
-
-        // Verify admin role immediately via /api/auth/me
-        const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-        const res = await fetch(`${API}/api/auth/me`, { credentials: "include" });
-        if (!res.ok) throw new Error("Failed to verify credentials");
-
-        const loggedUser = await res.json();
+        const loggedUser = await googleCodeExchange({ code, code_verifier: codeVerifier, redirect_uri: redirectUri, nonce });
         const isAdmin =
           loggedUser.is_admin || ["admin", "owner", "editor"].includes(loggedUser.role);
 

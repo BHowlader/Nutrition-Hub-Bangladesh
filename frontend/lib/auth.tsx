@@ -42,7 +42,7 @@ interface AuthState {
     code_verifier: string;
     redirect_uri: string;
     nonce?: string;
-  }) => Promise<void>;
+  }) => Promise<User>;
   logout: () => Promise<void>;
   updateProfile: (data: { name?: string; phone?: string; address?: string }) => Promise<void>;
   uploadPhoto: (file: File) => Promise<void>;
@@ -124,6 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify(params),
       });
       setUser(data.user);
+      return data.user;
     },
     []
   );
