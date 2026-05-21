@@ -714,18 +714,26 @@ function ProductsSection({
         <table className="w-full min-w-[880px] border-collapse text-left">
           <thead>
             <tr className="border-b border-cream/[0.08] bg-forest/40 text-[10px] uppercase tracking-wider font-black text-cream/40">
-              <th className="px-5 py-3.5">Product</th>
-              <th className="py-3.5">Category</th>
-              <th className="py-3.5">Price</th>
-              <th className="py-3.5">Stock</th>
-              <th className="py-3.5">Status</th>
-              <th className="pr-5 py-3.5 text-right">Actions</th>
+              <th className="w-[30%] pl-6 pr-4 py-3.5 text-left">Product</th>
+              <th className="w-[15%] px-4 py-3.5">
+                <div className="flex justify-center">Category</div>
+              </th>
+              <th className="w-[15%] px-4 py-3.5">
+                <div className="flex justify-center">Price</div>
+              </th>
+              <th className="w-[12%] px-4 py-3.5">
+                <div className="flex justify-center">Stock</div>
+              </th>
+              <th className="w-[13%] px-4 py-3.5">
+                <div className="flex justify-center">Status</div>
+              </th>
+              <th className="w-[15%] pl-4 pr-6 py-3.5 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
             {filteredProducts.map((product) => (
               <tr className="border-b border-cream/[0.04] align-middle hover:bg-cream/[0.02] transition-colors duration-150" key={product.id}>
-                <td className="px-5 py-4">
+                <td className="pl-6 pr-4 py-4 !text-left">
                   <div className="flex items-center gap-3.5">
                     <ProductThumb product={product} />
                     <div className="min-w-0">
@@ -738,26 +746,36 @@ function ProductsSection({
                     </div>
                   </div>
                 </td>
-                <td className="text-xs font-bold text-cream/70">{product.category?.name || "Unassigned"}</td>
-                <td>
-                  <div className="text-sm font-black text-cream">Tk {Number(product.price).toLocaleString("en-BD")}</div>
-                  {product.compare_at_price && (
-                    <div className="text-xs text-cream/35 line-through mt-0.5">
-                      Tk {Number(product.compare_at_price).toLocaleString("en-BD")}
-                    </div>
-                  )}
+                <td className="px-4 py-4 text-xs font-bold text-cream/70">
+                  <div className="flex justify-center">
+                    {product.category?.name || "Unassigned"}
+                  </div>
                 </td>
-                <td>
-                  <span className={`text-xs font-black ${product.stock === 0 ? "text-red-400 bg-red-500/10 px-2 py-0.5 rounded-md" : product.stock < 10 ? "text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md animate-pulse" : "text-cream"}`}>
-                    {product.stock}
-                  </span>
+                <td className="px-4 py-4">
+                  <div className="flex flex-col items-center justify-center">
+                    <span className="text-sm font-black text-cream">Tk {Number(product.price).toLocaleString("en-BD")}</span>
+                    {product.compare_at_price && (
+                      <span className="text-xs text-cream/35 line-through mt-0.5">
+                        Tk {Number(product.compare_at_price).toLocaleString("en-BD")}
+                      </span>
+                    )}
+                  </div>
                 </td>
-                <td>
-                  <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-black capitalize tracking-wider ${statusStyles[product.status]}`}>
-                    {product.status}
-                  </span>
+                <td className="px-4 py-4">
+                  <div className="flex justify-center">
+                    <span className={`text-xs font-black inline-block ${product.stock === 0 ? "text-red-400 bg-red-500/10 px-2 py-0.5 rounded-md" : product.stock < 10 ? "text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md animate-pulse" : "text-cream"}`}>
+                      {product.stock}
+                    </span>
+                  </div>
                 </td>
-                <td className="pr-5">
+                <td className="px-4 py-4">
+                  <div className="flex justify-center">
+                    <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-black capitalize tracking-wider ${statusStyles[product.status]}`}>
+                      {product.status}
+                    </span>
+                  </div>
+                </td>
+                <td className="pl-4 pr-6 py-4 text-right">
                   <div className="flex justify-end gap-2">
                     <Link
                       href={`/products/${product.slug}`}
@@ -815,50 +833,66 @@ function OrdersSection({ orders, saving, onStatusChange }: { orders: Order[]; sa
         <table className="w-full min-w-[980px] border-collapse text-left">
           <thead>
             <tr className="border-b border-cream/[0.08] bg-forest/40 text-[10px] uppercase tracking-wider font-black text-cream/40">
-              <th className="px-5 py-3.5">Order</th>
-              <th className="py-3.5">Customer</th>
-              <th className="py-3.5">Items</th>
-              <th className="py-3.5">Total</th>
-              <th className="py-3.5">Status</th>
-              <th className="pr-5 py-3.5">Created</th>
+              <th className="w-[15%] pl-6 pr-4 py-3.5 text-left">Order</th>
+              <th className="w-[30%] px-4 py-3.5 text-left">Customer</th>
+              <th className="w-[12%] px-4 py-3.5">
+                <div className="flex justify-center">Items</div>
+              </th>
+              <th className="w-[15%] px-4 py-3.5">
+                <div className="flex justify-center">Total</div>
+              </th>
+              <th className="w-[13%] px-4 py-3.5">
+                <div className="flex justify-center">Status</div>
+              </th>
+              <th className="w-[15%] pl-4 pr-6 py-3.5 text-right">Created</th>
             </tr>
           </thead>
           <tbody>
             {orders.map((order) => (
               <tr key={order.id} className="border-b border-cream/[0.04] align-middle hover:bg-cream/[0.02] transition-colors duration-150">
-                <td className="px-5 py-4">
+                <td className="pl-6 pr-4 py-4 !text-left">
                   <strong className="block text-sm text-cream font-bold">#{order.id.slice(0, 8)}</strong>
                   <span className="text-[10px] font-black tracking-wider text-cream/35 mt-0.5">{order.payment_method.toUpperCase()}</span>
                 </td>
-                <td>
+                <td className="px-4 py-4 !text-left">
                   <strong className="block text-sm text-cream font-bold">{order.customer_name}</strong>
                   <span className="block text-xs text-cream/50 mt-0.5">{order.phone}</span>
                   <span className="block max-w-[260px] truncate text-xs text-cream/30 mt-0.5">{order.address}</span>
                 </td>
-                <td className="text-xs font-bold text-cream/70">{order.items.reduce((sum, item) => sum + item.quantity, 0)}</td>
-                <td className="text-sm font-black text-cream">Tk {Number(order.total).toLocaleString("en-BD")}</td>
-                <td>
-                  <div className="relative inline-block">
-                    <select
-                      value={order.status}
-                      disabled={saving}
-                      onChange={(e) => onStatusChange(order.id, e.target.value as OrderStatus)}
-                      className="h-9 appearance-none rounded-xl border border-cream/[0.12] bg-forest/60 pl-3 pr-8 text-xs font-bold text-cream outline-none focus:border-gold/50 focus:ring-4 focus:ring-gold/10 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed capitalize cursor-pointer"
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="confirmed">Confirmed</option>
-                      <option value="shipped">Shipped</option>
-                      <option value="delivered">Delivered</option>
-                      <option value="cancelled">Cancelled</option>
-                    </select>
-                    <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-cream/40">
-                      <svg className="h-3.5 w-3.5 fill-current" viewBox="0 0 20 20">
-                        <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                      </svg>
+                <td className="px-4 py-4 text-xs font-bold text-cream/70">
+                  <div className="flex justify-center">
+                    {order.items.reduce((sum, item) => sum + item.quantity, 0)}
+                  </div>
+                </td>
+                <td className="px-4 py-4 text-sm font-black text-cream">
+                  <div className="flex justify-center">
+                    Tk {Number(order.total).toLocaleString("en-BD")}
+                  </div>
+                </td>
+                <td className="px-4 py-4">
+                  <div className="flex justify-center">
+                    <div className="relative inline-block text-left">
+                      <select
+                        value={order.status}
+                        disabled={saving}
+                        onChange={(e) => onStatusChange(order.id, e.target.value as OrderStatus)}
+                        className="h-9 appearance-none rounded-xl border border-cream/[0.12] bg-forest/60 pl-3 pr-8 text-xs font-bold text-cream outline-none focus:border-gold/50 focus:ring-4 focus:ring-gold/10 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed capitalize cursor-pointer"
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                      <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-cream/40">
+                        <svg className="h-3.5 w-3.5 fill-current" viewBox="0 0 20 20">
+                          <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                        </svg>
+                      </div>
                     </div>
                   </div>
                 </td>
-                <td className="pr-5 text-xs font-semibold text-cream/40">
+                <td className="pl-4 pr-6 py-4 text-xs font-semibold text-cream/40 text-right">
                   {order.created_at ? new Date(order.created_at).toLocaleString() : "Unknown"}
                 </td>
               </tr>
