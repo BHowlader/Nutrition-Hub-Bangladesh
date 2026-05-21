@@ -388,14 +388,14 @@ export default function AdminProductsPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-ink text-cream font-sans overflow-x-hidden">
+    <div className="relative min-h-screen lg:h-screen lg:overflow-hidden bg-ink text-cream font-sans overflow-x-hidden">
       {/* Background glow effects */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <div className="absolute -left-[10%] -top-[10%] h-[50vw] w-[50vw] rounded-full bg-gold/5 blur-[120px] animate-aurora-1" />
         <div className="absolute -right-[10%] -bottom-[10%] h-[50vw] w-[50vw] rounded-full bg-mint/5 blur-[120px] animate-aurora-2" />
       </div>
 
-      <div className="relative z-10 flex flex-col lg:flex-row min-h-screen">
+      <div className="relative z-10 flex flex-col lg:flex-row min-h-screen lg:h-screen lg:overflow-hidden">
         {/* Sidebar for Desktop */}
         <aside className="hidden lg:flex lg:flex-col lg:w-48 xl:w-56 shrink-0 border-r border-cream/[0.08] bg-forest/40 backdrop-blur-md p-5 sticky top-0 h-screen justify-between">
           <div>
@@ -508,7 +508,7 @@ export default function AdminProductsPage() {
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto max-w-full z-10">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 lg:h-screen overflow-y-auto max-w-full z-10 scrollbar-thin">
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-cream">
