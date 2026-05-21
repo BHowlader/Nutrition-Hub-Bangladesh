@@ -5,6 +5,13 @@ import { fetchProductBySlug, fetchProducts } from "@/lib/products";
 import { ProductDetailClient } from "@/components/ProductDetailClient";
 import { Header } from "@/components/Header";
 
+export const revalidate = 300;
+
+export async function generateStaticParams() {
+  const products = await fetchProducts({ limit: 200 });
+  return products.map((product) => ({ id: product.slug }));
+}
+
 export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const product = await fetchProductBySlug(id);

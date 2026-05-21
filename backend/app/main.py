@@ -42,6 +42,11 @@ def create_tables() -> None:
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS detail VARCHAR(200)"))
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS accent VARCHAR(20)"))
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS subcategory VARCHAR(120)"))
+        conn.execute(text("CREATE INDEX IF NOT EXISTS ix_products_created_at ON products (created_at)"))
+        conn.execute(text("CREATE INDEX IF NOT EXISTS ix_products_category_id ON products (category_id)"))
+        conn.execute(text("CREATE INDEX IF NOT EXISTS ix_products_status_created_at ON products (status, created_at DESC)"))
+        conn.execute(text("CREATE INDEX IF NOT EXISTS ix_products_category_status_created_at ON products (category_id, status, created_at DESC)"))
+        conn.execute(text("CREATE INDEX IF NOT EXISTS ix_categories_name ON categories (name)"))
         if settings.admin_email:
             conn.execute(
                 text("UPDATE users SET is_admin = TRUE WHERE email = :email"),

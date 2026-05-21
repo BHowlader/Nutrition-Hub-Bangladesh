@@ -3,7 +3,7 @@ from decimal import Decimal
 from enum import Enum
 from uuid import uuid4
 
-from sqlalchemy import DateTime, Enum as SqlEnum, ForeignKey, Integer, Numeric, String, Text
+from sqlalchemy import DateTime, Enum as SqlEnum, ForeignKey, Index, Integer, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -26,6 +26,10 @@ class Category(Base):
 
 class Product(Base):
     __tablename__ = "products"
+    __table_args__ = (
+        Index("ix_products_status_created_at", "status", "created_at"),
+        Index("ix_products_category_status_created_at", "category_id", "status", "created_at"),
+    )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
     name: Mapped[str] = mapped_column(String(180), index=True)
@@ -43,8 +47,8 @@ class Product(Base):
     accent: Mapped[str | None] = mapped_column(String(20), nullable=True)
     subcategory: Mapped[str | None] = mapped_column(String(120), nullable=True, index=True)
     status: Mapped[ProductStatus] = mapped_column(SqlEnum(ProductStatus), default=ProductStatus.draft, index=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    category_id: Mapped[str] = mapped_column(ForeignKey("categories.id"))
+    category_id: Mapped[str] = mapped_column(ForeignKey("categories.id"), index=True)
     category: Mapped[Category] = relationship(back_populates="products")
