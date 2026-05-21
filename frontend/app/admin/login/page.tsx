@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Shield, AlertCircle, Lock, ShieldCheck, LogOut } from "lucide-react";
+import { Shield, AlertCircle, Lock, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { PageLoading } from "@/components/PageLoading";
 import { activateAdminSession, clearAdminSession, isAdminSessionActive } from "@/lib/adminSession";
@@ -161,16 +161,6 @@ export default function AdminLoginPage() {
     window.location.href = googleAuthUrl;
   };
 
-  const handleSignOut = async () => {
-    try {
-      setError("");
-      await logout();
-      clearAdminSession();
-    } catch (err) {
-      setError("Failed to sign out cleanly.");
-    }
-  };
-
   if (loading) return <PageLoading label="Verifying session" />;
 
   return (
@@ -286,14 +276,13 @@ export default function AdminLoginPage() {
         </div>
 
         {/* Footer Navigation */}
-        <div className="mt-8 border-t border-cream/15 pt-5 text-center flex justify-center">
-          <button
-            onClick={handleSignOut}
-            className="flex items-center gap-1.5 text-xs text-cream/40 hover:text-cream transition-colors duration-300 font-medium focus:outline-none cursor-pointer"
+        <div className="mt-8 border-t border-cream/15 pt-5 text-center">
+          <Link
+            href="/"
+            className="text-xs text-cream/40 hover:text-cream transition-colors duration-300 font-medium"
           >
-            <LogOut size={12} />
-            <span>Sign out</span>
-          </button>
+            ← Return to public storefront
+          </Link>
         </div>
       </div>
     </div>
