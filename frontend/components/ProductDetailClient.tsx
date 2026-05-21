@@ -90,7 +90,7 @@ export function ProductDetailClient({
 
               {/* Quick Trust Checks under image */}
               {/* Quick Trust Checks under image */}
-              <div className="mt-6 grid grid-cols-2 gap-4">
+              <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
                 <div className="rounded-2xl border border-white/[0.05] bg-[#0c1324]/20 p-5 md:p-6 flex items-center gap-4">
                   <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-gold/15 text-gold border border-white/5">
                     <ShieldCheck size={24} />
@@ -126,7 +126,7 @@ export function ProductDetailClient({
                   </div>
                 </div>
 
-                <h1 className="mt-3 text-3xl md:text-4xl font-black leading-tight text-cream">
+                <h1 className="mt-3 text-2xl sm:text-3xl md:text-4xl font-black leading-tight text-cream">
                   {product.name}
                 </h1>
 

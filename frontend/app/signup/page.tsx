@@ -97,7 +97,7 @@ function SignupContent() {
   if (loading) return <PageLoading label="Checking session" />;
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-ink">
+    <div className="flex min-h-screen w-full lg:h-screen lg:overflow-hidden bg-ink">
       {/* Image Portion (Left) */}
       {/* Image Portion (Left) */}
       <div className={`hidden lg:block lg:w-[52%] xl:w-[55%] h-full relative overflow-hidden transition-[transform,opacity] duration-500 ease-out-expo ${(!mounted) ? '-translate-x-8 opacity-0' : 'translate-x-0 opacity-100'}`}>
@@ -126,7 +126,7 @@ function SignupContent() {
       </div>
 
       {/* Form Portion (Right) - Stretched Full Height */}
-      <div className={`w-full lg:w-[48%] xl:w-[45%] h-full flex flex-col justify-center bg-ink border-l border-cream/5 px-8 sm:px-12 md:px-16 lg:px-20 py-8 overflow-hidden max-h-screen transition-[transform,opacity] duration-500 ease-out-expo ${(!mounted) ? 'translate-x-8 opacity-0' : 'translate-x-0 opacity-100'}`}>
+      <div className={`w-full lg:w-[48%] xl:w-[45%] lg:h-full flex flex-col justify-center bg-ink border-l border-cream/5 px-6 sm:px-12 md:px-16 lg:px-20 py-10 lg:py-8 lg:overflow-y-auto lg:max-h-screen transition-[transform,opacity] duration-500 ease-out-expo ${(!mounted) ? 'translate-x-8 opacity-0' : 'translate-x-0 opacity-100'}`}>
         <div className="w-full max-w-md mx-auto my-auto py-4">
           {/* Logo - Centered at the top of the form flow */}
           <div className="flex flex-col items-center text-center mb-5">

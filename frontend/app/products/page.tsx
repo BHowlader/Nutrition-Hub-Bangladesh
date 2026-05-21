@@ -92,7 +92,7 @@ export default function ProductsPage() {
         <div className="shell relative z-10 grid items-end gap-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(360px,0.65fr)]">
           <div className="max-w-3xl">
             <p className="eyebrow text-gold">Premium Catalog</p>
-            <h1 className="text-[clamp(2.8rem,6vw,5.8rem)] font-black leading-[0.92] tracking-tight">
+            <h1 className="text-[clamp(2rem,7vw,5.8rem)] font-black leading-[0.95] tracking-tight">
               Verified supplements, organized for serious buyers.
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-relaxed text-cream/60 md:text-lg">
@@ -100,17 +100,17 @@ export default function ProductsPage() {
             </p>
 
             <div className="mt-8 grid max-w-2xl grid-cols-3 overflow-hidden rounded-xl border border-white/[0.08] bg-[#0c1324]/60 backdrop-blur-md">
-              <div className="p-4">
-                <strong className="block text-2xl font-black text-cream">{products.length}</strong>
-                <span className="text-xs font-bold uppercase tracking-wider text-cream/40">Products</span>
+              <div className="p-3 sm:p-4">
+                <strong className="block text-lg sm:text-2xl font-black text-cream">{products.length}</strong>
+                <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-cream/40">Products</span>
               </div>
-              <div className="border-x border-white/[0.06] p-4">
-                <strong className="block text-2xl font-black text-cream">{availableCount}</strong>
-                <span className="text-xs font-bold uppercase tracking-wider text-cream/40">In stock</span>
+              <div className="border-x border-white/[0.06] p-3 sm:p-4">
+                <strong className="block text-lg sm:text-2xl font-black text-cream">{availableCount}</strong>
+                <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-cream/40">In stock</span>
               </div>
-              <div className="p-4">
-                <strong className="block text-2xl font-black text-cream">COD</strong>
-                <span className="text-xs font-bold uppercase tracking-wider text-cream/40">Available</span>
+              <div className="p-3 sm:p-4">
+                <strong className="block text-lg sm:text-2xl font-black text-cream">COD</strong>
+                <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-cream/40">Available</span>
               </div>
             </div>
           </div>

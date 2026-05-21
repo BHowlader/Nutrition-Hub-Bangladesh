@@ -242,14 +242,14 @@ export function Hero({
               </span>
             </div>
 
-            <h1 className="flex flex-col text-[clamp(2.8rem,5.45vw,5.15rem)] font-black leading-[0.95] tracking-tight text-cream" style={{ perspective: "1000px" }}>
+            <h1 className="flex flex-col text-[clamp(2.25rem,8vw,5.15rem)] font-black leading-[0.95] tracking-tight text-cream" style={{ perspective: "1000px" }}>
               <span className="hero-title-line block">Power Your</span>
               <span className="hero-title-line block mt-2">
                 <span className="bg-gradient-to-r from-gold via-champagne to-mint bg-clip-text text-transparent">
                   Performance.
                 </span>
               </span>
-              <span className="hero-title-line block mt-2 text-[clamp(2.2rem,3.45vw,3.55rem)] text-cream/80">
+              <span className="hero-title-line block mt-2 text-[clamp(1.6rem,5.5vw,3.55rem)] text-cream/80">
                 Without Compromise.
               </span>
             </h1>
@@ -258,15 +258,55 @@ export function Hero({
               {heroDescription}
             </p>
 
-            <div className="mt-7 flex w-full flex-nowrap items-center gap-3 sm:mt-8 sm:gap-4">
-              <a href="#catalog" className="hero-btn btn-primary min-h-[54px] whitespace-nowrap px-6 text-base sm:min-h-[56px] sm:px-7 sm:text-lg">
+            <div className="mt-7 flex w-full flex-wrap items-center gap-3 sm:mt-8 sm:gap-4">
+              <a href="#catalog" className="hero-btn btn-primary min-h-[52px] w-full justify-center whitespace-nowrap px-5 text-sm sm:w-auto sm:min-h-[56px] sm:px-7 sm:text-lg">
                 Explore Products <ArrowRight size={20} className="ml-1" />
               </a>
-              <a href="#authenticity" className="hero-btn btn-secondary min-h-[54px] whitespace-nowrap border-white/10 bg-white/5 px-6 text-base backdrop-blur-md sm:min-h-[56px] sm:px-7 sm:text-lg">
+              <a href="#authenticity" className="hero-btn btn-secondary min-h-[52px] w-full justify-center whitespace-nowrap border-white/10 bg-white/5 px-5 text-sm backdrop-blur-md sm:w-auto sm:min-h-[56px] sm:px-7 sm:text-lg">
                 <ShieldCheck size={20} className="mr-2 text-mint" />
                 Verify Authenticity
               </a>
             </div>
+
+            {/* Mobile-only product showcase (the lg overlapping version is hidden below lg) */}
+            {visualProducts.length > 0 && (
+              <div className="relative mt-10 w-full lg:hidden">
+                <div className="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  {visualProducts.map((product) => (
+                    <div
+                      key={product.id}
+                      className="snap-start shrink-0 w-[68%] max-w-[280px] sm:w-[260px] overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0c1324] shadow-[0_20px_40px_rgba(0,0,0,0.4)] backdrop-blur-2xl"
+                      style={{ boxShadow: `0 20px 40px -10px ${product.accent || "#F59E0B"}15` }}
+                    >
+                      <div className="relative aspect-square w-full overflow-hidden bg-[#050811] border-b border-white/[0.04]">
+                        <Image
+                          src={product.image_url || "/images/logo.png"}
+                          alt={product.name}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 640px) 70vw, 260px"
+                        />
+                      </div>
+                      <div className="p-4">
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-cream/50 mb-1">
+                          {product.category?.name || ""}
+                        </div>
+                        <h3 className="text-base font-bold text-cream truncate">{product.name}</h3>
+                        <div className="mt-3 flex items-center justify-between">
+                          <span className="font-black text-gold">{formatTaka(product.price)}</span>
+                          <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold text-cream/70 backdrop-blur-md">
+                            {product.badge || ""}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-cream/30">
+                  Swipe to explore →
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Right Column - Visual Showcase */}
@@ -324,11 +364,11 @@ export function Hero({
       {/* Feature Row - Sits naturally below the 100svh viewport fold */}
       <div className="relative z-20 bg-[#04060d] py-6 border-b border-white/[0.05]">
         <div className="shell">
-          <div className="flex items-center justify-center gap-8 text-xs font-semibold text-cream/40 uppercase tracking-widest">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[11px] font-semibold text-cream/40 uppercase tracking-widest sm:gap-8 sm:text-xs">
             <div className="flex items-center gap-2">
               <ShieldCheck size={16} className="text-gold" /> Guaranteed Authentic
             </div>
-            <div className="h-4 w-[1px] bg-white/10" />
+            <div className="hidden h-4 w-[1px] bg-white/10 sm:block" />
             <div className="flex items-center gap-2">
               <Zap size={16} className="text-mint" /> Fast Delivery
             </div>
