@@ -44,7 +44,8 @@ export function ProductDetailClient({
     }
   }, []);
 
-  const specs = product.detail.split(/·|\|/).map((s) => s.trim()).filter(Boolean);
+  const specs = (product.detail || "").split(/·|\|/).map((s) => s.trim()).filter(Boolean);
+  const accent = product.accent || "#F59E0B";
 
   return (
     <div className="min-h-screen bg-[#04060d] text-cream selection:bg-gold selection:text-ink">
@@ -66,16 +67,16 @@ export function ProductDetailClient({
                   <div className="absolute inset-0 rounded-[32px] border border-white/5 pointer-events-none" />
                   
                   {/* Subtle decorative backing glow matching product accent */}
-                  <div 
+                  <div
                     className="absolute inset-0 opacity-20 blur-3xl transition-opacity duration-500 pointer-events-none"
                     style={{
-                      background: `radial-gradient(circle at center, ${product.accent} 0%, transparent 70%)`
+                      background: `radial-gradient(circle at center, ${accent} 0%, transparent 70%)`
                     }}
                   />
 
                   <div className={`relative w-full h-full transition-transform duration-700 ease-out ${hoveredImage ? 'scale-105' : 'scale-100'}`}>
                     <Image
-                      src={product.image || "/images/logo.png"}
+                      src={product.image_url || "/images/logo.png"}
                       alt={product.name}
                       fill
                       className="object-contain"
@@ -117,7 +118,7 @@ export function ProductDetailClient({
               <Reveal>
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-black uppercase tracking-[0.18em] text-gold">
-                    {product.category}
+                    {product.category?.name || ""}
                   </span>
                   <span className="h-1.5 w-1.5 rounded-full bg-white/20" />
                   <div className="flex items-center gap-1 text-xs font-black text-gold">
@@ -177,7 +178,7 @@ export function ProductDetailClient({
                       <button
                         onClick={async () => {
                           if (!user) {
-                            router.push(`/login?redirect=/products/${product.id}`);
+                            router.push(`/login?redirect=/products/${product.slug}`);
                             return;
                           }
                           setAdding(true);

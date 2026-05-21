@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ArrowRight, ArrowDown, ShieldCheck, Zap } from "lucide-react";
-import { formatTaka, products } from "@/lib/products";
+import { fetchProducts, formatTaka, type Product } from "@/lib/products";
 import gsap from "gsap";
 
 export function Hero() {
@@ -12,7 +12,12 @@ export function Hero() {
   const [progress, setProgress] = useState(0);
   const [animatingOut, setAnimatingOut] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const hasAnimated = useRef(false);
+
+  useEffect(() => {
+    fetchProducts().then(setAllProducts);
+  }, []);
 
   useEffect(() => {
     setMounted(true);
@@ -83,12 +88,8 @@ export function Hero() {
     return () => ctx.revert();
   }, [loading]);
 
-  // Use a diverse subset of products representing different categories for the visual right side
-  const visualProducts = products.filter(p => 
-    p.id === "creatine-tropical-tango" ||
-    p.id === "pintola-protein-oats" ||
-    p.id === "kapiva-shilajit-gold"
-  );
+  const visualSlugs = new Set(["creatine-tropical-tango", "pintola-protein-oats", "kapiva-shilajit-gold"]);
+  const visualProducts = allProducts.filter((p) => visualSlugs.has(p.slug));
 
   return (
     <>
@@ -273,17 +274,16 @@ export function Hero() {
                   perspective: "1200px"
                 }}
               >
-                <div 
+                <div
                   className={`hero-visual-card animate-float-${i + 1} w-[260px] overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0c1324] shadow-[0_30px_60px_rgba(0,0,0,0.4)] backdrop-blur-2xl transition-all duration-300 hover:border-white/20`}
                   style={{
-                    boxShadow: `0 30px 60px -10px ${product.accent}15`
+                    boxShadow: `0 30px 60px -10px ${product.accent || "#F59E0B"}15`
                   }}
                 >
-                  {/* Seamless dark container for image blending - full bleed to top, left, right */}
                   <div className="relative aspect-square w-full overflow-hidden bg-[#050811] border-b border-white/[0.04]">
                     <div className="absolute inset-0">
                       <Image
-                        src={product.image!}
+                        src={product.image_url || "/images/logo.png"}
                         alt={product.name}
                         fill
                         className="object-cover w-full h-full"
@@ -291,14 +291,13 @@ export function Hero() {
                       />
                     </div>
                   </div>
-                  {/* Padded text section below */}
                   <div className="p-4">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-cream/50 mb-1">{product.category}</div>
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-cream/50 mb-1">{product.category?.name || ""}</div>
                     <h3 className="text-base font-bold text-cream truncate">{product.name}</h3>
                     <div className="mt-3 flex items-center justify-between">
                       <span className="font-black text-gold">{formatTaka(product.price)}</span>
                       <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold text-cream/70 backdrop-blur-md">
-                        {product.badge}
+                        {product.badge || ""}
                       </span>
                     </div>
                   </div>

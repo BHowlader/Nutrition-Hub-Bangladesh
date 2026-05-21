@@ -1,18 +1,13 @@
-import { products } from "@/lib/products";
-import { ProductDetailClient } from "@/components/ProductDetailClient";
-import { Header } from "@/components/Header";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-export async function generateStaticParams() {
-  return products.map((product) => ({
-    id: product.id,
-  }));
-}
+import { fetchProductBySlug, fetchProducts } from "@/lib/products";
+import { ProductDetailClient } from "@/components/ProductDetailClient";
+import { Header } from "@/components/Header";
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const product = products.find((p) => p.id === id);
+  const product = await fetchProductBySlug(id);
 
   if (!product) {
     return (
@@ -29,11 +24,8 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     );
   }
 
-  const relatedProducts = products
-    .filter((p) => p.category === product.category && p.id !== product.id)
-    .slice(0, 3);
+  const all = product.category ? await fetchProducts({ category: product.category.name }) : [];
+  const relatedProducts = all.filter((p) => p.id !== product.id).slice(0, 3);
 
-  return (
-    <ProductDetailClient product={product} relatedProducts={relatedProducts} />
-  );
+  return <ProductDetailClient product={product} relatedProducts={relatedProducts} />;
 }

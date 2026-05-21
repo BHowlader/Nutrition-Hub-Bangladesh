@@ -9,6 +9,7 @@ from app.api import auth, cart, categories, orders, products
 from app.core.config import settings
 from app.core.database import Base, engine
 from app.core.limiter import limiter
+from app.core.seed import seed_if_empty
 from app.models import cart as cart_model, catalog, order, user  # noqa: F401
 
 if settings.jwt_secret in {"", "development-secret", "local-development-secret", "change-me"} or len(settings.jwt_secret) < 32:
@@ -37,11 +38,22 @@ def create_tables() -> None:
         conn.execute(
             text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT FALSE")
         )
+        conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS badge VARCHAR(120)"))
+        conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS detail VARCHAR(200)"))
+        conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS accent VARCHAR(20)"))
+        conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS subcategory VARCHAR(120)"))
         if settings.admin_email:
             conn.execute(
                 text("UPDATE users SET is_admin = TRUE WHERE email = :email"),
                 {"email": settings.admin_email.lower().strip()},
             )
+
+    from app.core.database import SessionLocal
+    db = SessionLocal()
+    try:
+        seed_if_empty(db)
+    finally:
+        db.close()
 
 
 @app.get("/health")

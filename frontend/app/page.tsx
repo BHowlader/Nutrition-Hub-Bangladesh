@@ -20,7 +20,16 @@ import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { ProductCard } from "@/components/ProductCard";
 import { Reveal } from "@/components/Reveal";
-import { products } from "@/lib/products";
+import { fetchProducts } from "@/lib/products";
+
+const FEATURED_SLUGS = new Set([
+  "creatine-tropical-tango",
+  "creatine-kiwi-kick",
+  "mb-omega3-gold",
+  "mb-vite-multivitamin",
+  "pintola-protein-oats",
+  "kapiva-shilajit-gold",
+]);
 
 const categories = [
   {
@@ -83,7 +92,9 @@ const deliveryOptions: { icon: LucideIcon; title: string; text: string }[] = [
   { icon: Banknote, title: "Cash on delivery", text: "Pay after product arrival for zero purchase friction." }
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const allProducts = await fetchProducts();
+  const featured = allProducts.filter((p) => FEATURED_SLUGS.has(p.slug));
   return (
     <main className="min-h-screen bg-ink text-cream antialiased">
       <Header />
@@ -170,20 +181,11 @@ export default function HomePage() {
           </Reveal>
 
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {products
-              .filter(p => 
-                p.id === "creatine-tropical-tango" ||
-                p.id === "creatine-kiwi-kick" ||
-                p.id === "mb-omega3-gold" ||
-                p.id === "mb-vite-multivitamin" ||
-                p.id === "pintola-protein-oats" ||
-                p.id === "kapiva-shilajit-gold"
-              )
-              .map((product, index) => (
-                <Reveal delay={index * 0.05} key={product.id}>
-                  <ProductCard product={product} />
-                </Reveal>
-              ))}
+            {featured.map((product, index) => (
+              <Reveal delay={index * 0.05} key={product.id}>
+                <ProductCard product={product} />
+              </Reveal>
+            ))}
           </div>
 
           <div className="mt-16 text-center">

@@ -15,13 +15,26 @@ router = APIRouter(prefix="/products", tags=["products"])
 def list_products(
     db: Session = Depends(get_db),
     status_filter: ProductStatus | None = Query(default=ProductStatus.published, alias="status"),
-    limit: int = Query(default=24, ge=1, le=100),
+    category: str | None = Query(default=None),
+    limit: int = Query(default=100, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
 ) -> list[Product]:
-    stmt = select(Product).offset(offset).limit(limit).order_by(Product.created_at.desc())
+    from app.models.catalog import Category
+    stmt = select(Product).order_by(Product.created_at.desc())
     if status_filter:
         stmt = stmt.where(Product.status == status_filter)
+    if category:
+        stmt = stmt.join(Category, Product.category_id == Category.id).where(Category.name == category)
+    stmt = stmt.offset(offset).limit(limit)
     return list(db.scalars(stmt))
+
+
+@router.get("/by-slug/{slug}", response_model=ProductRead)
+def get_product_by_slug(slug: str, db: Session = Depends(get_db)) -> Product:
+    product = db.query(Product).filter(Product.slug == slug).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return product
 
 
 @router.get("/admin", response_model=list[ProductRead])

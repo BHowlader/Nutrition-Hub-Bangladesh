@@ -206,9 +206,8 @@ export default function DashboardPage() {
                   <button
                     key={key}
                     onClick={() => setSection(key)}
-                    className={`group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition ${
-                      active ? "bg-gold/15 text-gold" : "text-cream/70 hover:bg-cream/[0.04] hover:text-cream"
-                    }`}
+                    className={`group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition ${active ? "bg-gold/15 text-gold" : "text-cream/70 hover:bg-cream/[0.04] hover:text-cream"
+                      }`}
                   >
                     <Icon size={18} className={active ? "text-gold" : "text-cream/40"} />
                     <div className="flex-1 min-w-0">
@@ -268,11 +267,10 @@ export default function DashboardPage() {
 
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl border border-cream/10 bg-ink/95 p-4 shadow-2xl backdrop-blur-xl min-w-[280px]">
-          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-            toast.type === "success"
+          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${toast.type === "success"
               ? "bg-green-500/20 text-green-400 border border-green-500/30"
               : "bg-red-500/20 text-red-400 border border-red-500/30"
-          }`}>
+            }`}>
             {toast.type === "success" ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
           </div>
           <div className="flex-1">
@@ -468,9 +466,8 @@ function OrdersSection({ orders, loading }: { orders: Order[]; loading: boolean 
                   <p className="text-lg font-black text-cream">৳{Number(order.total).toLocaleString()}</p>
                 </div>
                 <span
-                  className={`rounded-full border px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
-                    statusColors[order.status] || "bg-cream/10 text-cream/60 border-cream/20"
-                  }`}
+                  className={`rounded-full border px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${statusColors[order.status] || "bg-cream/10 text-cream/60 border-cream/20"
+                    }`}
                 >
                   {order.status}
                 </span>

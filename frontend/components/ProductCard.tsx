@@ -9,17 +9,17 @@ import { formatTaka, type Product } from "@/lib/products";
 export function ProductCard({ product }: { product: Product }) {
   const [hovered, setHovered] = useState(false);
 
-  // Split details into visual pill tags
-  const specs = product.detail.split(/·|\|/).map(s => s.trim()).filter(Boolean);
+  const specs = (product.detail || "").split(/·|\|/).map(s => s.trim()).filter(Boolean);
+  const accent = product.accent || "#F59E0B";
 
   return (
-    <Link 
-      href={`/products/${product.id}`}
+    <Link
+      href={`/products/${product.slug}`}
       className="group relative flex flex-col h-full overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#090d16] transition-all duration-500 hover:border-white/20"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        boxShadow: hovered ? `0 30px 60px -15px ${product.accent}20` : "0 10px 30px rgba(0,0,0,0.3)"
+        boxShadow: hovered ? `0 30px 60px -15px ${accent}20` : "0 10px 30px rgba(0,0,0,0.3)"
       }}
     >
       {/* 100% Authentic Shield Badge */}
@@ -38,7 +38,7 @@ export function ProductCard({ product }: { product: Product }) {
       <div className="relative aspect-square w-full overflow-hidden border-b border-white/[0.05] bg-[#050811]">
         <div className={`absolute inset-0 transition-transform duration-700 ease-out ${hovered ? 'scale-105' : 'scale-100'}`}>
           <Image
-            src={product.image || "/images/logo.png"}
+            src={product.image_url || "/images/logo.png"}
             alt={product.name}
             fill
             className="object-cover w-full h-full"
@@ -53,7 +53,7 @@ export function ProductCard({ product }: { product: Product }) {
         {/* Category & Verified Rating */}
         <div className="mb-3 flex items-center justify-between">
           <span className="text-[10px] font-black uppercase tracking-[0.15em] text-cream/40">
-            {product.category}
+            {product.category?.name || ""}
           </span>
           <div className="flex items-center gap-1 text-[11px] font-black text-gold">
             <Star size={11} className="fill-gold" /> 4.9

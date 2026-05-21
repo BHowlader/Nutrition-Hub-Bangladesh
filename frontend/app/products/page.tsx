@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Header } from "@/components/Header";
 import { ProductCard } from "@/components/ProductCard";
-import { formatTaka, products } from "@/lib/products";
+import { fetchProducts, formatTaka, type Product } from "@/lib/products";
 import {
   ArrowRight,
   BadgeCheck,
@@ -29,9 +29,9 @@ const filterCategories = [
 export default function ProductsPage() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [query, setQuery] = useState("");
+  const [products, setProducts] = useState<Product[]>([]);
   const catalogRef = useRef<HTMLDivElement>(null);
 
-  // Force scroll to top on mount for page transition and parse category parameter
   useEffect(() => {
     if (typeof window !== "undefined") {
       window.scrollTo(0, 0);
@@ -41,14 +41,15 @@ export default function ProductsPage() {
         setActiveCategory(cat);
       }
     }
+    fetchProducts().then(setProducts);
   }, []);
 
   const categoryProducts = activeCategory === "all"
     ? products
-    : products.filter((product) => product.category === activeCategory);
+    : products.filter((product) => product.category?.name === activeCategory);
 
   const filteredProducts = categoryProducts.filter((product) => {
-    const searchText = `${product.name} ${product.category} ${product.description} ${product.detail}`.toLowerCase();
+    const searchText = `${product.name} ${product.category?.name || ""} ${product.description} ${product.detail || ""}`.toLowerCase();
     return searchText.includes(query.trim().toLowerCase());
   });
 
@@ -60,7 +61,7 @@ export default function ProductsPage() {
   const categoryCounts = filterCategories.reduce<Record<string, number>>((acc, category) => {
     acc[category.id] = category.id === "all"
       ? products.length
-      : products.filter((product) => product.category === category.id).length;
+      : products.filter((product) => product.category?.name === category.id).length;
     return acc;
   }, {});
 
@@ -124,7 +125,7 @@ export default function ProductsPage() {
                 <article key={product.id} className="group flex items-center gap-4 rounded-xl border border-white/[0.08] bg-[#0c1324]/72 p-3 backdrop-blur-md transition hover:border-gold/35">
                   <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-[#050811]">
                     <Image
-                      src={product.image || "/images/logo.png"}
+                      src={product.image_url || "/images/logo.png"}
                       alt={product.name}
                       fill
                       className="object-cover transition duration-500 group-hover:scale-105"

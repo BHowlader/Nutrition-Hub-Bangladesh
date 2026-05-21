@@ -29,6 +29,10 @@ class ProductBase(BaseModel):
     batch_no: str | None = None
     expiry_date: str | None = None
     image_url: str | None = None
+    badge: str | None = None
+    detail: str | None = None
+    accent: str | None = None
+    subcategory: str | None = None
     status: ProductStatus = ProductStatus.draft
     category_id: str
 
@@ -42,10 +46,16 @@ class ProductUpdate(BaseModel):
     description: str | None = None
     price: Decimal | None = None
     stock: int | None = Field(default=None, ge=0)
+    badge: str | None = None
+    detail: str | None = None
+    accent: str | None = None
+    subcategory: str | None = None
+    image_url: str | None = None
     status: ProductStatus | None = None
 
 
 class ProductRead(ProductBase):
     id: str
+    category: CategoryRead | None = None
 
     model_config = {"from_attributes": True}
