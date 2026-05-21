@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { ShoppingBag, LogIn, LogOut, User as UserIcon } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
+import { warmProductCache } from "@/lib/products";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -56,6 +57,28 @@ export function Header() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
+  useEffect(() => {
+    const warmRoutes = () => {
+      router.prefetch("/");
+      router.prefetch("/products");
+      router.prefetch(user ? "/cart" : "/login?redirect=/cart");
+      router.prefetch(user ? "/dashboard" : "/login");
+      warmProductCache();
+    };
+
+    if ("requestIdleCallback" in window) {
+      const id = window.requestIdleCallback(warmRoutes, { timeout: 1500 });
+      return () => window.cancelIdleCallback(id);
+    }
+
+    const timer = setTimeout(warmRoutes, 300);
+    return () => clearTimeout(timer);
+  }, [router, user]);
+
+  function prefetchCartTarget() {
+    router.prefetch(user ? "/cart" : "/login?redirect=/cart");
+  }
+
   function handleCartClick() {
     if (!user) {
       router.push("/login?redirect=/cart");
@@ -98,6 +121,8 @@ export function Header() {
         <div className="flex items-center gap-3">
           <button
             onClick={handleCartClick}
+            onFocus={prefetchCartTarget}
+            onMouseEnter={prefetchCartTarget}
             aria-label={`Cart with ${totalCount} ${totalCount === 1 ? "item" : "items"}`}
             className="relative inline-flex min-h-11 items-center gap-2 rounded-lg bg-cream px-4 font-black text-ink"
           >
