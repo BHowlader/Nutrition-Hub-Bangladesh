@@ -14,13 +14,17 @@ import {
   Filter,
   History,
   ImageIcon,
+  Mail,
   PackageCheck,
+  Phone,
   Plus,
   Search,
   ShieldCheck,
+  ShoppingBag,
   Sparkles,
   Trash2,
   Upload,
+  UserRound,
   Users,
   X,
   LogOut,
@@ -33,7 +37,25 @@ const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 type ProductStatus = "draft" | "published" | "archived";
 type StatusFilter = ProductStatus | "all";
-type AdminTab = "products" | "orders" | "analytics" | "audit" | "users" | "hero";
+type AdminTab = "products" | "orders" | "customers" | "analytics" | "audit" | "users" | "hero";
+
+interface Customer {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  address: string | null;
+  photo_url: string | null;
+  auth_provider: string;
+  created_at: string;
+  order_count: number;
+  total_spent: string;
+  pending_count: number;
+  delivered_count: number;
+  cancelled_count: number;
+  last_order_at: string | null;
+  orders: Order[];
+}
 
 interface HeroSettings {
   hero_description: string;
@@ -220,6 +242,7 @@ export default function AdminProductsPage() {
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
   const [heroSettings, setHeroSettings] = useState<HeroSettings | null>(null);
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -237,7 +260,7 @@ export default function AdminProductsPage() {
   const load = useCallback(async () => {
     setError("");
     try {
-      const [p, c, s, o, a, u, h] = await Promise.all([
+      const [p, c, s, o, a, u, h, cust] = await Promise.all([
         api<Product[]>("/api/products/admin"),
         api<Category[]>("/api/categories"),
         api<AdminStats>("/api/admin/stats"),
@@ -245,6 +268,7 @@ export default function AdminProductsPage() {
         api<AuditLog[]>("/api/admin/audit-logs"),
         user?.role === "owner" ? api<AdminUser[]>("/api/admin/users") : Promise.resolve([]),
         api<HeroSettings>("/api/settings/hero"),
+        api<Customer[]>("/api/admin/customers"),
       ]);
       setProducts(p);
       setCategories(c);
@@ -253,6 +277,7 @@ export default function AdminProductsPage() {
       setAuditLogs(a);
       setAdminUsers(u);
       setHeroSettings(h);
+      setCustomers(cust);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load CMS data");
     } finally {
@@ -463,6 +488,7 @@ export default function AdminProductsPage() {
               {([
                 ["products", Boxes, "Products"],
                 ["orders", ClipboardList, "Orders"],
+                ["customers", UserRound, "Customers"],
                 ["analytics", BarChart3, "Analytics"],
                 ["audit", History, "Audit Log"],
                 ["hero", Sparkles, "Hero Section"],
@@ -533,6 +559,7 @@ export default function AdminProductsPage() {
             {([
               ["products", Boxes, "Products"],
               ["orders", ClipboardList, "Orders"],
+              ["customers", UserRound, "Customers"],
               ["analytics", BarChart3, "Analytics"],
               ["audit", History, "Audit"],
               ["hero", Sparkles, "Hero"],
@@ -567,6 +594,7 @@ export default function AdminProductsPage() {
               <p className="mt-1 text-xs sm:text-sm text-cream/50">
                 {activeTab === "products" && "Manage catalog data, inventory, publishing status, and storefront product metadata."}
                 {activeTab === "orders" && "Track customer purchases, update fulfillment status, and inspect order details."}
+                {activeTab === "customers" && "Browse registered customers, their order history, lifetime spend, and delivery status."}
                 {activeTab === "analytics" && "Review sales, stock health, and performance snapshot metrics."}
                 {activeTab === "audit" && "Inspect security logs and administrative action history."}
                 {activeTab === "users" && "Manage administration access levels and roles."}
@@ -633,6 +661,7 @@ export default function AdminProductsPage() {
           )}
 
           {activeTab === "orders" && <OrdersSection orders={orders} saving={saving} onStatusChange={handleOrderStatus} />}
+          {activeTab === "customers" && <CustomersSection customers={customers} loading={loading} />}
           {activeTab === "analytics" && <AnalyticsSection stats={adminStats} products={products} orders={orders} />}
           {activeTab === "audit" && <AuditSection logs={auditLogs} />}
           {activeTab === "users" && <UsersSection users={adminUsers} saving={saving} onRoleChange={handleUserRole} />}
@@ -1058,6 +1087,278 @@ function UsersSection({ users, saving, onRoleChange }: { users: AdminUser[]; sav
         {users.length === 0 && <div className="p-16 text-center text-xs font-bold text-cream/30">Only owners can view users.</div>}
       </div>
     </div>
+  );
+}
+
+function CustomersSection({
+  customers,
+  loading,
+}: {
+  customers: Customer[];
+  loading: boolean;
+}) {
+  const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState<Customer | null>(null);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return customers;
+    return customers.filter((c) =>
+      `${c.name} ${c.email} ${c.phone || ""}`.toLowerCase().includes(q)
+    );
+  }, [customers, query]);
+
+  const totals = useMemo(() => {
+    return customers.reduce(
+      (acc, c) => {
+        acc.orders += c.order_count;
+        acc.spent += Number(c.total_spent);
+        acc.pending += c.pending_count;
+        if (c.order_count > 0) acc.active += 1;
+        return acc;
+      },
+      { orders: 0, spent: 0, pending: 0, active: 0 }
+    );
+  }, [customers]);
+
+  return (
+    <>
+      <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard icon={UserRound} label="Total customers" value={customers.length} />
+        <StatCard icon={ShoppingBag} label="Customers w/ orders" value={totals.active} />
+        <StatCard icon={ClipboardList} label="Total orders" value={totals.orders} />
+        <StatCard icon={AlertTriangle} label="Pending orders" value={totals.pending} />
+      </div>
+
+      <div className="premium-card overflow-hidden">
+        <div className="border-b border-cream/[0.08] p-5">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+            <div>
+              <h2 className="text-lg font-black text-cream">Customer Directory</h2>
+              <p className="text-xs text-cream/40 mt-0.5">
+                {loading
+                  ? "Loading customers..."
+                  : `${filtered.length} of ${customers.length} customer(s) shown`}
+              </p>
+            </div>
+            <label className="relative block w-full max-w-xs">
+              <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-cream/40" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search name, email, phone..."
+                className="h-11 w-full rounded-xl border border-cream/[0.12] bg-forest/60 pl-10 pr-4 text-xs font-semibold text-cream outline-none focus:border-gold/50 focus:ring-4 focus:ring-gold/10 transition-all duration-300"
+              />
+            </label>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto overscroll-none scrollbar-thin">
+          <table className="w-full min-w-[920px] border-collapse text-left">
+            <thead>
+              <tr className="border-b border-cream/[0.08] bg-forest/40 text-[10px] uppercase tracking-wider font-black text-cream/40">
+                <th className="w-[28%] pl-6 pr-4 py-3.5 text-left">Customer</th>
+                <th className="w-[18%] px-4 py-3.5 text-left">Contact</th>
+                <th className="w-[10%] px-4 py-3.5">
+                  <div className="flex justify-center">Orders</div>
+                </th>
+                <th className="w-[14%] px-4 py-3.5">
+                  <div className="flex justify-center">Total spent</div>
+                </th>
+                <th className="w-[12%] px-4 py-3.5">
+                  <div className="flex justify-center">Pending</div>
+                </th>
+                <th className="w-[12%] px-4 py-3.5">
+                  <div className="flex justify-center">Last order</div>
+                </th>
+                <th className="w-[6%] pl-4 pr-6 py-3.5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((c) => (
+                <tr
+                  key={c.id}
+                  className="border-b border-cream/[0.04] align-middle hover:bg-cream/[0.02] transition-colors duration-150"
+                >
+                  <td className="pl-6 pr-4 py-4 !text-left">
+                    <div className="flex items-center gap-3.5">
+                      <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-cream/[0.06] border border-cream/[0.08]">
+                        {c.photo_url ? (
+                          <Image src={c.photo_url} alt={c.name} fill className="object-cover" sizes="44px" />
+                        ) : (
+                          <span className="absolute inset-0 grid place-items-center text-xs font-black text-cream/60">
+                            {c.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <strong className="block max-w-[280px] truncate text-sm text-cream font-bold">{c.name}</strong>
+                        <span className="block max-w-[280px] truncate text-xs text-cream/40 mt-0.5">
+                          via {c.auth_provider} · joined {new Date(c.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 !text-left">
+                    <div className="flex items-center gap-1.5 text-xs text-cream/70">
+                      <Mail size={12} className="text-cream/40 shrink-0" />
+                      <span className="truncate max-w-[200px]">{c.email}</span>
+                    </div>
+                    {c.phone && (
+                      <div className="flex items-center gap-1.5 text-xs text-cream/50 mt-1">
+                        <Phone size={11} className="text-cream/30 shrink-0" />
+                        <span>{c.phone}</span>
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="flex justify-center">
+                      <span className="text-sm font-black text-cream">{c.order_count}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="flex justify-center">
+                      <span className="text-sm font-black text-gold">
+                        Tk {Number(c.total_spent).toLocaleString("en-BD")}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="flex justify-center">
+                      {c.pending_count > 0 ? (
+                        <span className="text-xs font-black text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md">
+                          {c.pending_count}
+                        </span>
+                      ) : (
+                        <span className="text-xs font-bold text-cream/30">—</span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="flex justify-center text-xs font-semibold text-cream/50">
+                      {c.last_order_at ? new Date(c.last_order_at).toLocaleDateString() : "—"}
+                    </div>
+                  </td>
+                  <td className="pl-4 pr-6 py-4 text-right">
+                    <button
+                      onClick={() => setSelected(c)}
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-cream/[0.12] bg-cream/[0.02] text-cream/60 hover:text-cream hover:border-cream/30 hover:bg-cream/[0.05] transition-all duration-200"
+                      title="View orders"
+                    >
+                      <Eye size={15} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {!loading && filtered.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-5 py-16 text-center text-xs font-bold text-cream/30">
+                    No customers match the current search.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {selected && <CustomerDetailModal customer={selected} onClose={() => setSelected(null)} />}
+    </>
+  );
+}
+
+function CustomerDetailModal({ customer, onClose }: { customer: Customer; onClose: () => void }) {
+  const statusTone: Record<string, string> = {
+    pending: "border-amber-500/20 bg-amber-500/10 text-amber-400",
+    confirmed: "border-sky-500/20 bg-sky-500/10 text-sky-400",
+    shipped: "border-violet-500/20 bg-violet-500/10 text-violet-400",
+    delivered: "border-emerald-500/20 bg-emerald-500/10 text-emerald-400",
+    cancelled: "border-red-500/20 bg-red-500/10 text-red-400",
+  };
+
+  return (
+    <Modal title={`Customer · ${customer.name}`} onClose={onClose} maxWidth="max-w-3xl">
+      <div className="space-y-5">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="rounded-xl border border-cream/[0.06] bg-cream/[0.02] p-3.5">
+            <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-cream/40 mb-1">
+              <Mail size={11} /> Email
+            </div>
+            <p className="text-xs font-bold text-cream break-all">{customer.email}</p>
+          </div>
+          <div className="rounded-xl border border-cream/[0.06] bg-cream/[0.02] p-3.5">
+            <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-cream/40 mb-1">
+              <Phone size={11} /> Phone
+            </div>
+            <p className="text-xs font-bold text-cream">{customer.phone || "Not provided"}</p>
+          </div>
+          {customer.address && (
+            <div className="sm:col-span-2 rounded-xl border border-cream/[0.06] bg-cream/[0.02] p-3.5">
+              <div className="text-[10px] font-black uppercase tracking-wider text-cream/40 mb-1">Default address</div>
+              <p className="text-xs font-bold text-cream/80 leading-relaxed">{customer.address}</p>
+            </div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <Metric label="Orders" value={String(customer.order_count)} />
+          <Metric label="Total spent" value={`Tk ${Number(customer.total_spent).toLocaleString("en-BD")}`} />
+          <Metric label="Pending" value={String(customer.pending_count)} />
+          <Metric label="Delivered" value={String(customer.delivered_count)} />
+        </div>
+
+        <div>
+          <h4 className="text-xs font-black uppercase tracking-wider text-cream/50 mb-3">Order history</h4>
+          {customer.orders.length === 0 ? (
+            <div className="rounded-xl border border-cream/[0.06] bg-cream/[0.02] p-8 text-center text-xs font-bold text-cream/30">
+              This customer hasn&apos;t placed any orders yet.
+            </div>
+          ) : (
+            <div className="space-y-2.5 max-h-[360px] overflow-y-auto overscroll-none scrollbar-thin pr-1">
+              {customer.orders.map((order) => (
+                <div
+                  key={order.id}
+                  className="rounded-xl border border-cream/[0.06] bg-cream/[0.02] p-4"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                    <div>
+                      <strong className="text-sm font-black text-cream">#{order.id.slice(0, 8)}</strong>
+                      <span className="ml-2 text-[10px] font-black uppercase tracking-wider text-cream/40">
+                        {order.payment_method}
+                      </span>
+                    </div>
+                    <span
+                      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-black capitalize tracking-wider ${
+                        statusTone[order.status] || "border-cream/10 bg-cream/[0.04] text-cream/60"
+                      }`}
+                    >
+                      {order.status}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-cream/60">
+                    <span>
+                      {order.items.reduce((sum, it) => sum + it.quantity, 0)} item
+                      {order.items.reduce((sum, it) => sum + it.quantity, 0) === 1 ? "" : "s"}
+                    </span>
+                    <span className="font-black text-gold">
+                      Tk {Number(order.total).toLocaleString("en-BD")}
+                    </span>
+                    <span className="text-cream/35">
+                      {order.created_at ? new Date(order.created_at).toLocaleString() : ""}
+                    </span>
+                  </div>
+                  {order.address && (
+                    <p className="mt-2 text-[11px] text-cream/40 leading-relaxed">
+                      Ship to: {order.address}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </Modal>
   );
 }
 

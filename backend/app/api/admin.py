@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.core.audit import write_audit_log
 from app.core.auth import require_admin_google, require_owner, require_trusted_admin_origin
@@ -12,7 +12,8 @@ from app.models.audit import AuditLog
 from app.models.catalog import Product, ProductStatus
 from app.models.order import Order, OrderStatus
 from app.models.user import User, UserRole
-from app.schemas.admin import AdminStats, AuditLogRead, UserAdminRead, UserRoleUpdate
+from app.schemas.admin import AdminStats, AuditLogRead, CustomerSummary, UserAdminRead, UserRoleUpdate
+from app.schemas.order import OrderRead
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -51,6 +52,88 @@ def admin_users(
     limit: int = Query(default=100, ge=1, le=200),
 ) -> list[User]:
     return list(db.scalars(select(User).order_by(User.created_at.desc()).limit(limit)))
+
+
+@router.get("/customers", response_model=list[CustomerSummary])
+def admin_customers(
+    db: Session = Depends(get_db),
+    _admin: User = Depends(require_admin_google),
+    q: str | None = Query(default=None, description="Search by name, email, or phone"),
+    limit: int = Query(default=200, ge=1, le=500),
+    offset: int = Query(default=0, ge=0),
+) -> list[CustomerSummary]:
+    # Start from customer users only. Privileged accounts are intentionally excluded.
+    user_stmt = select(User).where(User.role == UserRole.customer)
+    if q:
+        like = f"%{q.lower()}%"
+        user_stmt = user_stmt.where(
+            func.lower(User.name).like(like)
+            | func.lower(User.email).like(like)
+            | func.lower(func.coalesce(User.phone, "")).like(like)
+        )
+    user_stmt = user_stmt.order_by(User.created_at.desc()).offset(offset).limit(limit)
+    users = list(db.scalars(user_stmt))
+    if not users:
+        return []
+
+    user_ids = [u.id for u in users]
+
+    # Aggregate order stats per user in a single query.
+    agg_rows = db.execute(
+        select(
+            Order.user_id,
+            func.count(Order.id).label("order_count"),
+            func.coalesce(
+                func.sum(
+                    func.case((Order.status != OrderStatus.cancelled, Order.total), else_=0)
+                ),
+                0,
+            ).label("total_spent"),
+            func.sum(func.case((Order.status == OrderStatus.pending, 1), else_=0)).label("pending_count"),
+            func.sum(func.case((Order.status == OrderStatus.delivered, 1), else_=0)).label("delivered_count"),
+            func.sum(func.case((Order.status == OrderStatus.cancelled, 1), else_=0)).label("cancelled_count"),
+            func.max(Order.created_at).label("last_order_at"),
+        )
+        .where(Order.user_id.in_(user_ids))
+        .group_by(Order.user_id)
+    ).all()
+    agg_by_user = {row.user_id: row for row in agg_rows}
+
+    # Fetch all orders for these users with items, then bucket by user_id.
+    orders_stmt = (
+        select(Order)
+        .options(selectinload(Order.items))
+        .where(Order.user_id.in_(user_ids))
+        .order_by(Order.created_at.desc())
+    )
+    orders_by_user: dict[str, list[Order]] = {}
+    for o in db.scalars(orders_stmt):
+        orders_by_user.setdefault(o.user_id, []).append(o)
+
+    summaries: list[CustomerSummary] = []
+    for u in users:
+        row = agg_by_user.get(u.id)
+        user_orders = orders_by_user.get(u.id, [])
+        summaries.append(
+            CustomerSummary(
+                id=u.id,
+                name=u.name,
+                email=u.email,
+                phone=u.phone,
+                address=u.address,
+                photo_url=u.photo_url,
+                auth_provider=u.auth_provider.value if hasattr(u.auth_provider, "value") else str(u.auth_provider),
+                created_at=u.created_at,
+                order_count=int(row.order_count) if row else 0,
+                total_spent=Decimal(row.total_spent) if row else Decimal("0"),
+                pending_count=int(row.pending_count) if row else 0,
+                delivered_count=int(row.delivered_count) if row else 0,
+                cancelled_count=int(row.cancelled_count) if row else 0,
+                last_order_at=row.last_order_at if row else None,
+                orders=[OrderRead.model_validate(o) for o in user_orders],
+            )
+        )
+    return summaries
 
 
 @router.patch("/users/{user_id}/role", response_model=UserAdminRead)

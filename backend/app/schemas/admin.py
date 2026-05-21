@@ -3,6 +3,8 @@ from decimal import Decimal
 
 from pydantic import BaseModel, Field
 
+from app.schemas.order import OrderRead
+
 
 class AdminStats(BaseModel):
     orders: int
@@ -41,3 +43,23 @@ class UserAdminRead(BaseModel):
 
 class UserRoleUpdate(BaseModel):
     role: str = Field(pattern="^(customer|editor|admin|owner)$")
+
+
+class CustomerSummary(BaseModel):
+    id: str
+    name: str
+    email: str
+    phone: str | None = None
+    address: str | None = None
+    photo_url: str | None = None
+    auth_provider: str
+    created_at: datetime
+    order_count: int = 0
+    total_spent: Decimal = Decimal("0")
+    pending_count: int = 0
+    delivered_count: int = 0
+    cancelled_count: int = 0
+    last_order_at: datetime | None = None
+    orders: list[OrderRead] = []
+
+    model_config = {"from_attributes": True}
