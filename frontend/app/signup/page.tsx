@@ -45,7 +45,7 @@ function SignupContent() {
     if (!clientId) return;
 
     const script = document.createElement("script");
-    script.src = "https://accounts.google.com/gsi/client";
+    script.src = "https://accounts.google.com/gsi/client?hl=en";
     script.async = true;
     script.onload = () => {
       window.google?.accounts.id.initialize({
@@ -66,6 +66,7 @@ function SignupContent() {
           width: "100%",
           text: "signup_with",
           shape: "pill",
+          locale: "en",
         });
       }
       setGsiReady(true);

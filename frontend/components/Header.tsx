@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ShoppingBag, LogIn, LayoutDashboard, LogOut, User as UserIcon } from "lucide-react";
+import { ShoppingBag, LogIn, LogOut, User as UserIcon } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -110,14 +110,6 @@ export function Header() {
                         <p className="text-xs text-cream/50">{user.email}</p>
                       </div>
                       <div className="py-1">
-                        <Link
-                          href="/admin/products"
-                          onClick={() => setDropdownOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gold transition hover:bg-cream/5 hover:text-champagne font-black"
-                        >
-                          <LayoutDashboard size={16} />
-                          CMS / Admin Panel
-                        </Link>
                         <Link
                           href="/dashboard"
                           onClick={() => setDropdownOpen(false)}
