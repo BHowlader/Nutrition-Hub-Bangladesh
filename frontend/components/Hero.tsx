@@ -274,11 +274,11 @@ export function Hero({
             </div>
 
             {visualProducts.length > 0 && (
-              <div className="relative mt-8 h-[250px] w-full overflow-visible min-[390px]:h-[285px] sm:h-[340px] lg:hidden">
-                <div className="absolute inset-x-3 bottom-0 top-6 rounded-[2rem] border border-white/[0.06] bg-white/[0.025]" />
-                <div className="absolute left-1/2 top-0 z-30 w-[64%] max-w-[250px] -translate-x-1/2">
+              <div className="relative mx-auto mt-7 h-[clamp(210px,72vw,340px)] w-full max-w-[430px] overflow-hidden px-1 sm:mt-8 sm:h-[clamp(300px,48vw,380px)] sm:max-w-[560px] lg:hidden">
+                <div className="absolute inset-x-4 bottom-3 top-8 rounded-[2rem] border border-white/[0.06] bg-white/[0.025]" />
+                <div className="absolute left-1/2 top-0 z-30 w-[clamp(150px,54vw,250px)] -translate-x-1/2 sm:w-[clamp(230px,36vw,290px)]">
                   <div
-                    className="animate-float-1 overflow-hidden rounded-2xl border border-white/10 bg-[#0c1324] shadow-[0_28px_70px_rgba(0,0,0,0.45)]"
+                    className="animate-float-1 overflow-hidden rounded-[1.35rem] border border-white/10 bg-[#0c1324] shadow-[0_28px_70px_rgba(0,0,0,0.45)] sm:rounded-3xl"
                     style={{ boxShadow: `0 28px 70px -18px ${visualProducts[0].accent || "#60A5FA"}55` }}
                   >
                     <div className="relative aspect-square">
@@ -286,7 +286,7 @@ export function Hero({
                         src={visualProducts[0].image_url || "/images/logo.png"}
                         alt={visualProducts[0].name}
                         fill
-                        sizes="70vw"
+                        sizes="(max-width: 640px) 54vw, 290px"
                         className="object-cover"
                         priority
                       />
@@ -297,14 +297,14 @@ export function Hero({
                 {visualProducts.slice(1, 3).map((product, index) => (
                   <div
                     key={product.id}
-                    className={`absolute bottom-0 w-[50%] max-w-[210px] ${
+                    className={`absolute bottom-2 w-[clamp(118px,42vw,205px)] sm:bottom-0 sm:w-[clamp(190px,30vw,245px)] ${
                       index === 0
-                        ? "left-0 z-20 -rotate-6"
-                        : "right-0 z-10 rotate-6"
+                        ? "left-0 z-20 -rotate-6 sm:left-3"
+                        : "right-0 z-10 rotate-6 sm:right-3"
                     }`}
                   >
                     <div
-                      className={`overflow-hidden rounded-2xl border border-white/10 bg-[#0c1324] shadow-[0_22px_55px_rgba(0,0,0,0.38)] ${
+                      className={`overflow-hidden rounded-[1.25rem] border border-white/10 bg-[#0c1324] shadow-[0_22px_55px_rgba(0,0,0,0.38)] sm:rounded-3xl ${
                         index === 0 ? "animate-float-2" : "animate-float-3"
                       }`}
                       style={{ boxShadow: `0 22px 55px -18px ${product.accent || "#F59E0B"}50` }}
@@ -314,7 +314,7 @@ export function Hero({
                           src={product.image_url || "/images/logo.png"}
                           alt={product.name}
                           fill
-                          sizes="52vw"
+                          sizes="(max-width: 640px) 42vw, 245px"
                           className="object-cover"
                         />
                       </div>
