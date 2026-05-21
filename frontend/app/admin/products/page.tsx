@@ -22,8 +22,11 @@ import {
   Upload,
   Users,
   X,
+  LogOut,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
+import { clearAdminSession } from "@/lib/adminSession";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -184,8 +187,19 @@ function cleanProductPayload(form: FormState) {
 }
 
 export default function AdminProductsPage() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
+
+  const handleSignOut = async () => {
+    try {
+      await logout();
+      clearAdminSession();
+      router.replace("/admin/login");
+    } catch (e) {
+      console.error("Sign out failed", e);
+    }
+  };
   const [categories, setCategories] = useState<Category[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [adminStats, setAdminStats] = useState<AdminStats | null>(null);
@@ -449,13 +463,13 @@ export default function AdminProductsPage() {
                 <span className="block text-[10px] text-cream/40 uppercase font-black tracking-wider truncate">{user?.role || "Editor"}</span>
               </div>
             </div>
-            <Link
-              href="/"
-              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-cream/10 bg-cream/[0.02] text-xs font-black text-cream/60 hover:text-cream hover:border-cream/20 transition-all duration-300"
+            <button
+              onClick={handleSignOut}
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-cream/10 bg-cream/[0.02] text-xs font-black text-cream/60 hover:text-cream hover:border-cream/20 hover:bg-cream/[0.04] transition-all duration-300 cursor-pointer focus:outline-none"
             >
-              <ArrowLeft size={14} />
-              Exit to Store
-            </Link>
+              <LogOut size={14} />
+              Sign out
+            </button>
           </div>
         </aside>
 
@@ -471,13 +485,13 @@ export default function AdminProductsPage() {
                 <strong className="block text-xs font-black text-cream">Nutrition Hub</strong>
               </div>
             </div>
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 text-xs font-black text-cream/60 hover:text-cream"
+            <button
+              onClick={handleSignOut}
+              className="inline-flex items-center gap-1.5 text-xs font-black text-cream/60 hover:text-cream cursor-pointer focus:outline-none"
             >
-              <ArrowLeft size={13} />
-              Exit
-            </Link>
+              <LogOut size={13} />
+              Sign out
+            </button>
           </div>
           {/* Horizontal Scrollable Tabs */}
           <div className="flex gap-2 overflow-x-auto scrollbar-thin pb-1">
