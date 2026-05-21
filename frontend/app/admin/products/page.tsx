@@ -6,23 +6,31 @@ import Link from "next/link";
 import {
   AlertTriangle,
   ArrowLeft,
+  BarChart3,
   Boxes,
+  ClipboardList,
   Edit3,
   Eye,
   Filter,
+  History,
   ImageIcon,
   PackageCheck,
   Plus,
   Search,
   ShieldCheck,
   Trash2,
+  Upload,
+  Users,
   X,
 } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 type ProductStatus = "draft" | "published" | "archived";
 type StatusFilter = ProductStatus | "all";
+type AdminTab = "products" | "orders" | "analytics" | "audit" | "users";
+type OrderStatus = "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
 
 interface Category {
   id: string;
@@ -49,6 +57,52 @@ interface Product {
   status: ProductStatus;
   category_id: string;
   category?: Category | null;
+}
+
+interface OrderItem {
+  product_id: string;
+  quantity: number;
+  unit_price: string;
+}
+
+interface Order {
+  id: string;
+  customer_name: string;
+  phone: string;
+  address: string;
+  payment_method: string;
+  status: OrderStatus;
+  total: string;
+  items: OrderItem[];
+  created_at: string | null;
+}
+
+interface AdminStats {
+  orders: number;
+  pending_orders: number;
+  revenue: string;
+  products: number;
+  published_products: number;
+  low_stock_products: number;
+}
+
+interface AuditLog {
+  id: string;
+  actor_email: string | null;
+  action: string;
+  entity_type: string;
+  entity_id: string | null;
+  summary: string;
+  created_at: string;
+}
+
+interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  is_admin: boolean;
+  role: string;
+  created_at: string;
 }
 
 type FormState = Omit<Product, "id" | "category"> & { id?: string };
@@ -92,6 +146,19 @@ async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   return res.json();
 }
 
+async function uploadApi<T>(path: string, formData: FormData): Promise<T> {
+  const res = await fetch(`${API}${path}`, {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail || `Request failed (${res.status})`);
+  }
+  return res.json();
+}
+
 function slugify(value: string) {
   return value
     .toLowerCase()
@@ -117,12 +184,19 @@ function cleanProductPayload(form: FormState) {
 }
 
 export default function AdminProductsPage() {
+  const { user } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [adminStats, setAdminStats] = useState<AdminStats | null>(null);
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [activeTab, setActiveTab] = useState<AdminTab>("products");
   const [editing, setEditing] = useState<FormState | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [showCategoryForm, setShowCategoryForm] = useState(false);
@@ -134,18 +208,26 @@ export default function AdminProductsPage() {
   const load = useCallback(async () => {
     setError("");
     try {
-      const [p, c] = await Promise.all([
+      const [p, c, s, o, a, u] = await Promise.all([
         api<Product[]>("/api/products/admin"),
         api<Category[]>("/api/categories"),
+        api<AdminStats>("/api/admin/stats"),
+        api<Order[]>("/api/orders/admin"),
+        api<AuditLog[]>("/api/admin/audit-logs"),
+        user?.role === "owner" ? api<AdminUser[]>("/api/admin/users") : Promise.resolve([]),
       ]);
       setProducts(p);
       setCategories(c);
+      setAdminStats(s);
+      setOrders(o);
+      setAuditLogs(a);
+      setAdminUsers(u);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load CMS data");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user?.role]);
 
   useEffect(() => {
     load();
@@ -255,6 +337,56 @@ export default function AdminProductsPage() {
     }
   }
 
+  async function handleOrderStatus(orderId: string, nextStatus: OrderStatus) {
+    setSaving(true);
+    setError("");
+    try {
+      await api(`/api/orders/admin/${orderId}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      setNotice("Order status updated");
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to update order");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleUserRole(userId: string, role: string) {
+    setSaving(true);
+    setError("");
+    try {
+      await api(`/api/admin/users/${userId}/role`, {
+        method: "PATCH",
+        body: JSON.stringify({ role }),
+      });
+      setNotice("User role updated");
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to update role");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleImageUpload(file: File) {
+    setUploading(true);
+    setError("");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const data = await uploadApi<{ image_url: string }>("/api/products/admin/upload-image", formData);
+      if (editing) setEditing({ ...editing, image_url: data.image_url });
+      setNotice("Image uploaded");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Image upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
+
   return (
     <main className="min-h-screen bg-[#eef0e8] text-ink">
       <section className="mx-auto w-[min(1440px,calc(100%-32px))] py-8">
@@ -264,7 +396,7 @@ export default function AdminProductsPage() {
               <ArrowLeft size={16} />
               Storefront
             </Link>
-            <h1 className="text-3xl font-black tracking-tight md:text-4xl">CMS Products</h1>
+            <h1 className="text-3xl font-black tracking-tight md:text-4xl">CMS Panel</h1>
             <p className="mt-1 text-sm text-ink/55">
               Manage catalog data, inventory, publishing status, and storefront product metadata.
             </p>
@@ -299,6 +431,27 @@ export default function AdminProductsPage() {
           </Alert>
         )}
 
+        <div className="mb-6 flex flex-wrap gap-2">
+          {([
+            ["products", Boxes, "Products"],
+            ["orders", ClipboardList, "Orders"],
+            ["analytics", BarChart3, "Analytics"],
+            ["audit", History, "Audit log"],
+            ...(user?.role === "owner" ? ([["users", Users, "Users"]] as const) : []),
+          ] as const).map(([tab, Icon, label]) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`inline-flex min-h-10 items-center gap-2 rounded-lg border px-4 text-sm font-black ${
+                activeTab === tab ? "border-ink bg-ink text-cream" : "border-ink/12 bg-white text-ink/65 hover:text-ink"
+              }`}
+            >
+              <Icon size={16} />
+              {label}
+            </button>
+          ))}
+        </div>
+
         <div className="mb-6 grid gap-3 md:grid-cols-4">
           <StatCard icon={Boxes} label="Total products" value={stats.total} />
           <StatCard icon={PackageCheck} label="Published" value={stats.published} />
@@ -306,7 +459,113 @@ export default function AdminProductsPage() {
           <StatCard icon={ShieldCheck} label="Out of stock" value={stats.outOfStock} />
         </div>
 
-        <div className="rounded-xl border border-ink/10 bg-white shadow-sm">
+        {activeTab === "products" && <ProductsSection
+          loading={loading}
+          products={products}
+          categories={categories}
+          filteredProducts={filteredProducts}
+          query={query}
+          statusFilter={statusFilter}
+          categoryFilter={categoryFilter}
+          setQuery={setQuery}
+          setStatusFilter={setStatusFilter}
+          setCategoryFilter={setCategoryFilter}
+          setEditing={setEditing}
+          setDeleteTarget={setDeleteTarget}
+        />}
+
+        {activeTab === "orders" && <OrdersSection orders={orders} saving={saving} onStatusChange={handleOrderStatus} />}
+        {activeTab === "analytics" && <AnalyticsSection stats={adminStats} products={products} orders={orders} />}
+        {activeTab === "audit" && <AuditSection logs={auditLogs} />}
+        {activeTab === "users" && <UsersSection users={adminUsers} saving={saving} onRoleChange={handleUserRole} />}
+      </section>
+
+      {editing && (
+        <ProductModal
+          categories={categories}
+          editing={editing}
+          saving={saving}
+          uploading={uploading}
+          setEditing={setEditing}
+          onImageUpload={handleImageUpload}
+          onSubmit={handleSave}
+          onClose={() => setEditing(null)}
+        />
+      )}
+
+      {showCategoryForm && (
+        <Modal title="New category" onClose={() => setShowCategoryForm(false)}>
+          <form onSubmit={handleCreateCategory} className="space-y-4">
+            <Field
+              label="Name"
+              value={newCategory.name}
+              onChange={(value) => setNewCategory({ name: value, slug: slugify(value) })}
+            />
+            <Field
+              label="Slug"
+              value={newCategory.slug}
+              onChange={(value) => setNewCategory({ ...newCategory, slug: slugify(value) })}
+            />
+            <ModalActions saving={saving} submitLabel="Create category" onCancel={() => setShowCategoryForm(false)} />
+          </form>
+        </Modal>
+      )}
+
+      {deleteTarget && (
+        <Modal title="Delete product" onClose={() => setDeleteTarget(null)} maxWidth="max-w-md">
+          <div className="rounded-lg border border-red-500/20 bg-red-50 p-4 text-sm text-red-800">
+            This permanently deletes <strong>{deleteTarget.name}</strong>. Orders that reference this product may lose catalog context.
+          </div>
+          <div className="mt-5 flex gap-3">
+            <button
+              onClick={handleDelete}
+              disabled={saving}
+              className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg bg-red-600 px-4 text-sm font-black text-white disabled:opacity-50"
+            >
+              Delete product
+            </button>
+            <button
+              onClick={() => setDeleteTarget(null)}
+              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-ink/15 px-4 text-sm font-black"
+            >
+              Cancel
+            </button>
+          </div>
+        </Modal>
+      )}
+    </main>
+  );
+}
+
+function ProductsSection({
+  loading,
+  products,
+  categories,
+  filteredProducts,
+  query,
+  statusFilter,
+  categoryFilter,
+  setQuery,
+  setStatusFilter,
+  setCategoryFilter,
+  setEditing,
+  setDeleteTarget,
+}: {
+  loading: boolean;
+  products: Product[];
+  categories: Category[];
+  filteredProducts: Product[];
+  query: string;
+  statusFilter: StatusFilter;
+  categoryFilter: string;
+  setQuery: (value: string) => void;
+  setStatusFilter: (value: StatusFilter) => void;
+  setCategoryFilter: (value: string) => void;
+  setEditing: (value: FormState) => void;
+  setDeleteTarget: (value: Product) => void;
+}) {
+  return (
+    <div className="rounded-xl border border-ink/10 bg-white shadow-sm">
           <div className="border-b border-ink/10 p-4">
             <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
               <div>
@@ -426,61 +685,7 @@ export default function AdminProductsPage() {
               </tbody>
             </table>
           </div>
-        </div>
-      </section>
-
-      {editing && (
-        <ProductModal
-          categories={categories}
-          editing={editing}
-          saving={saving}
-          setEditing={setEditing}
-          onSubmit={handleSave}
-          onClose={() => setEditing(null)}
-        />
-      )}
-
-      {showCategoryForm && (
-        <Modal title="New category" onClose={() => setShowCategoryForm(false)}>
-          <form onSubmit={handleCreateCategory} className="space-y-4">
-            <Field
-              label="Name"
-              value={newCategory.name}
-              onChange={(value) => setNewCategory({ name: value, slug: slugify(value) })}
-            />
-            <Field
-              label="Slug"
-              value={newCategory.slug}
-              onChange={(value) => setNewCategory({ ...newCategory, slug: slugify(value) })}
-            />
-            <ModalActions saving={saving} submitLabel="Create category" onCancel={() => setShowCategoryForm(false)} />
-          </form>
-        </Modal>
-      )}
-
-      {deleteTarget && (
-        <Modal title="Delete product" onClose={() => setDeleteTarget(null)} maxWidth="max-w-md">
-          <div className="rounded-lg border border-red-500/20 bg-red-50 p-4 text-sm text-red-800">
-            This permanently deletes <strong>{deleteTarget.name}</strong>. Orders that reference this product may lose catalog context.
-          </div>
-          <div className="mt-5 flex gap-3">
-            <button
-              onClick={handleDelete}
-              disabled={saving}
-              className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg bg-red-600 px-4 text-sm font-black text-white disabled:opacity-50"
-            >
-              Delete product
-            </button>
-            <button
-              onClick={() => setDeleteTarget(null)}
-              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-ink/15 px-4 text-sm font-black"
-            >
-              Cancel
-            </button>
-          </div>
-        </Modal>
-      )}
-    </main>
+    </div>
   );
 }
 
@@ -488,6 +693,163 @@ function productToForm(product: Product): FormState {
   const { category, ...form } = product;
   void category;
   return form;
+}
+
+function OrdersSection({ orders, saving, onStatusChange }: { orders: Order[]; saving: boolean; onStatusChange: (id: string, status: OrderStatus) => void }) {
+  return (
+    <div className="rounded-xl border border-ink/10 bg-white shadow-sm">
+      <div className="border-b border-ink/10 p-4">
+        <h2 className="text-xl font-black">Order management</h2>
+        <p className="text-sm text-ink/50">{orders.length} order(s)</p>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[980px] text-left">
+          <thead>
+            <tr className="border-b border-ink/10 bg-[#f8f8f4] text-[11px] uppercase tracking-[0.14em] text-ink/45">
+              <th className="px-4 py-3">Order</th>
+              <th>Customer</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            {orders.map((order) => (
+              <tr key={order.id} className="border-b border-ink/[0.06]">
+                <td className="px-4 py-4">
+                  <strong className="block text-sm">#{order.id.slice(0, 8)}</strong>
+                  <span className="text-xs text-ink/45">{order.payment_method.toUpperCase()}</span>
+                </td>
+                <td>
+                  <strong className="block text-sm">{order.customer_name}</strong>
+                  <span className="block text-xs text-ink/50">{order.phone}</span>
+                  <span className="block max-w-[260px] truncate text-xs text-ink/35">{order.address}</span>
+                </td>
+                <td className="text-sm font-semibold">{order.items.reduce((sum, item) => sum + item.quantity, 0)}</td>
+                <td className="font-black">Tk {Number(order.total).toLocaleString("en-BD")}</td>
+                <td>
+                  <select
+                    value={order.status}
+                    disabled={saving}
+                    onChange={(e) => onStatusChange(order.id, e.target.value as OrderStatus)}
+                    className="h-9 rounded-lg border border-ink/12 bg-white px-2 text-xs font-black capitalize"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </td>
+                <td className="text-xs font-semibold text-ink/45">
+                  {order.created_at ? new Date(order.created_at).toLocaleString() : "Unknown"}
+                </td>
+              </tr>
+            ))}
+            {orders.length === 0 && (
+              <tr>
+                <td colSpan={6} className="px-4 py-12 text-center text-sm font-semibold text-ink/45">No orders yet.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function AnalyticsSection({ stats, products, orders }: { stats: AdminStats | null; products: Product[]; orders: Order[] }) {
+  const avgOrder = orders.length ? orders.reduce((sum, order) => sum + Number(order.total), 0) / orders.length : 0;
+  return (
+    <div className="grid gap-4 lg:grid-cols-2">
+      <div className="rounded-xl border border-ink/10 bg-white p-5 shadow-sm">
+        <h2 className="text-xl font-black">Business snapshot</h2>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <Metric label="Revenue" value={`Tk ${Number(stats?.revenue || 0).toLocaleString("en-BD")}`} />
+          <Metric label="Orders" value={String(stats?.orders || 0)} />
+          <Metric label="Pending orders" value={String(stats?.pending_orders || 0)} />
+          <Metric label="Average order" value={`Tk ${Math.round(avgOrder).toLocaleString("en-BD")}`} />
+        </div>
+      </div>
+      <div className="rounded-xl border border-ink/10 bg-white p-5 shadow-sm">
+        <h2 className="text-xl font-black">Inventory health</h2>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <Metric label="Products" value={String(stats?.products || products.length)} />
+          <Metric label="Published" value={String(stats?.published_products || 0)} />
+          <Metric label="Low stock" value={String(stats?.low_stock_products || 0)} />
+          <Metric label="Out of stock" value={String(products.filter((p) => p.stock === 0).length)} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AuditSection({ logs }: { logs: AuditLog[] }) {
+  return (
+    <div className="rounded-xl border border-ink/10 bg-white shadow-sm">
+      <div className="border-b border-ink/10 p-4">
+        <h2 className="text-xl font-black">Audit log</h2>
+        <p className="text-sm text-ink/50">Recent CMS-sensitive actions</p>
+      </div>
+      <div className="divide-y divide-ink/[0.06]">
+        {logs.map((log) => (
+          <div key={log.id} className="grid gap-2 p-4 md:grid-cols-[180px_1fr_220px]">
+            <span className="text-xs font-black uppercase tracking-wider text-ink/45">{log.action}</span>
+            <div>
+              <p className="text-sm font-bold">{log.summary}</p>
+              <p className="text-xs text-ink/45">{log.actor_email || "System"} · {log.entity_type}</p>
+            </div>
+            <span className="text-xs font-semibold text-ink/45 md:text-right">{new Date(log.created_at).toLocaleString()}</span>
+          </div>
+        ))}
+        {logs.length === 0 && <div className="p-12 text-center text-sm font-semibold text-ink/45">No audit events yet.</div>}
+      </div>
+    </div>
+  );
+}
+
+function UsersSection({ users, saving, onRoleChange }: { users: AdminUser[]; saving: boolean; onRoleChange: (id: string, role: string) => void }) {
+  return (
+    <div className="rounded-xl border border-ink/10 bg-white shadow-sm">
+      <div className="border-b border-ink/10 p-4">
+        <h2 className="text-xl font-black">Admin users</h2>
+        <p className="text-sm text-ink/50">Owner-only role management</p>
+      </div>
+      <div className="divide-y divide-ink/[0.06]">
+        {users.map((adminUser) => (
+          <div key={adminUser.id} className="grid items-center gap-3 p-4 md:grid-cols-[1fr_220px_180px]">
+            <div>
+              <strong className="block text-sm">{adminUser.name}</strong>
+              <span className="text-xs text-ink/45">{adminUser.email}</span>
+            </div>
+            <span className="text-xs font-black uppercase tracking-wider text-ink/45">{adminUser.is_admin ? "CMS access" : "Customer"}</span>
+            <select
+              value={adminUser.role}
+              disabled={saving}
+              onChange={(e) => onRoleChange(adminUser.id, e.target.value)}
+              className="h-10 rounded-lg border border-ink/12 bg-white px-3 text-sm font-black"
+            >
+              <option value="customer">Customer</option>
+              <option value="editor">Editor</option>
+              <option value="admin">Admin</option>
+              <option value="owner">Owner</option>
+            </select>
+          </div>
+        ))}
+        {users.length === 0 && <div className="p-12 text-center text-sm font-semibold text-ink/45">Only owners can view users.</div>}
+      </div>
+    </div>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-ink/10 bg-[#f8f8f4] p-4">
+      <strong className="block text-2xl font-black">{value}</strong>
+      <span className="text-xs font-bold uppercase tracking-wider text-ink/45">{label}</span>
+    </div>
+  );
 }
 
 function ProductThumb({ product }: { product: Product }) {
@@ -511,14 +873,18 @@ function ProductModal({
   categories,
   editing,
   saving,
+  uploading,
   setEditing,
+  onImageUpload,
   onSubmit,
   onClose,
 }: {
   categories: Category[];
   editing: FormState;
   saving: boolean;
+  uploading: boolean;
   setEditing: (value: FormState) => void;
+  onImageUpload: (file: File) => void;
   onSubmit: (e: React.FormEvent) => void;
   onClose: () => void;
 }) {
@@ -582,12 +948,29 @@ function ProductModal({
         </div>
 
         <div className="grid gap-4 md:grid-cols-[1fr_220px]">
-          <Field
-            label="Image URL"
-            value={editing.image_url || ""}
-            onChange={(value) => setEditing({ ...editing, image_url: value })}
-            required={false}
-          />
+          <div>
+            <Field
+              label="Image URL"
+              value={editing.image_url || ""}
+              onChange={(value) => setEditing({ ...editing, image_url: value })}
+              required={false}
+            />
+            <label className="mt-2 inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-lg border border-ink/12 bg-white px-3 text-xs font-black hover:border-ink/30">
+              <Upload size={14} />
+              {uploading ? "Uploading..." : "Upload image"}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                disabled={uploading}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) onImageUpload(file);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+          </div>
           <SelectField label="Status" value={editing.status} onChange={(value) => setEditing({ ...editing, status: value as ProductStatus })}>
             <option value="draft">Draft</option>
             <option value="published">Published</option>

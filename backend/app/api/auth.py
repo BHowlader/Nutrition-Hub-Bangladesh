@@ -17,7 +17,7 @@ from app.core.auth import (
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.limiter import limiter
-from app.models.user import AuthProvider, User
+from app.models.user import AuthProvider, User, UserRole
 from app.schemas.user import GoogleAuth, TokenResponse, UserCreate, UserLogin, UserOut, UserUpdate
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -52,6 +52,7 @@ def register(request: Request, response: Response, body: UserCreate, db: Session
         password_hash=hash_password(body.password),
         auth_provider=AuthProvider.email,
         is_admin=bool(settings.admin_email) and email == settings.admin_email.lower().strip(),
+        role=UserRole.owner if bool(settings.admin_email) and email == settings.admin_email.lower().strip() else UserRole.customer,
     )
     db.add(user)
     db.commit()
@@ -88,6 +89,7 @@ def google_auth(request: Request, response: Response, body: GoogleAuth, db: Sess
             photo_url=idinfo.get("picture"),
             auth_provider=AuthProvider.google,
             is_admin=bool(settings.admin_email) and email == settings.admin_email.lower().strip(),
+            role=UserRole.owner if bool(settings.admin_email) and email == settings.admin_email.lower().strip() else UserRole.customer,
         )
         db.add(user)
         db.commit()

@@ -13,6 +13,7 @@ export interface User {
   photo_url: string | null;
   auth_provider: string;
   is_admin: boolean;
+  role: string;
 }
 
 interface AuthState {

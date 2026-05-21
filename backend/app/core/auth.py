@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.database import get_db
-from app.models.user import User
+from app.models.user import User, UserRole
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -101,8 +101,14 @@ def get_optional_user(
 
 
 def require_admin(user: User = Depends(get_current_user)) -> User:
-    if not user.is_admin:
+    if not user.is_admin and user.role not in {UserRole.editor, UserRole.admin, UserRole.owner}:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
+    return user
+
+
+def require_owner(user: User = Depends(get_current_user)) -> User:
+    if user.role != UserRole.owner:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Owner access required")
     return user
 
 

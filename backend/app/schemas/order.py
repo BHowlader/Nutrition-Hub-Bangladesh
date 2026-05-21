@@ -1,4 +1,5 @@
 from decimal import Decimal
+from datetime import datetime
 
 from pydantic import BaseModel, Field
 
@@ -33,5 +34,10 @@ class OrderRead(BaseModel):
     status: str
     total: Decimal
     items: list[OrderItemRead]
+    created_at: datetime | None = None
 
     model_config = {"from_attributes": True}
+
+
+class OrderStatusUpdate(BaseModel):
+    status: str

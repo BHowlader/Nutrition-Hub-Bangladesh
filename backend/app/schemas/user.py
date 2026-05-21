@@ -31,6 +31,7 @@ class UserOut(BaseModel):
     photo_url: str | None = None
     auth_provider: str
     is_admin: bool = False
+    role: str = "customer"
 
     class Config:
         from_attributes = True

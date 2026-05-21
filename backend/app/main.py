@@ -5,12 +5,12 @@ from slowapi.errors import RateLimitExceeded
 from slowapi import _rate_limit_exceeded_handler
 from sqlalchemy import text
 
-from app.api import auth, cart, categories, orders, products
+from app.api import admin, auth, cart, categories, orders, products
 from app.core.config import settings
 from app.core.database import Base, engine
 from app.core.limiter import limiter
 from app.core.seed import seed_if_empty
-from app.models import cart as cart_model, catalog, order, user  # noqa: F401
+from app.models import audit, cart as cart_model, catalog, order, user  # noqa: F401
 
 if settings.jwt_secret in {"", "development-secret", "local-development-secret", "change-me"} or len(settings.jwt_secret) < 32:
     raise RuntimeError(
@@ -42,6 +42,7 @@ def create_tables() -> None:
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS detail VARCHAR(200)"))
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS accent VARCHAR(20)"))
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS subcategory VARCHAR(120)"))
+        conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(20) NOT NULL DEFAULT 'customer'"))
         conn.execute(text("CREATE INDEX IF NOT EXISTS ix_products_created_at ON products (created_at)"))
         conn.execute(text("CREATE INDEX IF NOT EXISTS ix_products_category_id ON products (category_id)"))
         conn.execute(text("CREATE INDEX IF NOT EXISTS ix_products_status_created_at ON products (status, created_at DESC)"))
@@ -49,9 +50,10 @@ def create_tables() -> None:
         conn.execute(text("CREATE INDEX IF NOT EXISTS ix_categories_name ON categories (name)"))
         if settings.admin_email:
             conn.execute(
-                text("UPDATE users SET is_admin = TRUE WHERE email = :email"),
+                text("UPDATE users SET is_admin = TRUE, role = 'owner' WHERE email = :email"),
                 {"email": settings.admin_email.lower().strip()},
             )
+        conn.execute(text("UPDATE users SET role = 'admin' WHERE is_admin = TRUE AND role = 'customer'"))
 
     from app.core.database import SessionLocal
     db = SessionLocal()
@@ -71,6 +73,7 @@ app.include_router(categories.router, prefix="/api")
 app.include_router(orders.router, prefix="/api")
 app.include_router(cart.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
+app.include_router(admin.router, prefix="/api")
 
 import os
 static_dir = os.path.join(os.path.dirname(__file__), "..", "static")

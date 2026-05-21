@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     cookie_secure: bool = False  # set true in production (https only)
     cookie_domain: str | None = None  # e.g. ".nutritionhubbangladesh.com" in prod
     redis_url: str | None = None  # if set, rate limiter uses Redis (shared across workers)
+    cloudinary_cloud_name: str = ""
+    cloudinary_api_key: str = ""
+    cloudinary_api_secret: str = ""
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

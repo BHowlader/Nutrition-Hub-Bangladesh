@@ -15,12 +15,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       router.replace("/login?redirect=/admin/products");
       return;
     }
-    if (!user.is_admin) {
+    if (!user.is_admin && !["editor", "admin", "owner"].includes(user.role)) {
       router.replace("/");
     }
   }, [user, loading, router]);
 
-  if (loading || !user || !user.is_admin) {
+  if (loading || !user || (!user.is_admin && !["editor", "admin", "owner"].includes(user.role))) {
     return <PageLoading label="Checking admin access" />;
   }
 

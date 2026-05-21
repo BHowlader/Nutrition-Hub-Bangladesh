@@ -13,6 +13,13 @@ class AuthProvider(str, Enum):
     google = "google"
 
 
+class UserRole(str, Enum):
+    customer = "customer"
+    editor = "editor"
+    admin = "admin"
+    owner = "owner"
+
+
 class User(Base):
     __tablename__ = "users"
 
@@ -25,6 +32,7 @@ class User(Base):
     photo_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     auth_provider: Mapped[AuthProvider] = mapped_column(SqlEnum(AuthProvider), default=AuthProvider.email)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    role: Mapped[UserRole] = mapped_column(SqlEnum(UserRole), default=UserRole.customer, nullable=False, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
