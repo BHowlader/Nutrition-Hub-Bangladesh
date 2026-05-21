@@ -19,6 +19,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { Header } from "@/components/Header";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -142,14 +143,14 @@ export default function DashboardPage() {
     : null;
 
   return (
-    <div className="min-h-screen bg-ink px-4 pb-16 pt-28">
-      <div className="mx-auto max-w-6xl">
+    <div className="min-h-screen md:h-screen md:overflow-hidden bg-ink px-4 pb-8 md:pb-6 pt-24 md:pt-28 flex flex-col">
+      <Header />
+      <div className="mx-auto max-w-6xl w-full flex-1 flex flex-col min-h-0">
 
-
-        <h1 className="mb-8 text-3xl font-black text-cream">My Dashboard</h1>
+        <h1 className="mb-6 md:mb-8 text-3xl font-black text-cream shrink-0">My Dashboard</h1>
 
         {/* Tabs */}
-        <div className="mb-8 flex gap-1 rounded-xl border border-cream/10 bg-cream/[0.03] p-1">
+        <div className="mb-6 md:mb-8 flex gap-1 rounded-xl border border-cream/10 bg-cream/[0.03] p-1 shrink-0">
           {[
             { key: "profile" as Tab, label: "Profile", icon: UserIcon },
             { key: "orders" as Tab, label: "Orders", icon: Package },
@@ -171,11 +172,11 @@ export default function DashboardPage() {
 
         {/* Profile Tab */}
         {tab === "profile" && (
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3 flex-1 min-h-0 overflow-y-auto md:overflow-hidden pb-4">
             {/* Left Column: User Summary & Stats (1/3 width on desktop) */}
-            <div className="space-y-6 md:col-span-1">
+            <div className="space-y-6 md:col-span-1 md:h-full md:flex md:flex-col md:min-h-0">
               {/* Profile Card */}
-              <div className="premium-card p-6 flex flex-col items-center relative overflow-hidden group">
+              <div className="premium-card p-6 flex flex-col items-center relative overflow-hidden group shrink-0">
                 {/* Decorative background glow */}
                 <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gold/10 blur-2xl transition-all duration-500 group-hover:bg-gold/15" />
                 <div className="absolute -left-10 -bottom-10 h-32 w-32 rounded-full bg-champagne/10 blur-2xl transition-all duration-500 group-hover:bg-champagne/15" />
@@ -236,17 +237,17 @@ export default function DashboardPage() {
               </div>
 
               {/* Stats Panel */}
-              <div className="premium-card p-6 space-y-4">
-                <h4 className="text-xs font-black uppercase tracking-widest text-cream/40 border-b border-cream/10 pb-2">
+              <div className="premium-card p-6 space-y-4 md:flex-1 md:min-h-0 md:flex md:flex-col">
+                <h4 className="text-xs font-black uppercase tracking-widest text-cream/40 border-b border-cream/10 pb-2 shrink-0">
                   My Activity Stats
                 </h4>
                 
                 {ordersLoading ? (
-                  <div className="py-4 text-center">
+                  <div className="py-4 text-center flex-1 flex items-center justify-center">
                     <span className="text-xs text-cream/40 animate-pulse">Calculating stats...</span>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 gap-3">
+                  <div className="grid grid-cols-1 gap-3 overflow-y-auto md:flex-1 pr-1.5 scrollbar-thin">
                     {/* Stat item 1 */}
                     <div className="flex items-center gap-4 rounded-xl border border-cream/5 bg-cream/[0.02] p-3 transition duration-300 hover:bg-cream/[0.04]">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gold/10 text-gold border border-gold/20">
@@ -298,76 +299,78 @@ export default function DashboardPage() {
             </div>
 
             {/* Right Column: Personal Details Form (2/3 width on desktop) */}
-            <div className="premium-card p-8 md:col-span-2 relative overflow-hidden group">
+            <div className="premium-card p-8 md:col-span-2 relative overflow-hidden group md:h-full md:flex md:flex-col md:min-h-0">
               {/* Decorative subtle background circle */}
               <div className="absolute -left-20 -top-20 h-48 w-48 rounded-full bg-gold/[0.02] blur-3xl" />
               
-              <h2 className="mb-6 text-xl font-extrabold text-cream flex items-center gap-2">
+              <h2 className="mb-6 text-xl font-extrabold text-cream flex items-center gap-2 shrink-0">
                 <UserIcon className="text-gold" size={20} />
                 Edit Profile Details
               </h2>
 
-              <form onSubmit={handleSaveProfile} className="space-y-6 relative z-10">
-                {/* Full Name field */}
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-black uppercase tracking-wider text-cream/40">
-                    Full Name
-                  </label>
-                  <div className="relative group/input">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-cream/30 group-focus-within/input:text-gold transition-colors duration-300">
-                      <UserIcon size={16} />
+              <form onSubmit={handleSaveProfile} className="space-y-6 relative z-10 md:flex-1 md:flex md:flex-col md:min-h-0">
+                <div className="space-y-6 md:flex-1 md:overflow-y-auto pr-1.5 scrollbar-thin">
+                  {/* Full Name field */}
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-black uppercase tracking-wider text-cream/40">
+                      Full Name
+                    </label>
+                    <div className="relative group/input">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-cream/30 group-focus-within/input:text-gold transition-colors duration-300">
+                        <UserIcon size={16} />
+                      </div>
+                      <input
+                        type="text"
+                        required
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full rounded-xl border border-cream/10 bg-cream/[0.03] pl-11 pr-4 py-3.5 text-sm text-cream outline-none transition-all duration-300 focus:border-gold/50 focus:ring-4 focus:ring-gold/10 hover:border-cream/20"
+                        placeholder="Your full name"
+                      />
                     </div>
-                    <input
-                      type="text"
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full rounded-xl border border-cream/10 bg-cream/[0.03] pl-11 pr-4 py-3.5 text-sm text-cream outline-none transition-all duration-300 focus:border-gold/50 focus:ring-4 focus:ring-gold/10 hover:border-cream/20"
-                      placeholder="Your full name"
-                    />
                   </div>
-                </div>
 
-                {/* Phone Number field */}
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-black uppercase tracking-wider text-cream/40">
-                    Phone Number
-                  </label>
-                  <div className="relative group/input">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-cream/30 group-focus-within/input:text-gold transition-colors duration-300">
-                      <Phone size={16} />
+                  {/* Phone Number field */}
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-black uppercase tracking-wider text-cream/40">
+                      Phone Number
+                    </label>
+                    <div className="relative group/input">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-cream/30 group-focus-within/input:text-gold transition-colors duration-300">
+                        <Phone size={16} />
+                      </div>
+                      <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="w-full rounded-xl border border-cream/10 bg-cream/[0.03] pl-11 pr-4 py-3.5 text-sm text-cream outline-none transition-all duration-300 focus:border-gold/50 focus:ring-4 focus:ring-gold/10 hover:border-cream/20"
+                        placeholder="+880 1XXX XXXXXX"
+                      />
                     </div>
-                    <input
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="w-full rounded-xl border border-cream/10 bg-cream/[0.03] pl-11 pr-4 py-3.5 text-sm text-cream outline-none transition-all duration-300 focus:border-gold/50 focus:ring-4 focus:ring-gold/10 hover:border-cream/20"
-                      placeholder="+880 1XXX XXXXXX"
-                    />
                   </div>
-                </div>
 
-                {/* Delivery Address field */}
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-black uppercase tracking-wider text-cream/40">
-                    Delivery Address
-                  </label>
-                  <div className="relative group/input">
-                    <div className="absolute left-4 top-4 text-cream/30 group-focus-within/input:text-gold transition-colors duration-300">
-                      <MapPin size={16} />
+                  {/* Delivery Address field */}
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-black uppercase tracking-wider text-cream/40">
+                      Delivery Address
+                    </label>
+                    <div className="relative group/input">
+                      <div className="absolute left-4 top-4 text-cream/30 group-focus-within/input:text-gold transition-colors duration-300">
+                        <MapPin size={16} />
+                      </div>
+                      <textarea
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        rows={4}
+                        className="w-full resize-none rounded-xl border border-cream/10 bg-cream/[0.03] pl-11 pr-4 py-3.5 text-sm text-cream outline-none transition-all duration-300 focus:border-gold/50 focus:ring-4 focus:ring-gold/10 hover:border-cream/20"
+                        placeholder="Enter your complete delivery address in Bangladesh"
+                      />
                     </div>
-                    <textarea
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                      rows={4}
-                      className="w-full resize-none rounded-xl border border-cream/10 bg-cream/[0.03] pl-11 pr-4 py-3.5 text-sm text-cream outline-none transition-all duration-300 focus:border-gold/50 focus:ring-4 focus:ring-gold/10 hover:border-cream/20"
-                      placeholder="Enter your complete delivery address in Bangladesh"
-                    />
                   </div>
                 </div>
 
                 {/* Action button */}
-                <div className="pt-2">
+                <div className="pt-4 shrink-0 border-t border-cream/10 mt-auto">
                   <button
                     type="submit"
                     disabled={saving}
@@ -384,7 +387,7 @@ export default function DashboardPage() {
 
         {/* Orders Tab */}
         {tab === "orders" && (
-          <div className="space-y-4">
+          <div className="space-y-4 flex-1 md:overflow-y-auto md:min-h-0 pr-1.5 scrollbar-thin pb-4">
             {ordersLoading ? (
               <div className="premium-card flex items-center justify-center p-12">
                 <p className="text-sm text-cream/50">Loading orders...</p>
