@@ -16,5 +16,11 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
+    @property
+    def admin_emails(self) -> list[str]:
+        if not self.admin_email:
+            return []
+        return [email.strip().lower() for email in self.admin_email.split(",") if email.strip()]
+
 
 settings = Settings()

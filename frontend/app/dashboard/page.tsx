@@ -269,8 +269,8 @@ export default function DashboardPage() {
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl border border-cream/10 bg-ink/95 p-4 shadow-2xl backdrop-blur-xl min-w-[280px]">
           <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${toast.type === "success"
-              ? "bg-green-500/20 text-green-400 border border-green-500/30"
-              : "bg-red-500/20 text-red-400 border border-red-500/30"
+            ? "bg-green-500/20 text-green-400 border border-green-500/30"
+            : "bg-red-500/20 text-red-400 border border-red-500/30"
             }`}>
             {toast.type === "success" ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
           </div>

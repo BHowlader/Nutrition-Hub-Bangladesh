@@ -48,11 +48,12 @@ def create_tables() -> None:
         conn.execute(text("CREATE INDEX IF NOT EXISTS ix_products_status_created_at ON products (status, created_at DESC)"))
         conn.execute(text("CREATE INDEX IF NOT EXISTS ix_products_category_status_created_at ON products (category_id, status, created_at DESC)"))
         conn.execute(text("CREATE INDEX IF NOT EXISTS ix_categories_name ON categories (name)"))
-        if settings.admin_email:
-            conn.execute(
-                text("UPDATE users SET is_admin = TRUE, role = 'owner' WHERE email = :email"),
-                {"email": settings.admin_email.lower().strip()},
-            )
+        if settings.admin_emails:
+            for email in settings.admin_emails:
+                conn.execute(
+                    text("UPDATE users SET is_admin = TRUE, role = 'owner' WHERE email = :email"),
+                    {"email": email},
+                )
         conn.execute(text("UPDATE users SET role = 'admin' WHERE is_admin = TRUE AND role = 'customer'"))
 
     from app.core.database import SessionLocal
@@ -79,3 +80,4 @@ import os
 static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
 os.makedirs(static_dir, exist_ok=True)
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
+# Trigger reload to load new env configs

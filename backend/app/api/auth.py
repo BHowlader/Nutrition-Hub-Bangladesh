@@ -51,8 +51,8 @@ def register(request: Request, response: Response, body: UserCreate, db: Session
         email=email,
         password_hash=hash_password(body.password),
         auth_provider=AuthProvider.email,
-        is_admin=bool(settings.admin_email) and email == settings.admin_email.lower().strip(),
-        role=UserRole.owner if bool(settings.admin_email) and email == settings.admin_email.lower().strip() else UserRole.customer,
+        is_admin=email in settings.admin_emails,
+        role=UserRole.owner if email in settings.admin_emails else UserRole.customer,
     )
     db.add(user)
     db.commit()
@@ -88,8 +88,8 @@ def google_auth(request: Request, response: Response, body: GoogleAuth, db: Sess
             email=email,
             photo_url=idinfo.get("picture"),
             auth_provider=AuthProvider.google,
-            is_admin=bool(settings.admin_email) and email == settings.admin_email.lower().strip(),
-            role=UserRole.owner if bool(settings.admin_email) and email == settings.admin_email.lower().strip() else UserRole.customer,
+            is_admin=email in settings.admin_emails,
+            role=UserRole.owner if email in settings.admin_emails else UserRole.customer,
         )
         db.add(user)
         db.commit()
