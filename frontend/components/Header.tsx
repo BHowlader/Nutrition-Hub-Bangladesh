@@ -123,18 +123,20 @@ export function Header() {
             onClick={handleCartClick}
             onFocus={prefetchCartTarget}
             onMouseEnter={prefetchCartTarget}
-            aria-label={`Cart with ${totalCount} ${totalCount === 1 ? "item" : "items"}`}
+            aria-label={user ? `Cart with ${totalCount} ${totalCount === 1 ? "item" : "items"}` : "Cart"}
             className="relative inline-flex min-h-11 items-center gap-2 rounded-lg bg-cream px-4 font-black text-ink"
           >
             <ShoppingBag size={18} />
             Cart
-            <span
-              className={`absolute -right-2 -top-2 flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-[10px] font-black ring-2 ring-ink ${
-                totalCount > 0 ? "bg-gold text-ink" : "bg-ink text-cream/70"
-              }`}
-            >
-              {totalCount}
-            </span>
+            {user && (
+              <span
+                className={`absolute -right-2 -top-2 flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-[10px] font-black ring-2 ring-ink ${
+                  totalCount > 0 ? "bg-gold text-ink" : "bg-ink text-cream/70"
+                }`}
+              >
+                {totalCount}
+              </span>
+            )}
           </button>
 
           {!loading && (
