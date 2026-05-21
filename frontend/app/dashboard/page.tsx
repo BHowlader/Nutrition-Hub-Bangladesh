@@ -154,8 +154,61 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-[280px_1fr]">
-          {/* Sidebar */}
-          <aside className="space-y-4">
+          {/* Mobile Sidebar/Header (visible only on mobile) */}
+          <div className="space-y-4 md:hidden">
+            {/* Mobile User Header */}
+            <div className="premium-card p-4 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="relative shrink-0 cursor-pointer group/avatar" onClick={() => fileRef.current?.click()}>
+                  {photoSrc ? (
+                    <img
+                      src={photoSrc}
+                      alt={user.name}
+                      className="h-10 w-10 rounded-full object-cover ring-2 ring-gold/30"
+                    />
+                  ) : (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-gold to-champagne text-sm font-black text-ink ring-2 ring-gold/30">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-extrabold text-cream">{user.name}</p>
+                  <p className="truncate text-[10px] text-cream/50">{user.email}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => logout().then(() => router.push("/"))}
+                className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-cream/60 transition hover:text-red-400"
+              >
+                Sign out
+              </button>
+            </div>
+
+            {/* Mobile Nav Tabs Slider */}
+            <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {NAV_ITEMS.map(({ key, label, icon: Icon }) => {
+                const active = section === key;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setSection(key)}
+                    className={`flex shrink-0 items-center gap-2 rounded-full border px-4 py-2.5 text-xs font-bold transition ${
+                      active
+                        ? "border-gold/55 bg-gold/10 text-cream"
+                        : "border-white/[0.06] bg-white/[0.02] text-cream/60 hover:border-white/12 hover:bg-white/[0.04]"
+                    }`}
+                  >
+                    <Icon size={14} className={active ? "text-gold" : "text-cream/40"} />
+                    <span>{label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Desktop Sidebar (hidden on mobile) */}
+          <aside className="hidden md:block space-y-4">
             <div className="premium-card p-5">
               <div className="flex items-center gap-3">
                 <div className="relative shrink-0 cursor-pointer group/avatar" onClick={() => fileRef.current?.click()}>

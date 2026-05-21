@@ -210,7 +210,52 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") setCartOpen(false);
+  if (event.key === "Escape") {
+    setCartOpen(false);
+    if (siteHeader && siteHeader.classList.contains("menu-open")) {
+      siteHeader.classList.remove("menu-open");
+      mobileDrawer.classList.remove("open");
+      mobileDrawer.setAttribute("aria-hidden", "true");
+      if (menuTrigger) menuTrigger.setAttribute("aria-expanded", "false");
+    }
+  }
+});
+
+// Mobile menu toggle logic
+const menuTrigger = document.querySelector("[data-toggle-menu]");
+const siteHeader = document.querySelector(".site-header");
+const mobileDrawer = document.querySelector("[data-mobile-drawer]");
+
+if (menuTrigger && siteHeader && mobileDrawer) {
+  menuTrigger.addEventListener("click", () => {
+    const isOpen = siteHeader.classList.toggle("menu-open");
+    mobileDrawer.classList.toggle("open", isOpen);
+    mobileDrawer.setAttribute("aria-hidden", String(!isOpen));
+    menuTrigger.setAttribute("aria-expanded", String(isOpen));
+  });
+
+  // Close menu when clicking a link
+  const mobileLinks = mobileDrawer.querySelectorAll("a");
+  mobileLinks.forEach((link) => {
+    link.addEventListener("click", () => {
+      siteHeader.classList.remove("menu-open");
+      mobileDrawer.classList.remove("open");
+      mobileDrawer.setAttribute("aria-hidden", "true");
+      menuTrigger.setAttribute("aria-expanded", "false");
+    });
+  });
+}
+
+// Close mobile menu if clicked outside
+document.addEventListener("click", (event) => {
+  if (siteHeader && siteHeader.classList.contains("menu-open")) {
+    if (!siteHeader.contains(event.target)) {
+      siteHeader.classList.remove("menu-open");
+      mobileDrawer.classList.remove("open");
+      mobileDrawer.setAttribute("aria-hidden", "true");
+      if (menuTrigger) menuTrigger.setAttribute("aria-expanded", "false");
+    }
+  }
 });
 
 renderProducts();

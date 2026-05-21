@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { ShoppingBag, LogIn, LogOut, User as UserIcon } from "lucide-react";
+import { ShoppingBag, LogIn, LogOut, User as UserIcon, Menu, X } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
 import { warmProductCache } from "@/lib/products";
@@ -44,7 +44,13 @@ export function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -94,19 +100,19 @@ export function Header() {
   }
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 pt-4">
-      <nav className="shell flex min-h-[72px] items-center justify-between gap-6 rounded-lg border border-cream/10 bg-ink/75 px-5 text-cream backdrop-blur-xl">
-        <Link href="/" onClick={handleLogoClick} className="flex items-center gap-3">
+    <header className="fixed inset-x-0 top-0 z-50 pt-2 sm:pt-4">
+      <nav className="shell flex min-h-[58px] items-center justify-between gap-2 rounded-lg border border-cream/10 bg-ink/75 px-3 text-cream backdrop-blur-xl sm:min-h-[72px] sm:gap-6 sm:px-5">
+        <Link href="/" onClick={handleLogoClick} className="flex min-w-0 items-center gap-2 sm:gap-3">
           <Image
             src="/images/logo.png"
             alt="Nutrition Hub Bangladesh"
             width={44}
             height={44}
-            className="rounded-lg object-contain"
+            className="h-9 w-9 shrink-0 rounded-lg object-contain sm:h-11 sm:w-11"
           />
-          <span>
-            <strong className="block leading-tight">Nutrition Hub</strong>
-            <small className="block text-xs text-cream/60">Bangladesh</small>
+          <span className="min-w-0">
+            <strong className="block truncate text-sm leading-tight sm:text-base">Nutrition Hub</strong>
+            <small className="block truncate text-[11px] text-cream/60 sm:text-xs">Bangladesh</small>
           </span>
         </Link>
 
@@ -118,16 +124,16 @@ export function Header() {
           ))}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           <button
             onClick={handleCartClick}
             onFocus={prefetchCartTarget}
             onMouseEnter={prefetchCartTarget}
             aria-label={user ? `Cart with ${totalCount} ${totalCount === 1 ? "item" : "items"}` : "Cart"}
-            className="relative inline-flex min-h-11 items-center gap-2 rounded-lg bg-cream px-4 font-black text-ink"
+            className="relative inline-flex min-h-10 w-10 items-center justify-center gap-1.5 rounded-lg bg-cream text-sm font-black text-ink sm:min-h-11 sm:w-auto sm:gap-2 sm:px-4 sm:text-base"
           >
             <ShoppingBag size={18} />
-            Cart
+            <span className="hidden sm:inline">Cart</span>
             {user && (
               <span
                 className={`absolute -right-2 -top-2 flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-[10px] font-black ring-2 ring-ink ${
@@ -182,7 +188,7 @@ export function Header() {
               ) : (
                 <Link
                   href="/login"
-                  className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-cream/15 bg-cream/[0.04] px-4 font-bold text-cream transition hover:border-gold/50 hover:text-champagne"
+                  className="inline-flex min-h-10 w-10 items-center justify-center gap-2 rounded-lg border border-cream/15 bg-cream/[0.04] font-bold text-cream transition hover:border-gold/50 hover:text-champagne sm:min-h-11 sm:w-auto sm:px-4"
                 >
                   <LogIn size={18} />
                   <span className="hidden sm:inline">Login</span>
@@ -190,8 +196,35 @@ export function Header() {
               )}
             </>
           )}
+
+          {/* Mobile hamburger menu button */}
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="inline-flex min-h-10 w-10 items-center justify-center rounded-lg border border-cream/15 bg-cream/[0.04] text-cream transition hover:border-gold/50 hover:text-champagne sm:min-h-11 sm:w-11 md:hidden"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+          >
+            {menuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
         </div>
       </nav>
+
+      {/* Mobile Drawer Overlay */}
+      {menuOpen && (
+        <div className="fixed inset-x-3 top-[74px] z-40 overflow-hidden rounded-xl border border-cream/10 bg-ink/95 shadow-2xl backdrop-blur-xl sm:inset-x-4 sm:top-[92px] md:hidden">
+          <nav className="flex flex-col gap-1 p-3">
+            {navItems.map(([label, href]) => (
+              <Link
+                key={href}
+                href={href}
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 rounded-lg px-4 py-3 text-base font-bold text-cream/80 transition hover:bg-cream/5 hover:text-cream"
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+      )}
     </header>
   );
 }

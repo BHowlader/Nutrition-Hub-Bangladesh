@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { ArrowRight, ArrowDown, ShieldCheck, Zap } from "lucide-react";
+import { ArrowRight, ShieldCheck, Zap } from "lucide-react";
 import { fetchProducts, formatTaka, type Product } from "@/lib/products";
 
 const SKIP_HOME_LOADER_KEY = "nutrition-hub-skip-home-loader";
@@ -104,7 +104,7 @@ export function Hero({
     <>
       <section
         ref={rootRef}
-        className="relative flex min-h-[100svh] items-center overflow-hidden bg-[#04060d] pb-10 pt-[6.75rem] sm:pt-[7.25rem] md:pt-[7.75rem] lg:pb-12 lg:pt-[7.75rem]"
+        className="relative flex min-h-[100svh] items-start overflow-hidden bg-[#04060d] pb-7 pt-[5.75rem] sm:items-center sm:pb-10 sm:pt-[7.25rem] md:pt-[7.75rem] lg:pb-12 lg:pt-[7.75rem]"
       >
         {/* Cinematic Loader Shutter Panels */}
         {loading && (
@@ -228,89 +228,105 @@ export function Hero({
           ))}
         </div>
 
-        <div className="shell relative z-10 mx-auto grid items-center gap-10 py-4 sm:py-6 lg:grid-cols-[minmax(620px,0.98fr)_minmax(0,1.02fr)] lg:gap-8 lg:py-0 xl:grid-cols-[minmax(680px,0.95fr)_minmax(0,1.05fr)]">
+        <div className="shell relative z-10 mx-auto grid items-start gap-6 py-2 sm:items-center sm:gap-10 sm:py-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-8 lg:py-0 xl:grid-cols-[minmax(680px,0.95fr)_minmax(0,1.05fr)]">
           
           {/* Left Column - Content */}
           <div className="flex max-w-3xl flex-col items-start">
-            <div className="hero-badge mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-md sm:mb-5">
+            <div className="hero-badge mb-4 inline-flex max-w-full items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 backdrop-blur-md sm:mb-5 sm:px-4 sm:py-2">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-mint opacity-75"></span>
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-mint"></span>
               </span>
-              <span className="text-xs font-bold tracking-wide text-cream/90 uppercase">
+              <span className="truncate text-[10px] font-bold uppercase tracking-[0.14em] text-cream/90 sm:text-xs sm:tracking-wide">
                 Premium Supplements Bangladesh
               </span>
             </div>
 
-            <h1 className="flex flex-col text-[clamp(2.25rem,8vw,5.15rem)] font-black leading-[0.95] tracking-tight text-cream" style={{ perspective: "1000px" }}>
-              <span className="hero-title-line block">Power Your</span>
-              <span className="hero-title-line block mt-2">
-                <span className="bg-gradient-to-r from-gold via-champagne to-mint bg-clip-text text-transparent">
-                  Performance.
-                </span>
-              </span>
-              <span className="hero-title-line block mt-2 text-[clamp(1.6rem,5.5vw,3.55rem)] text-cream/80">
+            <h1 className="max-w-[11ch] text-[clamp(2.45rem,12vw,4.75rem)] font-extrabold leading-[0.96] tracking-tight text-cream sm:max-w-none sm:leading-[1.08]">
+              Power Your{" "}
+              <span className="bg-gradient-to-r from-gold via-champagne to-mint bg-clip-text text-transparent block sm:inline">
+                Performance.
+              </span>{" "}
+              <span className="mt-3 block max-w-[16ch] text-[clamp(1.35rem,6vw,3.2rem)] font-bold leading-tight text-cream/80 sm:mt-2 sm:max-w-none">
                 Without Compromise.
               </span>
             </h1>
 
-            <p className="hero-desc mt-6 max-w-xl text-base leading-relaxed text-cream/60 sm:text-lg lg:mt-7">
+            <p className="hero-desc mt-4 max-w-xl text-[0.95rem] leading-7 text-cream/64 sm:mt-6 sm:text-lg sm:leading-relaxed">
               {heroDescription}
             </p>
 
-            <div className="mt-7 flex w-full flex-wrap items-center gap-3 sm:mt-8 sm:gap-4">
-              <a href="#catalog" className="hero-btn btn-primary min-h-[52px] w-full justify-center whitespace-nowrap px-5 text-sm sm:w-auto sm:min-h-[56px] sm:px-7 sm:text-lg">
-                Explore Products <ArrowRight size={20} className="ml-1" />
+            <div className="mt-6 grid w-full grid-cols-1 gap-3 min-[390px]:grid-cols-2 sm:mt-7 sm:flex sm:w-auto sm:items-center">
+              <a 
+                href="#catalog" 
+                className="group hero-btn btn-primary min-h-[46px] w-full justify-center whitespace-nowrap px-5 text-sm sm:min-h-[52px] sm:w-auto sm:max-w-none sm:px-6 sm:text-base"
+              >
+                Explore Products 
+                <ArrowRight size={18} className="ml-1.5 transition-transform group-hover:translate-x-1" />
               </a>
-              <a href="#authenticity" className="hero-btn btn-secondary min-h-[52px] w-full justify-center whitespace-nowrap border-white/10 bg-white/5 px-5 text-sm backdrop-blur-md sm:w-auto sm:min-h-[56px] sm:px-7 sm:text-lg">
-                <ShieldCheck size={20} className="mr-2 text-mint" />
+              <a 
+                href="#authenticity" 
+                className="group hero-btn btn-secondary min-h-[46px] w-full justify-center whitespace-nowrap border-white/10 bg-white/5 px-5 text-sm backdrop-blur-md sm:min-h-[52px] sm:w-auto sm:max-w-none sm:px-6 sm:text-base"
+              >
+                <ShieldCheck size={18} className="mr-2 text-mint transition-transform group-hover:scale-110" />
                 Verify Authenticity
               </a>
             </div>
 
-            {/* Mobile-only product showcase (the lg overlapping version is hidden below lg) */}
             {visualProducts.length > 0 && (
-              <div className="relative mt-10 w-full lg:hidden">
-                <div className="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                  {visualProducts.map((product) => (
+              <div className="relative mt-8 h-[250px] w-full overflow-visible min-[390px]:h-[285px] sm:h-[340px] lg:hidden">
+                <div className="absolute inset-x-3 bottom-0 top-6 rounded-[2rem] border border-white/[0.06] bg-white/[0.025]" />
+                <div className="absolute left-1/2 top-0 z-30 w-[64%] max-w-[250px] -translate-x-1/2">
+                  <div
+                    className="animate-float-1 overflow-hidden rounded-2xl border border-white/10 bg-[#0c1324] shadow-[0_28px_70px_rgba(0,0,0,0.45)]"
+                    style={{ boxShadow: `0 28px 70px -18px ${visualProducts[0].accent || "#60A5FA"}55` }}
+                  >
+                    <div className="relative aspect-square">
+                      <Image
+                        src={visualProducts[0].image_url || "/images/logo.png"}
+                        alt={visualProducts[0].name}
+                        fill
+                        sizes="70vw"
+                        className="object-cover"
+                        priority
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {visualProducts.slice(1, 3).map((product, index) => (
+                  <div
+                    key={product.id}
+                    className={`absolute bottom-0 w-[50%] max-w-[210px] ${
+                      index === 0
+                        ? "left-0 z-20 -rotate-6"
+                        : "right-0 z-10 rotate-6"
+                    }`}
+                  >
                     <div
-                      key={product.id}
-                      className="snap-start shrink-0 w-[68%] max-w-[280px] sm:w-[260px] overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0c1324] shadow-[0_20px_40px_rgba(0,0,0,0.4)] backdrop-blur-2xl"
-                      style={{ boxShadow: `0 20px 40px -10px ${product.accent || "#F59E0B"}15` }}
+                      className={`overflow-hidden rounded-2xl border border-white/10 bg-[#0c1324] shadow-[0_22px_55px_rgba(0,0,0,0.38)] ${
+                        index === 0 ? "animate-float-2" : "animate-float-3"
+                      }`}
+                      style={{ boxShadow: `0 22px 55px -18px ${product.accent || "#F59E0B"}50` }}
                     >
-                      <div className="relative aspect-square w-full overflow-hidden bg-[#050811] border-b border-white/[0.04]">
+                      <div className="relative aspect-square">
                         <Image
                           src={product.image_url || "/images/logo.png"}
                           alt={product.name}
                           fill
+                          sizes="52vw"
                           className="object-cover"
-                          sizes="(max-width: 640px) 70vw, 260px"
                         />
                       </div>
-                      <div className="p-4">
-                        <div className="text-[10px] font-bold uppercase tracking-widest text-cream/50 mb-1">
-                          {product.category?.name || ""}
-                        </div>
-                        <h3 className="text-base font-bold text-cream truncate">{product.name}</h3>
-                        <div className="mt-3 flex items-center justify-between">
-                          <span className="font-black text-gold">{formatTaka(product.price)}</span>
-                          <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold text-cream/70 backdrop-blur-md">
-                            {product.badge || ""}
-                          </span>
-                        </div>
-                      </div>
                     </div>
-                  ))}
-                </div>
-                <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-cream/30">
-                  Swipe to explore →
-                </p>
+                  </div>
+                ))}
               </div>
             )}
           </div>
 
           {/* Right Column - Visual Showcase */}
-          <div className="relative hidden h-[min(49vw,560px)] min-h-[470px] w-full items-center justify-center lg:flex" style={{ perspective: "1200px" }}>
+          <div className="relative hidden w-full items-center justify-center lg:flex lg:h-[min(49vw,560px)] lg:min-h-[470px]" style={{ perspective: "1200px" }}>
             <div className="absolute inset-0 rounded-full border border-white/5 pointer-events-none" />
             
             {visualProducts.map((product, i) => (

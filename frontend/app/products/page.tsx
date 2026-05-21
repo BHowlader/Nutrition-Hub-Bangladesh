@@ -147,7 +147,40 @@ export default function ProductsPage() {
 
       <main ref={catalogRef} className="relative py-12 md:py-16 scroll-mt-[6.75rem]">
         <div className="shell grid items-start gap-8 md:grid-cols-[260px_minmax(0,1fr)] xl:grid-cols-[280px_minmax(0,1fr)]">
-          <aside className="md:sticky md:top-[6.75rem] md:self-start">
+          {/* Mobile Categories Scroll (visible only on mobile) */}
+          <div className="md:hidden">
+            <div className="flex items-center justify-between px-1 mb-3">
+              <h2 className="text-xs font-black uppercase tracking-[0.14em] text-cream/55">Categories</h2>
+              <span className="rounded-full bg-white/[0.06] px-2.5 py-1 text-[9px] font-black text-cream/45">
+                {filteredProducts.length} items
+              </span>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {filterCategories.map((category) => {
+                const Icon = category.icon;
+                const active = activeCategory === category.id;
+
+                return (
+                  <button
+                    key={category.id}
+                    onClick={() => handleCategoryChange(category.id)}
+                    className={`flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold transition ${
+                      active
+                        ? "border-gold/55 bg-gold/10 text-cream"
+                        : "border-white/[0.06] bg-white/[0.02] text-cream/60 hover:border-white/12 hover:bg-white/[0.04]"
+                    }`}
+                  >
+                    <Icon size={14} className={active ? "text-gold" : "text-cream/40"} />
+                    <span>{category.label}</span>
+                    <span className="text-[10px] font-bold text-cream/30">({categoryCounts[category.id]})</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Desktop Categories Sidebar (hidden on mobile) */}
+          <aside className="hidden md:sticky md:top-[6.75rem] md:self-start md:block">
             <div className="rounded-xl border border-white/[0.08] bg-[#0c1324]/55 p-4 backdrop-blur-md md:max-h-[calc(100svh-7.75rem)] md:overflow-y-auto">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-sm font-black uppercase tracking-[0.14em] text-cream/55">Categories</h2>

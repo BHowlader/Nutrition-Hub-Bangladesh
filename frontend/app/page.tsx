@@ -128,29 +128,53 @@ export default async function HomePage() {
       <div className="h-[1px] bg-white/[0.05]" />
 
       {/* Shop by Goal */}
-      <section className="bg-ink py-28">
+      <section className="relative overflow-hidden bg-ink py-16 sm:py-20 lg:py-28">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(96,165,250,0.13),transparent_32%),radial-gradient(circle_at_85%_15%,rgba(16,185,129,0.08),transparent_30%)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/[0.06]" />
         <div className="shell">
           <Reveal>
-            <div className="text-center max-w-2xl mx-auto mb-14">
-              <p className="eyebrow text-gold">Shop by goal</p>
-              <h2 className="heading-lg text-cream">Find the right supplement faster.</h2>
-              <p className="mt-4 text-lg text-cream/60">Browse by category to find exactly what fits your training, health goals, and daily routine.</p>
+            <div className="relative mb-9 grid gap-5 sm:mb-12 lg:grid-cols-[0.92fr_1.08fr] lg:items-end">
+              <div>
+                <p className="eyebrow text-gold">Shop by goal</p>
+                <h2 className="max-w-xl text-[clamp(2rem,5vw,4rem)] font-black leading-[0.98] tracking-tight text-cream">
+                  Choose the stack that matches your routine.
+                </h2>
+              </div>
+              <p className="max-w-xl text-sm leading-7 text-cream/58 sm:text-base lg:justify-self-end">
+                Fast routes into the store for strength training, daily wellness, protein breakfast,
+                and healthy snacking. Each goal opens the matching product category.
+              </p>
             </div>
           </Reveal>
 
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {categories.map(({ title, text, icon: Icon }, index) => (
+          <div className="relative grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {categories.map(({ title, text, icon: Icon, accent }, index) => (
               <Reveal delay={index * 0.06} key={title}>
                 <Link
                   href={`/products?category=${encodeURIComponent(title)}`}
-                  className="group block relative min-h-[280px] rounded-2xl border border-white/[0.06] bg-[#0c1324]/40 p-7 transition-all duration-300 hover:-translate-y-1 hover:border-gold/30 hover:bg-[#0c1324]/75 hover:shadow-[0_20px_40px_rgba(96,165,250,0.05)]"
+                  className="group relative flex min-h-[210px] overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0c1324]/58 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.2)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-gold/30 hover:bg-[#0c1324]/80 sm:min-h-[250px] sm:p-6"
                 >
-                  <div className="mb-8 grid h-14 w-14 place-items-center rounded-xl bg-gold/10 border border-white/5 text-gold">
-                    <Icon size={26} />
+                  <div className={`absolute inset-x-0 top-0 h-28 bg-gradient-to-b ${accent} opacity-80`} />
+                  <Icon size={130} className="absolute -right-8 -top-8 text-white/[0.025] transition duration-300 group-hover:scale-110 group-hover:text-gold/[0.08]" />
+                  <div className="relative z-10 flex min-h-full w-full flex-col">
+                    <div className="flex items-center justify-between">
+                      <span className="grid h-11 w-11 place-items-center rounded-xl border border-white/10 bg-white/[0.06] text-gold shadow-inner">
+                        <Icon size={21} />
+                      </span>
+                      <span className="font-mono text-xs font-bold text-cream/28">
+                        0{index + 1}
+                      </span>
+                    </div>
+                    <div className="mt-auto pt-8">
+                      <h3 className="text-lg font-black leading-tight text-cream transition-colors duration-300 group-hover:text-gold sm:text-xl">
+                        {title}
+                      </h3>
+                      <p className="mt-3 line-clamp-3 text-sm leading-6 text-cream/58">{text}</p>
+                      <div className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-cream/36 transition group-hover:text-gold">
+                        Browse <ArrowRight size={14} className="transition group-hover:translate-x-1" />
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="text-xl font-bold text-cream group-hover:text-gold transition-colors duration-300">{title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-cream/60">{text}</p>
-                  <ArrowRight size={18} className="absolute bottom-7 right-7 text-cream/20 transition-all group-hover:text-gold group-hover:translate-x-1" />
                 </Link>
               </Reveal>
             ))}
@@ -162,25 +186,29 @@ export default async function HomePage() {
       <div className="h-[1px] bg-white/[0.05]" />
 
       {/* Best Sellers (Catalog) */}
-      <section id="catalog" className="bg-[#0b101c]/40 py-28 text-cream border-y border-white/[0.05]">
+      <section id="catalog" className="relative overflow-hidden bg-[#080d18] py-16 text-cream sm:py-20 lg:py-28">
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),transparent_22%),radial-gradient(circle_at_85%_0%,rgba(245,158,11,0.12),transparent_30%)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/[0.06]" />
         <div className="shell">
           <Reveal>
-            <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between mb-14">
+            <div className="relative mb-8 grid gap-6 rounded-[28px] border border-white/[0.07] bg-white/[0.035] p-5 backdrop-blur-xl sm:mb-12 sm:p-7 md:grid-cols-[1fr_auto] md:items-end">
               <div className="max-w-2xl">
                 <p className="eyebrow text-gold">Best sellers</p>
-                <h2 className="heading-lg text-cream">Popular picks at Nutrition Hub.</h2>
-                <p className="mt-4 text-lg leading-relaxed text-cream/50">
+                <h2 className="max-w-2xl text-[clamp(2rem,5vw,4rem)] font-black leading-[0.98] tracking-tight text-cream">
+                  Popular picks at Nutrition Hub.
+                </h2>
+                <p className="mt-4 max-w-xl text-sm leading-7 text-cream/56 sm:text-base">
                   Curated products for gym-goers, coaches, students, professionals, and
                   anyone building a cleaner daily nutrition routine.
                 </p>
               </div>
-              <Link className="hidden items-center gap-2 font-black text-gold transition hover:text-mint md:inline-flex text-sm" href="/products">
-                View all products <ArrowRight size={16} />
+              <Link className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-gold/30 bg-gold/10 px-5 text-sm font-black text-gold transition hover:border-gold hover:bg-gold hover:text-ink" href="/products">
+                View all <ArrowRight size={16} />
               </Link>
             </div>
           </Reveal>
 
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="relative grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
             {featured.map((product, index) => (
               <Reveal delay={index * 0.05} key={product.id}>
                 <ProductCard product={product} />
@@ -188,10 +216,10 @@ export default async function HomePage() {
             ))}
           </div>
 
-          <div className="mt-16 text-center">
+          <div className="mt-10 text-center sm:mt-14">
             <Link 
               href="/products" 
-              className="inline-flex items-center gap-2.5 rounded-full border border-gold/40 bg-gold/5 px-8 py-4 text-base font-black uppercase tracking-wider text-gold shadow-[0_0_30px_rgba(245,158,11,0.05)] transition-all duration-300 hover:border-gold hover:bg-gold hover:text-ink hover:shadow-[0_0_40px_rgba(245,158,11,0.15)]"
+              className="inline-flex min-h-12 items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.04] px-6 text-sm font-black uppercase tracking-[0.16em] text-cream/72 shadow-[0_0_30px_rgba(245,158,11,0.05)] transition-all duration-300 hover:border-gold hover:bg-gold hover:text-ink hover:shadow-[0_0_40px_rgba(245,158,11,0.15)] sm:px-8 sm:text-base"
             >
               View All Products <ArrowRight size={18} />
             </Link>

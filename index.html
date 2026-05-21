@@ -30,7 +30,20 @@
         <button class="cart-trigger" type="button" data-open-cart>
           Cart <span data-cart-count>0</span>
         </button>
+        <button class="menu-trigger" type="button" aria-label="Toggle menu" data-toggle-menu>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="icon-menu"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="icon-close"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
+        </button>
       </nav>
+      <!-- Mobile Drawer Overlay -->
+      <div class="mobile-drawer-overlay" aria-hidden="true" data-mobile-drawer>
+        <nav class="mobile-nav">
+          <a href="#catalog">Catalog</a>
+          <a href="#performance">Performance</a>
+          <a href="#trust">Trust</a>
+          <a href="#checkout">Checkout</a>
+        </nav>
+      </div>
     </header>
 
     <main id="top">

@@ -133,6 +133,74 @@ button {
   font-size: 0.78rem;
 }
 
+.menu-trigger {
+  display: none;
+}
+
+.menu-trigger svg {
+  display: block;
+}
+
+.menu-trigger .icon-close {
+  display: none;
+}
+
+.site-header.menu-open .menu-trigger .icon-menu {
+  display: none;
+}
+
+.site-header.menu-open .menu-trigger .icon-close {
+  display: block;
+}
+
+.mobile-drawer-overlay {
+  position: absolute;
+  top: 100%;
+  left: 18px;
+  right: 18px;
+  margin-top: 8px;
+  z-index: 40;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid rgba(244, 241, 232, 0.1);
+  background: rgba(7, 17, 14, 0.95);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.mobile-drawer-overlay.open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.mobile-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  gap: 4px;
+}
+
+.mobile-nav a {
+  display: block;
+  padding: 12px 16px;
+  color: rgba(255, 250, 240, 0.8);
+  font-weight: 700;
+  font-size: 1rem;
+  border-radius: 8px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.mobile-nav a:hover {
+  background: rgba(255, 250, 240, 0.05);
+  color: #fffaf0;
+}
+
 .hero {
   min-height: 800px;
   position: relative;
@@ -766,6 +834,37 @@ h2 {
     display: none;
   }
 
+  .menu-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    width: 42px;
+    border: 1px solid rgba(244, 241, 232, 0.15);
+    border-radius: 8px;
+    background: rgba(244, 241, 232, 0.04);
+    color: #fffaf0;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .menu-trigger:hover {
+    border-color: var(--gold);
+    color: var(--gold-2);
+  }
+
+  .brand {
+    order: 1;
+  }
+
+  .cart-trigger {
+    order: 2;
+  }
+
+  .menu-trigger {
+    order: 3;
+  }
+
   .service-grid,
   .feature-band,
   .performance-grid {
@@ -803,6 +902,15 @@ h2 {
     display: none;
   }
 
+  .menu-trigger {
+    order: 2;
+  }
+
+  .cart-trigger {
+    order: 3;
+    width: 100%;
+  }
+
   .hero {
     min-height: 760px;
   }
@@ -820,8 +928,7 @@ h2 {
     font-size: clamp(3rem, 15vw, 4.5rem);
   }
 
-  .button,
-  .cart-trigger {
+  .button {
     width: 100%;
   }
 
@@ -849,5 +956,28 @@ h2 {
   .feature-band {
     padding: 18px;
     margin-bottom: 64px;
+  }
+
+  .feature-visual {
+    min-height: 280px;
+  }
+
+  .jar-one {
+    width: 100px;
+    height: 140px;
+  }
+
+  .jar-two,
+  .jar-three {
+    width: 65px;
+    height: 100px;
+  }
+
+  .jar-two {
+    left: 10%;
+  }
+
+  .jar-three {
+    right: 10%;
   }
 }
