@@ -22,9 +22,11 @@ function UserAvatar({ name, photoUrl }: { name: string; photoUrl: string | null 
   if (photoUrl) {
     const src = photoUrl.startsWith("http") ? photoUrl : `${API}${photoUrl}`;
     return (
+      // eslint-disable-next-line @next/next/no-img-element
       <img
         src={src}
         alt={name}
+        referrerPolicy="no-referrer"
         className="h-9 w-9 rounded-full object-cover ring-2 ring-gold/50"
       />
     );
