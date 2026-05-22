@@ -32,6 +32,8 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const catalogRef = useRef<HTMLDivElement>(null);
 
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       window.scrollTo(0, 0);
@@ -41,7 +43,7 @@ export default function ProductsPage() {
         setActiveCategory(cat);
       }
     }
-    fetchProducts().then(setProducts);
+    fetchProducts().then((p) => { setProducts(p); setLoading(false); });
   }, []);
 
   const categoryProducts = activeCategory === "all"
@@ -295,7 +297,20 @@ export default function ProductsPage() {
 
           {/* Product grid */}
           <div className="mt-8 sm:mt-10">
-            {filteredProducts.length > 0 ? (
+            {loading ? (
+              <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 xl:grid-cols-4">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="animate-pulse rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
+                    <div className="aspect-square bg-white/[0.04]" />
+                    <div className="p-3 sm:p-4 space-y-2.5">
+                      <div className="h-3 w-3/4 rounded bg-white/[0.06]" />
+                      <div className="h-2.5 w-1/2 rounded bg-white/[0.04]" />
+                      <div className="h-4 w-1/3 rounded bg-white/[0.06]" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : filteredProducts.length > 0 ? (
               <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 xl:grid-cols-4">
                 {filteredProducts.map((product) => (
                   <ProductCard product={product} key={product.id} />

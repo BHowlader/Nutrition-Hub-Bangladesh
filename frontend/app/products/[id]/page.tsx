@@ -1,11 +1,37 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-import { fetchProductBySlug, fetchProducts } from "@/lib/products";
+import { fetchProductBySlug, fetchProducts, formatTaka } from "@/lib/products";
 import { ProductDetailClient } from "@/components/ProductDetailClient";
 import { Header } from "@/components/Header";
 
 export const revalidate = 300;
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const product = await fetchProductBySlug(id);
+
+  if (!product) {
+    return { title: "Product Not Found | Nutrition Hub Bangladesh" };
+  }
+
+  const title = `${product.name} | Nutrition Hub Bangladesh`;
+  const description = product.description
+    ? `${product.description.slice(0, 155)}${product.description.length > 155 ? "..." : ""}`
+    : `Buy ${product.name} — ${formatTaka(product.price)} at Nutrition Hub Bangladesh. 100% authentic, delivered via Pathao.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      ...(product.image_url ? { images: [{ url: product.image_url, alt: product.name }] } : {}),
+    },
+  };
+}
 
 export async function generateStaticParams() {
   const products = await fetchProducts({ limit: 200 });

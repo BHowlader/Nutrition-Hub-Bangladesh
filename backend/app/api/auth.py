@@ -22,6 +22,7 @@ from app.core.database import get_db
 from app.core.limiter import limiter
 from app.models.user import AuthProvider, User, UserRole
 from app.schemas.user import (
+    ChangePassword,
     GoogleAuth,
     GoogleCodeExchange,
     TokenResponse,
@@ -286,6 +287,30 @@ def get_me(user: User = Depends(get_current_user)):
 def update_me(body: UserUpdate, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     for field, value in body.model_dump(exclude_unset=True).items():
         setattr(user, field, value)
+    db.commit()
+    db.refresh(user)
+    return UserOut.model_validate(user)
+
+
+@router.post("/me/change-password", response_model=UserOut)
+@limiter.limit("5/minute")
+def change_password(
+    request: Request,
+    body: ChangePassword,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    # Only email/password accounts can change password
+    if user.auth_provider != AuthProvider.email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Google accounts cannot set a password. Manage your password through Google.",
+        )
+    if not user.password_hash or not verify_password(body.current_password, user.password_hash):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Current password is incorrect")
+    user.password_hash = hash_password(body.new_password)
+    # Bump token version to invalidate other sessions
+    user.token_version = int(user.token_version or 0) + 1
     db.commit()
     db.refresh(user)
     return UserOut.model_validate(user)

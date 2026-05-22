@@ -547,6 +547,52 @@ function OrdersSection({ orders, loading }: { orders: Order[]; loading: boolean 
 }
 
 function SecuritySection({ user }: { user: { email: string; auth_provider: string; is_admin: boolean } }) {
+  const [showForm, setShowForm] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  async function handleChangePassword(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    if (newPassword.length < 8) {
+      setError("New password must be at least 8 characters.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError("New passwords do not match.");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const res = await fetch(`${API}/api/auth/me/change-password`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || "Failed to change password");
+      }
+      setSuccess("Password changed successfully. Other sessions have been signed out.");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setShowForm(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <>
       <SectionHeader title="Security" desc="Sign-in method and account information." />
@@ -555,10 +601,79 @@ function SecuritySection({ user }: { user: { email: string; auth_provider: strin
         <Row label="Sign-in method" value={user.auth_provider === "google" ? "Google" : "Email & password"} />
         <Row label="Role" value={user.is_admin ? "Administrator" : "Customer"} />
 
+        {success && (
+          <div className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-xs font-bold text-emerald-400">
+            <CheckCircle2 size={14} /> {success}
+          </div>
+        )}
+
         {user.auth_provider !== "google" && (
           <div className="rounded-xl border border-cream/10 bg-cream/[0.02] p-4">
-            <p className="text-sm font-bold text-cream">Password</p>
-            <p className="mt-1 text-xs text-cream/50">Password change isn&apos;t available yet — coming soon.</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-bold text-cream">Password</p>
+                <p className="mt-0.5 text-xs text-cream/50">Change your account password</p>
+              </div>
+              {!showForm && (
+                <button
+                  onClick={() => { setShowForm(true); setError(""); setSuccess(""); }}
+                  className="rounded-lg border border-cream/10 bg-cream/[0.04] px-3 py-1.5 text-xs font-bold text-cream/70 transition hover:border-gold/30 hover:text-cream"
+                >
+                  Change
+                </button>
+              )}
+            </div>
+
+            {showForm && (
+              <form onSubmit={handleChangePassword} className="mt-4 space-y-3">
+                {error && (
+                  <div className="flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">
+                    <AlertCircle size={13} /> {error}
+                  </div>
+                )}
+                <input
+                  type="password"
+                  placeholder="Current password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  required
+                  className="h-10 w-full rounded-lg border border-cream/10 bg-cream/[0.04] px-3 text-sm text-cream outline-none placeholder:text-cream/30 focus:border-gold/40"
+                />
+                <input
+                  type="password"
+                  placeholder="New password (min 8 chars)"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  minLength={8}
+                  className="h-10 w-full rounded-lg border border-cream/10 bg-cream/[0.04] px-3 text-sm text-cream outline-none placeholder:text-cream/30 focus:border-gold/40"
+                />
+                <input
+                  type="password"
+                  placeholder="Confirm new password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className="h-10 w-full rounded-lg border border-cream/10 bg-cream/[0.04] px-3 text-sm text-cream outline-none placeholder:text-cream/30 focus:border-gold/40"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="btn-primary min-h-[40px] flex-1 text-xs disabled:opacity-50"
+                  >
+                    {saving ? "Saving..." : "Update password"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setShowForm(false); setError(""); }}
+                    className="rounded-lg border border-cream/10 bg-cream/[0.04] px-4 text-xs font-bold text-cream/60 transition hover:text-cream"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         )}
       </div>
