@@ -217,24 +217,14 @@ export default async function HomePage() {
         <div className="shell">
           <Reveal>
             <div className="mb-7 sm:mb-12">
-              {/* Eyebrow + inline "View all" link */}
-              <div className="flex items-center justify-between gap-4">
-                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gold sm:text-xs">
-                  Best sellers
-                </p>
-                <Link
-                  href="/products"
-                  className="group inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-cream/55 transition hover:text-gold sm:text-xs"
-                >
-                  View all
-                  <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
-                </Link>
-              </div>
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gold sm:text-xs">
+                Best sellers
+              </p>
 
-              <h2 className="mt-3 max-w-2xl text-[clamp(1.75rem,7vw,4rem)] font-black leading-[1.05] tracking-tight text-cream sm:mt-4 sm:leading-[0.98]">
+              <h2 className="mt-3 max-w-2xl text-[clamp(1.75rem,7vw,4rem)] font-black leading-[1.05] tracking-tight text-cream sm:mt-4 sm:leading-[0.98] lg:max-w-[980px] xl:max-w-[1080px]">
                 Popular picks at Nutrition Hub.
               </h2>
-              <p className="mt-3 max-w-xl text-sm leading-6 text-cream/55 sm:mt-4 sm:text-base sm:leading-7">
+              <p className="mt-3 max-w-xl text-sm leading-6 text-cream/55 sm:mt-4 sm:text-base sm:leading-7 lg:max-w-[820px] xl:max-w-[920px]">
                 Curated products for gym-goers, coaches, students, professionals, and
                 anyone building a cleaner daily nutrition routine.
               </p>

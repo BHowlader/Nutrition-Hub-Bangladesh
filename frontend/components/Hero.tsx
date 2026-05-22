@@ -104,7 +104,7 @@ export function Hero({
     <>
       <section
         ref={rootRef}
-        className="relative flex min-h-[100svh] items-center overflow-hidden bg-[#04060d] pb-7 pt-[5.25rem] sm:pb-10 sm:pt-[7.25rem] md:pt-[7.75rem] lg:pb-12 lg:pt-[7.75rem]"
+        className="relative flex min-h-[100svh] items-center justify-center overflow-hidden bg-[#04060d] pb-7 pt-[7.5rem] sm:pb-10 sm:pt-[7.25rem] md:pt-[7.75rem] lg:pb-12 lg:pt-[7.75rem]"
       >
         {/* Cinematic Loader Shutter Panels */}
         {loading && (
@@ -225,7 +225,7 @@ export function Hero({
           ))}
         </div>
 
-        <div className="shell relative z-10 mx-auto grid items-start gap-6 py-2 sm:items-center sm:gap-10 sm:py-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-8 lg:py-0 xl:grid-cols-[minmax(680px,0.95fr)_minmax(0,1.05fr)]">
+        <div className="shell relative z-10 mx-auto grid items-center gap-6 py-2 sm:gap-10 sm:py-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-8 lg:py-0 xl:grid-cols-[minmax(680px,0.95fr)_minmax(0,1.05fr)]">
 
           {/* Left Column - Content */}
           <div className="flex max-w-3xl flex-col items-center text-center lg:items-start lg:text-left">
