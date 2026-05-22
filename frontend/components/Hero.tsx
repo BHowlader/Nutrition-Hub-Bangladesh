@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ArrowRight, ShieldCheck, Zap } from "lucide-react";
-import { fetchProducts, formatTaka, type Product } from "@/lib/products";
+import { fetchProducts, formatTaka, productImage, type Product } from "@/lib/products";
 
 const SKIP_HOME_LOADER_KEY = "nutrition-hub-skip-home-loader";
 
@@ -283,7 +283,7 @@ export function Hero({
                   >
                     <div className="relative aspect-square">
                       <Image
-                        src={visualProducts[0].image_url || "/images/logo.png"}
+                        src={productImage(visualProducts[0])}
                         alt={visualProducts[0].name}
                         fill
                         sizes="(max-width: 640px) 54vw, 290px"
@@ -309,7 +309,7 @@ export function Hero({
                     >
                       <div className="relative aspect-square">
                         <Image
-                          src={product.image_url || "/images/logo.png"}
+                          src={productImage(product)}
                           alt={product.name}
                           fill
                           sizes="(max-width: 640px) 42vw, 245px"
@@ -346,7 +346,7 @@ export function Hero({
                   <div className="relative aspect-square w-full overflow-hidden bg-[#050811] border-b border-white/[0.04]">
                     <div className="absolute inset-0">
                       <Image
-                        src={product.image_url || "/images/logo.png"}
+                        src={productImage(product)}
                         alt={product.name}
                         fill
                         sizes="260px"

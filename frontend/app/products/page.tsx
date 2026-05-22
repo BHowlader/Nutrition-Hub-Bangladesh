@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { ProductCard } from "@/components/ProductCard";
-import { fetchProducts, formatTaka, type Product } from "@/lib/products";
+import { fetchProducts, formatTaka, productImage, type Product } from "@/lib/products";
 import {
   ArrowRight,
   CookingPot,
@@ -184,7 +184,7 @@ export default function ProductsPage() {
 
                 <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#050811]">
                   <Image
-                    src={featuredProduct.image_url || "/images/logo.png"}
+                    src={productImage(featuredProduct)}
                     alt={featuredProduct.name}
                     fill
                     className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.04]"

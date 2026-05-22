@@ -33,6 +33,7 @@ import {
 import { useRouter } from "next/navigation";
 import { csrfHeader } from "@/lib/auth";
 import { useAdminAuth } from "@/lib/adminAuth";
+import { productImage } from "@/lib/products";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -1802,7 +1803,7 @@ function HeroSection({
                 <div className="mt-3 flex items-center gap-3 rounded-xl border border-cream/[0.06] bg-cream/[0.02] p-2.5">
                   <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-cream/[0.04]">
                     {preview.image_url ? (
-                      <Image src={preview.image_url} alt={preview.name} fill className="object-cover" sizes="48px" />
+                      <Image src={productImage(preview)} alt={preview.name} fill className="object-cover" sizes="48px" />
                     ) : (
                       <div className="grid h-full w-full place-items-center text-cream/30">
                         <ImageIcon size={16} />
@@ -1851,7 +1852,7 @@ function ProductThumb({ product }: { product: Product }) {
     );
   }
 
-  const src = product.image_url.startsWith("http") ? product.image_url : product.image_url;
+  const src = productImage(product);
   return (
     <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-cream/[0.02] border border-cream/[0.08]">
       <Image src={src} alt={product.name} fill className="object-cover" sizes="56px" />

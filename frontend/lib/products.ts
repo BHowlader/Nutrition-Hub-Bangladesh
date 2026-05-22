@@ -53,9 +53,11 @@ export function formatTaka(value: number | string) {
   return `Tk ${new Intl.NumberFormat("en-BD").format(n)}`;
 }
 
-export function productImage(p: Product): string {
-  if (!p.image_url) return "/images/logo.png";
-  return p.image_url.startsWith("http") ? p.image_url : p.image_url;
+export function productImage(p?: { image_url: string | null } | null): string {
+  if (!p || !p.image_url) return "/images/logo.png";
+  if (p.image_url.startsWith("http")) return p.image_url;
+  if (p.image_url.startsWith("/static")) return `${API}${p.image_url}`;
+  return p.image_url;
 }
 
 function productCacheKey(opts: FetchProductsOptions) {

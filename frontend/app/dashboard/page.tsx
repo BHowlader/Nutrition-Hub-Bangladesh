@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Camera,
   Package,
@@ -55,13 +55,13 @@ const statusColors: Record<string, string> = {
 const NAV_ITEMS: { key: Section; label: string; icon: typeof UserIcon; desc: string }[] = [
   { key: "profile", label: "Profile", icon: UserIcon, desc: "Name, photo & contact" },
   { key: "address", label: "Address", icon: MapPin, desc: "Delivery details" },
-  { key: "orders", label: "Orders", icon: Package, desc: "Order history" },
   { key: "security", label: "Security", icon: Lock, desc: "Account & sign-in" },
 ];
 
-export default function DashboardPage() {
+function DashboardContent() {
   const { user, loading, updateProfile, uploadPhoto, refreshUser, logout } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [section, setSection] = useState<Section>("profile");
   const [orders, setOrders] = useState<Order[]>([]);
@@ -93,6 +93,14 @@ export default function DashboardPage() {
       setAddress(user.address || "");
     }
   }, [user]);
+
+  const tabParam = searchParams.get("tab") || searchParams.get("section");
+
+  useEffect(() => {
+    if (tabParam === "orders" || tabParam === "profile" || tabParam === "address" || tabParam === "security") {
+      setSection(tabParam as Section);
+    }
+  }, [tabParam]);
 
   const fetchOrders = useCallback(async () => {
     if (!user) return;
@@ -342,6 +350,14 @@ export default function DashboardPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<PageLoading label="Loading account" />}>
+      <DashboardContent />
+    </Suspense>
   );
 }
 

@@ -8,6 +8,7 @@ import { csrfHeader, useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
 import { Header } from "@/components/Header";
 import { PageLoading } from "@/components/PageLoading";
+import { productImage } from "@/lib/products";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -141,11 +142,7 @@ export default function CartPage() {
           <div className="grid gap-6 md:grid-cols-[1fr_320px]">
             <div className="space-y-3">
               {items.map((it) => {
-                const img = it.product.image_url
-                  ? it.product.image_url.startsWith("http")
-                    ? it.product.image_url
-                    : `${API}${it.product.image_url}`
-                  : null;
+                const img = it.product.image_url ? productImage(it.product) : null;
                 const lineTotal = Number(it.product.price) * it.quantity;
                 return (
                   <div

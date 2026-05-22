@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-import { fetchProductBySlug, fetchProducts, formatTaka } from "@/lib/products";
+import { fetchProductBySlug, fetchProducts, formatTaka, productImage } from "@/lib/products";
 import { ProductDetailClient } from "@/components/ProductDetailClient";
 import { Header } from "@/components/Header";
 
@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       title,
       description,
       type: "website",
-      ...(product.image_url ? { images: [{ url: product.image_url, alt: product.name }] } : {}),
+      ...(product.image_url ? { images: [{ url: productImage(product), alt: product.name }] } : {}),
     },
   };
 }

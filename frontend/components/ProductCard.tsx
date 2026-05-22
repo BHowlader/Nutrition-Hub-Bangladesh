@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Star, ShieldCheck, ShoppingBag } from "lucide-react";
-import { formatTaka, type Product } from "@/lib/products";
+import { formatTaka, productImage, type Product } from "@/lib/products";
 
 export function ProductCard({ product }: { product: Product }) {
   const [hovered, setHovered] = useState(false);
@@ -48,7 +48,7 @@ export function ProductCard({ product }: { product: Product }) {
           }`}
         >
           <Image
-            src={product.image_url || "/images/logo.png"}
+            src={productImage(product)}
             alt={product.name}
             fill
             className="h-full w-full object-cover"

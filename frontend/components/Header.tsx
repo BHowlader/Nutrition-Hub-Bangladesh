@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { ShoppingBag, LogIn, LogOut, User as UserIcon, Menu, X } from "lucide-react";
+import { ShoppingBag, LogIn, LogOut, User as UserIcon, Menu, X, Package } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
 import { warmProductCache } from "@/lib/products";
@@ -172,6 +172,14 @@ export function Header() {
                         >
                           <UserIcon size={16} />
                           My Profile
+                        </Link>
+                        <Link
+                          href="/dashboard?tab=orders"
+                          onClick={() => setDropdownOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-cream/70 transition hover:bg-cream/5 hover:text-cream"
+                        >
+                          <Package size={16} />
+                          My Orders
                         </Link>
                         <button
                           onClick={() => {

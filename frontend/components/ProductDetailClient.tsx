@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/Header";
 import { ProductCard } from "@/components/ProductCard";
-import { formatTaka, type Product } from "@/lib/products";
+import { formatTaka, productImage, type Product } from "@/lib/products";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
 import { Reveal } from "@/components/Reveal";
@@ -76,7 +76,7 @@ export function ProductDetailClient({
 
                   <div className={`relative w-full h-full transition-transform duration-700 ease-out ${hoveredImage ? 'scale-105' : 'scale-100'}`}>
                     <Image
-                      src={product.image_url || "/images/logo.png"}
+                      src={productImage(product)}
                       alt={product.name}
                       fill
                       className="object-contain"
