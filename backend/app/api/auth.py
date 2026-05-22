@@ -1,6 +1,10 @@
+import logging
 import os
+from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse
 from uuid import uuid4
+
+from jose import JWTError, jwt
 
 import requests
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, UploadFile, status
@@ -9,6 +13,7 @@ from google.oauth2 import id_token as google_id_token
 from sqlalchemy.orm import Session
 
 from app.core.auth import (
+    ALGORITHM,
     _token_expiry_hours_for,
     clear_auth_cookie,
     create_access_token,
@@ -17,14 +22,17 @@ from app.core.auth import (
     set_auth_cookie,
     verify_password,
 )
+from app.core.email import send_password_reset_email, send_verification_email
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.limiter import limiter
 from app.models.user import AuthProvider, User, UserRole
 from app.schemas.user import (
     ChangePassword,
+    ForgotPassword,
     GoogleAuth,
     GoogleCodeExchange,
+    ResetPassword,
     TokenResponse,
     UserCreate,
     UserLogin,
@@ -68,9 +76,9 @@ def _token_response(user: User, response: Response) -> TokenResponse:
     return TokenResponse(access_token=token, user=UserOut.model_validate(user))
 
 
-@router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/register", status_code=status.HTTP_201_CREATED)
 @limiter.limit("5/minute")
-def register(request: Request, response: Response, body: UserCreate, db: Session = Depends(get_db)):
+def register(request: Request, body: UserCreate, db: Session = Depends(get_db)):
     email = body.email.lower().strip()
     # H1: prevent admin-email pre-registration lockout. Admin emails must onboard via Google OAuth only.
     if email in settings.privileged_emails:
@@ -87,11 +95,20 @@ def register(request: Request, response: Response, body: UserCreate, db: Session
         auth_provider=AuthProvider.email,
         is_admin=False,
         role=UserRole.customer,
+        email_verified=False,
     )
     db.add(user)
     db.commit()
     db.refresh(user)
-    return _token_response(user, response)
+
+    # Send verification email
+    token = _create_verification_token(user.id)
+    verify_url = f"{settings.frontend_url}/verify-email?token={token}"
+    sent = send_verification_email(email, verify_url)
+    if not sent:
+        logger.info("Email verification link (SMTP not configured): %s", verify_url)
+
+    return {"message": "Account created. Please check your email to verify your account."}
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -100,6 +117,12 @@ def login(request: Request, response: Response, body: UserLogin, db: Session = D
     user = db.query(User).filter(User.email == body.email.lower().strip()).first()
     if not user or not user.password_hash or not verify_password(body.password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+    # Block unverified email accounts
+    if user.auth_provider == AuthProvider.email and not user.email_verified:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Please verify your email before signing in. Check your inbox for the verification link.",
+        )
     # Block admin users from email/password login — must use Google OAuth
     if user.is_admin or user.role in {UserRole.editor, UserRole.admin, UserRole.owner}:
         raise HTTPException(
@@ -145,6 +168,7 @@ def _upsert_google_user(db: Session, idinfo: dict) -> User:
             email=email,
             photo_url=google_photo,
             auth_provider=AuthProvider.google,
+            email_verified=True,  # Google already verified the email
             is_admin=is_admin_email,
             role=configured_role,
         )
@@ -154,6 +178,9 @@ def _upsert_google_user(db: Session, idinfo: dict) -> User:
     else:
         # H1: upgrade an existing email/password account on verified Google sign-in.
         changed = False
+        if not user.email_verified:
+            user.email_verified = True
+            changed = True
         if user.auth_provider != AuthProvider.google:
             user.auth_provider = AuthProvider.google
             user.password_hash = None
@@ -352,3 +379,158 @@ def upload_photo(
     db.commit()
     db.refresh(user)
     return UserOut.model_validate(user)
+
+
+# ── Token helpers (verification & password reset) ─────────────────
+
+logger = logging.getLogger(__name__)
+
+VERIFY_TOKEN_EXPIRE_HOURS = 24
+RESET_TOKEN_EXPIRE_MINUTES = 30
+
+
+def _create_verification_token(user_id: str) -> str:
+    """Create a 24-hour JWT for email verification."""
+    expire = datetime.now(timezone.utc) + timedelta(hours=VERIFY_TOKEN_EXPIRE_HOURS)
+    return jwt.encode(
+        {"sub": user_id, "purpose": "email_verification", "exp": expire},
+        settings.jwt_secret,
+        algorithm=ALGORITHM,
+    )
+
+
+def _decode_verification_token(token: str) -> dict | None:
+    """Decode and validate an email-verification JWT."""
+    try:
+        payload = jwt.decode(token, settings.jwt_secret, algorithms=[ALGORITHM])
+        if payload.get("purpose") != "email_verification" or not payload.get("sub"):
+            return None
+        return payload
+    except JWTError:
+        return None
+
+
+def _create_reset_token(user_id: str, token_version: int) -> str:
+    """Create a short-lived JWT specifically for password reset."""
+    expire = datetime.now(timezone.utc) + timedelta(minutes=RESET_TOKEN_EXPIRE_MINUTES)
+    return jwt.encode(
+        {"sub": user_id, "ver": token_version, "purpose": "password_reset", "exp": expire},
+        settings.jwt_secret,
+        algorithm=ALGORITHM,
+    )
+
+
+def _decode_reset_token(token: str) -> dict | None:
+    """Decode and validate a password-reset JWT."""
+    try:
+        payload = jwt.decode(token, settings.jwt_secret, algorithms=[ALGORITHM])
+        if payload.get("purpose") != "password_reset" or not payload.get("sub"):
+            return None
+        return payload
+    except JWTError:
+        return None
+
+
+@router.post("/forgot-password", status_code=status.HTTP_200_OK)
+@limiter.limit("3/minute")
+def forgot_password(request: Request, body: ForgotPassword, db: Session = Depends(get_db)):
+    """Send a password-reset link to the user's email.
+
+    Always returns 200 to prevent email enumeration.
+    """
+    email = body.email.lower().strip()
+    user = db.query(User).filter(User.email == email).first()
+
+    if user and user.auth_provider == AuthProvider.email and user.password_hash:
+        token = _create_reset_token(user.id, int(user.token_version or 0))
+        reset_url = f"{settings.frontend_url}/reset-password?token={token}"
+        sent = send_password_reset_email(email, reset_url)
+        if not sent:
+            # SMTP not configured — log the link so dev can use it
+            logger.info("Password reset link (SMTP not configured): %s", reset_url)
+
+    return {"message": "If an account with that email exists, a reset link has been sent."}
+
+
+@router.post("/reset-password", response_model=TokenResponse)
+@limiter.limit("5/minute")
+def reset_password(request: Request, response: Response, body: ResetPassword, db: Session = Depends(get_db)):
+    """Verify the reset token and set a new password."""
+    payload = _decode_reset_token(body.token)
+    if payload is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired reset link. Please request a new one.",
+        )
+
+    user = db.query(User).filter(User.id == payload["sub"]).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid reset link.")
+
+    # Ensure token_version matches (token is invalidated if user changed password or logged out all)
+    if int(payload.get("ver", 0)) != int(user.token_version or 0):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This reset link has already been used or is no longer valid.",
+        )
+
+    user.password_hash = hash_password(body.new_password)
+    # If user reset password via email link, they've proven email ownership
+    if not user.email_verified:
+        user.email_verified = True
+    # Bump token version to invalidate the reset token and all other sessions
+    user.token_version = int(user.token_version or 0) + 1
+    db.commit()
+    db.refresh(user)
+
+    # Log the user in automatically after reset
+    return _token_response(user, response)
+
+
+# ── Email Verification ────────────────────────────────────────────
+
+
+@router.post("/verify-email", response_model=TokenResponse)
+@limiter.limit("10/minute")
+def verify_email(request: Request, response: Response, token: str, db: Session = Depends(get_db)):
+    """Verify a user's email address and log them in."""
+    payload = _decode_verification_token(token)
+    if payload is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired verification link. Please request a new one.",
+        )
+
+    user = db.query(User).filter(User.id == payload["sub"]).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid verification link.")
+
+    if user.email_verified:
+        # Already verified — just log them in
+        return _token_response(user, response)
+
+    user.email_verified = True
+    db.commit()
+    db.refresh(user)
+
+    return _token_response(user, response)
+
+
+@router.post("/resend-verification", status_code=status.HTTP_200_OK)
+@limiter.limit("3/minute")
+def resend_verification(request: Request, body: ForgotPassword, db: Session = Depends(get_db)):
+    """Resend the verification email. Uses ForgotPassword schema (just an email field).
+
+    Always returns 200 to prevent email enumeration.
+    """
+    email = body.email.lower().strip()
+    user = db.query(User).filter(User.email == email).first()
+
+    if user and user.auth_provider == AuthProvider.email and not user.email_verified:
+        token = _create_verification_token(user.id)
+        verify_url = f"{settings.frontend_url}/verify-email?token={token}"
+        sent = send_verification_email(email, verify_url)
+        if not sent:
+            logger.info("Email verification link (SMTP not configured): %s", verify_url)
+
+    return {"message": "If an unverified account with that email exists, a verification link has been sent."}

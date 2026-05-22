@@ -16,6 +16,14 @@ class Settings(BaseSettings):
     cloudinary_cloud_name: str = ""
     cloudinary_api_key: str = ""
     cloudinary_api_secret: str = ""
+    # SMTP for transactional emails (password reset, etc.)
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_from_email: str = "noreply@nutritionhubbangladesh.com"
+    smtp_from_name: str = "Nutrition Hub Bangladesh"
+    frontend_url: str = "http://localhost:3000"
 
     @property
     def is_production(self) -> bool:

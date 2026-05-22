@@ -102,11 +102,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const register = useCallback(async (name: string, email: string, password: string) => {
-    const data = await apiFetch("/api/auth/register", {
+    await apiFetch("/api/auth/register", {
       method: "POST",
       body: JSON.stringify({ name, email, password }),
     });
-    setUser(data.user);
+    // Don't set user — account needs email verification first
   }, []);
 
   const googleLogin = useCallback(async (credential: string, nonce?: string) => {

@@ -40,6 +40,7 @@ class UserOut(BaseModel):
     auth_provider: str
     is_admin: bool = False
     role: str = "customer"
+    email_verified: bool = False
 
     class Config:
         from_attributes = True
@@ -47,6 +48,15 @@ class UserOut(BaseModel):
 
 class ChangePassword(BaseModel):
     current_password: str = Field(min_length=1)
+    new_password: str = Field(min_length=8, max_length=128)
+
+
+class ForgotPassword(BaseModel):
+    email: EmailStr
+
+
+class ResetPassword(BaseModel):
+    token: str = Field(min_length=10)
     new_password: str = Field(min_length=8, max_length=128)
 
 

@@ -33,6 +33,7 @@ class User(Base):
     auth_provider: Mapped[AuthProvider] = mapped_column(SqlEnum(AuthProvider), default=AuthProvider.email)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     role: Mapped[UserRole] = mapped_column(SqlEnum(UserRole), default=UserRole.customer, nullable=False, index=True)
+    email_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     # M5: bumped on logout / role change to invalidate outstanding JWTs.
     token_version: Mapped[int] = mapped_column(default=0, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

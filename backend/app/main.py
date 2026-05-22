@@ -36,6 +36,10 @@ if settings.is_production:
         )
     if not settings.google_client_id:
         raise RuntimeError("GOOGLE_CLIENT_ID must be set in production for admin OAuth.")
+    if not settings.smtp_host or not settings.smtp_user or not settings.smtp_password:
+        raise RuntimeError(
+            "SMTP_HOST, SMTP_USER, and SMTP_PASSWORD must be set in production for transactional emails."
+        )
 
 app = FastAPI(title="Nutrition Hub Bangladesh API", version="0.1.0")
 app.state.limiter = limiter
@@ -56,6 +60,10 @@ CSRF_EXEMPT_PATHS: set[str] = {
     "/api/auth/google",
     "/api/auth/google/exchange",
     "/api/auth/logout",
+    "/api/auth/forgot-password",
+    "/api/auth/reset-password",
+    "/api/auth/verify-email",
+    "/api/auth/resend-verification",
 }
 
 
