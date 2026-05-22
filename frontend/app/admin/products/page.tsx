@@ -36,6 +36,11 @@ import { clearAdminSession } from "@/lib/adminSession";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+function resolveMediaUrl(url: string | null) {
+  if (!url) return null;
+  return url.startsWith("http") ? url : `${API}${url}`;
+}
+
 type ProductStatus = "draft" | "published" | "archived";
 type StatusFilter = ProductStatus | "all";
 type AdminTab = "products" | "orders" | "customers" | "analytics" | "audit" | "users" | "hero" | "coupons";
@@ -1451,8 +1456,8 @@ function CustomersSection({
           {filtered.map((c) => (
             <div key={c.id} className="flex items-start gap-3 p-4">
               <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-cream/[0.06] border border-cream/[0.08]">
-                {c.photo_url ? (
-                  <Image src={c.photo_url} alt={c.name} fill className="object-cover" sizes="40px" />
+                {resolveMediaUrl(c.photo_url) ? (
+                  <Image src={resolveMediaUrl(c.photo_url)!} alt={c.name} fill className="object-cover" sizes="40px" />
                 ) : (
                   <span className="absolute inset-0 grid place-items-center text-[10px] font-black text-cream/60">
                     {c.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
@@ -1518,8 +1523,8 @@ function CustomersSection({
                   <td className="pl-6 pr-4 py-4 !text-left">
                     <div className="flex items-center gap-3.5">
                       <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-cream/[0.06] border border-cream/[0.08]">
-                        {c.photo_url ? (
-                          <Image src={c.photo_url} alt={c.name} fill className="object-cover" sizes="44px" />
+                        {resolveMediaUrl(c.photo_url) ? (
+                          <Image src={resolveMediaUrl(c.photo_url)!} alt={c.name} fill className="object-cover" sizes="44px" />
                         ) : (
                           <span className="absolute inset-0 grid place-items-center text-xs font-black text-cream/60">
                             {c.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
