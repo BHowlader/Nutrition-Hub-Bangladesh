@@ -273,7 +273,7 @@ export function Hero({
             {visualProducts.length > 0 && (
               <div className="relative mx-auto mt-7 h-[clamp(210px,72vw,340px)] w-full max-w-[430px] overflow-hidden px-1 sm:mt-8 sm:h-[clamp(300px,48vw,380px)] sm:max-w-[560px] lg:hidden">
                 <div className="absolute inset-x-4 bottom-3 top-8 rounded-[2rem] border border-white/[0.06] bg-white/[0.025]" />
-                <div className="absolute left-1/2 top-0 z-30 w-[clamp(150px,54vw,250px)] -translate-x-1/2 sm:w-[clamp(230px,36vw,290px)]">
+                <div className="absolute left-1/2 top-4 z-30 w-[clamp(150px,54vw,250px)] -translate-x-1/2 sm:top-5 sm:w-[clamp(230px,36vw,290px)]">
                   <div
                     className="animate-float-1 overflow-hidden rounded-[1.35rem] border border-white/10 bg-[#0c1324] shadow-[0_28px_70px_rgba(0,0,0,0.45)] sm:rounded-3xl"
                     style={{ boxShadow: `0 28px 70px -18px ${visualProducts[0].accent || "#60A5FA"}55` }}
