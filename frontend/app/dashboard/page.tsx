@@ -152,6 +152,27 @@ function DashboardContent() {
 
   const totalSpent = orders.reduce((sum, o) => sum + Number(o.total || 0), 0);
 
+  if (section === "orders") {
+    return (
+      <div className="min-h-screen bg-ink pt-24 md:pt-28 pb-10">
+        <Header />
+        <div className="mx-auto max-w-4xl px-4">
+          <div className="mb-6">
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-cream/50 transition hover:text-gold"
+            >
+              ← Back to Account
+            </Link>
+          </div>
+          <div className="premium-card p-6 md:p-8 min-h-[500px]">
+            <OrdersSection orders={orders} loading={ordersLoading} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-ink pt-24 md:pt-28 pb-10">
       <Header />
@@ -316,11 +337,7 @@ function DashboardContent() {
               />
             )}
 
-            {section === "orders" && (
-              <OrdersSection orders={orders} loading={ordersLoading} />
-            )}
-
-            {section === "security" && (
+             {section === "security" && (
               <SecuritySection user={user} />
             )}
           </section>
