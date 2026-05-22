@@ -317,28 +317,31 @@ export default async function HomePage() {
       <div className="h-[1px] bg-white/[0.05]" />
 
       {/* Delivery & Payment */}
-      <section id="delivery" className="bg-[#0b101c]/40 py-28 border-y border-white/[0.05]">
+      <section id="delivery" className="bg-[#0b101c]/40 py-14 border-y border-white/[0.05] sm:py-20 lg:py-28">
         <div className="shell">
           <Reveal>
-            <div className="text-center max-w-2xl mx-auto mb-14">
+            <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12 lg:mb-14">
               <p className="eyebrow text-gold">Delivery & payment</p>
               <h2 className="heading-lg text-cream">Built for how Bangladesh orders.</h2>
-              <p className="mt-4 text-lg text-cream/60">
+              <p className="mt-3 text-sm leading-relaxed text-cream/60 sm:mt-4 sm:text-lg">
                 Fast ordering, phone confirmation, courier-friendly addresses, and payment
                 options customers already trust.
               </p>
             </div>
           </Reveal>
 
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
             {deliveryOptions.map(({ icon: Icon, title, text }, index) => (
               <Reveal delay={index * 0.05} key={title}>
-                <article className="rounded-2xl border border-white/[0.06] bg-[#0c1324]/40 p-7 text-center transition-all duration-300 hover:-translate-y-1 hover:border-gold/30 hover:bg-[#0c1324]/75">
-                  <div className="mx-auto mb-5 grid h-14 w-14 place-items-center rounded-xl bg-gold/10 text-gold border border-white/5">
-                    <Icon size={26} />
+                <article className="flex items-start gap-4 rounded-2xl border border-white/[0.06] bg-[#0c1324]/40 p-4 transition-all duration-300 hover:border-gold/30 hover:bg-[#0c1324]/75 sm:block sm:p-7 sm:text-center sm:hover:-translate-y-1">
+                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-white/5 bg-gold/10 text-gold sm:mx-auto sm:mb-5 sm:h-14 sm:w-14">
+                    <Icon size={22} className="sm:hidden" />
+                    <Icon size={26} className="hidden sm:block" />
                   </div>
-                  <h3 className="font-bold text-cream">{title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-cream/60">{text}</p>
+                  <div className="min-w-0 flex-1 sm:flex-none">
+                    <h3 className="font-bold text-cream">{title}</h3>
+                    <p className="mt-1 text-sm leading-relaxed text-cream/60 sm:mt-2">{text}</p>
+                  </div>
                 </article>
               </Reveal>
             ))}
