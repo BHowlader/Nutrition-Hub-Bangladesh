@@ -272,7 +272,9 @@ export function Hero({
             </div>
 
             {visualProducts.length > 0 && (
-              <div className="relative mx-auto mt-4 h-[clamp(210px,72vw,340px)] w-full max-w-[430px] overflow-hidden px-2 sm:mt-6 sm:h-[clamp(300px,48vw,380px)] sm:max-w-[560px] lg:hidden">
+              <div className="relative mx-auto mt-4 h-[clamp(220px,76vw,360px)] w-full max-w-[430px] overflow-hidden px-2 sm:mt-6 sm:h-[clamp(310px,50vw,400px)] sm:max-w-[560px] lg:hidden">
+                {/* Bottom fade so card edges blend into the page bg instead of looking like contained rectangles */}
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 h-20 bg-gradient-to-t from-[#04060d] via-[#04060d]/70 to-transparent sm:h-24" />
                 <div className="absolute left-1/2 top-4 z-30 w-[clamp(150px,54vw,250px)] -translate-x-1/2 sm:top-5 sm:w-[clamp(230px,36vw,290px)]">
                   <div
                     className="animate-float-1 overflow-hidden rounded-[1.5rem] sm:rounded-3xl"
@@ -294,7 +296,7 @@ export function Hero({
                 {visualProducts.slice(1, 3).map((product, index) => (
                   <div
                     key={product.id}
-                    className={`absolute bottom-2 w-[clamp(118px,42vw,205px)] sm:bottom-0 sm:w-[clamp(190px,30vw,245px)] ${index === 0
+                    className={`absolute -bottom-6 w-[clamp(118px,42vw,205px)] sm:-bottom-8 sm:w-[clamp(190px,30vw,245px)] ${index === 0
                         ? "left-2 z-20 -rotate-6 sm:left-3"
                         : "right-2 z-10 rotate-6 sm:right-3"
                       }`}
