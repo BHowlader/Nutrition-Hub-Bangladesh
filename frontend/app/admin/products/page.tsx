@@ -743,7 +743,7 @@ export default function AdminProductsPage() {
           )}
 
           {activeTab === "products" && (
-            <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mb-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
               <StatCard icon={Boxes} label="Total products" value={stats.total} />
               <StatCard icon={PackageCheck} label="Published" value={stats.published} />
               <StatCard icon={AlertTriangle} label="Low stock" value={stats.lowStock} />
@@ -1917,12 +1917,13 @@ function Alert({ children, tone, onClose }: { children: React.ReactNode; tone: "
 
 function StatCard({ icon: Icon, label, value }: { icon: typeof Boxes; label: string; value: number }) {
   return (
-    <article className="premium-card p-6 group hover:border-cream/20 hover:shadow-[0_0_30px_rgba(96,165,250,0.04)] hover:-translate-y-0.5 transition-all duration-300">
-      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gold/10 text-gold border border-gold/20 group-hover:scale-110 transition-transform duration-300">
-        <Icon size={18} />
+    <article className="premium-card p-4 sm:p-6 group hover:border-cream/20 hover:shadow-[0_0_30px_rgba(96,165,250,0.04)] hover:-translate-y-0.5 transition-all duration-300">
+      <div className="mb-2.5 sm:mb-4 flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl bg-gold/10 text-gold border border-gold/20 group-hover:scale-110 transition-transform duration-300">
+        <Icon size={16} className="sm:hidden" />
+        <Icon size={18} className="hidden sm:block" />
       </div>
-      <strong className="block text-3xl font-black text-cream">{value}</strong>
-      <span className="text-xs font-bold uppercase tracking-wider text-cream/40 mt-1 block">{label}</span>
+      <strong className="block text-2xl sm:text-3xl font-black text-cream">{value}</strong>
+      <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-cream/40 mt-0.5 sm:mt-1 block">{label}</span>
     </article>
   );
 }
