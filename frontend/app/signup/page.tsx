@@ -54,6 +54,8 @@ function SignupContent() {
     script.onload = () => {
       window.google?.accounts.id.initialize({
         client_id: clientId,
+        auto_select: false,
+        prompt_parent_id: googleBtnRef.current?.id,
         callback: async (response: { credential: string }) => {
           try {
             await googleLogin(response.credential);
@@ -67,10 +69,13 @@ function SignupContent() {
         window.google?.accounts.id.renderButton(googleBtnRef.current, {
           theme: "filled_black",
           size: "large",
-          width: "100%",
+          width: 360,
           text: "signup_with",
           shape: "pill",
           locale: "en",
+          click_listener: () => {
+            window.google?.accounts.id.disableAutoSelect();
+          },
         });
       }
       setGsiReady(true);
@@ -125,6 +130,7 @@ function SignupContent() {
           src="/images/signup-gym-shake.png" 
           alt="Premium Nutrition" 
           fill
+          sizes="(min-width: 1024px) 55vw, 0vw"
           priority
           className="object-cover transition-transform duration-[10000ms] hover:scale-105"
         />
@@ -171,6 +177,9 @@ function SignupContent() {
               </p>
               <p className="text-xs text-cream/40 mt-3">
                 Click the link in the email to activate your account. The link expires in 24 hours.
+              </p>
+              <p className="mt-3 rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs font-semibold leading-relaxed text-amber-100/80">
+                If you don&apos;t see it in your inbox, please check your <strong className="font-black text-amber-50">spam or junk folder</strong>.
               </p>
               <div className="mt-5 flex flex-col items-center gap-3">
                 <button

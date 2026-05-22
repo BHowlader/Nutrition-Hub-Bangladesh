@@ -158,6 +158,7 @@ export function Hero({
             src="/images/gym-bg.png"
             alt="Luxury Gymnasium Studio"
             fill
+            sizes="100vw"
             className="object-cover opacity-[0.28] -scale-x-100 scale-105"
             priority
           />
@@ -348,6 +349,7 @@ export function Hero({
                         src={product.image_url || "/images/logo.png"}
                         alt={product.name}
                         fill
+                        sizes="260px"
                         className="object-cover w-full h-full"
                         priority
                       />

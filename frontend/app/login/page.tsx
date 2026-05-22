@@ -15,6 +15,7 @@ declare global {
         id: {
           initialize: (config: Record<string, unknown>) => void;
           renderButton: (el: HTMLElement, config: Record<string, unknown>) => void;
+          disableAutoSelect: () => void;
         };
       };
     };
@@ -65,6 +66,8 @@ function LoginContent() {
     script.onload = () => {
       window.google?.accounts.id.initialize({
         client_id: clientId,
+        auto_select: false,
+        prompt_parent_id: googleBtnRef.current?.id,
         callback: async (response: { credential: string }) => {
           try {
             await googleLogin(response.credential);
@@ -78,10 +81,13 @@ function LoginContent() {
         window.google?.accounts.id.renderButton(googleBtnRef.current, {
           theme: "filled_black",
           size: "large",
-          width: "100%",
+          width: 360,
           text: "signin_with",
           shape: "pill",
           locale: "en",
+          click_listener: () => {
+            window.google?.accounts.id.disableAutoSelect();
+          },
         });
       }
       setGsiReady(true);
@@ -223,6 +229,7 @@ function LoginContent() {
           src="/images/login-protein-man.png" 
           alt="Nutrition Hub Premium" 
           fill
+          sizes="(min-width: 1024px) 55vw, 0vw"
           priority
           className="object-cover transition-transform duration-[10000ms] hover:scale-105"
         />

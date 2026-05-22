@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     smtp_port: int = 587
     smtp_user: str = ""
     smtp_password: str = ""
-    smtp_from_email: str = "noreply@nutritionhubbangladesh.com"
+    smtp_from_email: str = "nutritionhubbd001@gmail.com"
     smtp_from_name: str = "Nutrition Hub Bangladesh"
     frontend_url: str = "http://localhost:3000"
 

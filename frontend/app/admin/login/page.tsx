@@ -16,6 +16,7 @@ declare global {
         id: {
           initialize: (config: Record<string, unknown>) => void;
           renderButton: (el: HTMLElement, config: Record<string, unknown>) => void;
+          disableAutoSelect: () => void;
         };
       };
     };

@@ -157,6 +157,15 @@ def create_tables() -> None:
         conn.execute(
             text("ALTER TABLE users ADD COLUMN IF NOT EXISTS token_version INTEGER NOT NULL DEFAULT 0")
         )
+        conn.execute(
+            text("ALTER TABLE users ADD COLUMN IF NOT EXISTS auth_provider VARCHAR(20) NOT NULL DEFAULT 'email'")
+        )
+        # Existing local/prod users predate email verification, so treat them as already verified.
+        # New email/password registrations explicitly set email_verified=False in app/api/auth.py.
+        conn.execute(
+            text("ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT TRUE")
+        )
+        conn.execute(text("ALTER TABLE users ALTER COLUMN email_verified SET DEFAULT FALSE"))
         conn.execute(text("ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS ip_address VARCHAR(64)"))
         conn.execute(text("ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS user_agent VARCHAR(500)"))
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS badge VARCHAR(120)"))

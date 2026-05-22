@@ -30,6 +30,8 @@ def send_email(to: str, subject: str, html_body: str, plain_body: str) -> bool:
     msg["Reply-To"] = settings.smtp_from_email
     msg["Date"] = formatdate(localtime=True)
     msg["Message-ID"] = make_msgid(domain=settings.smtp_from_email.split("@")[-1])
+    msg["Auto-Submitted"] = "auto-generated"
+    msg["X-Auto-Response-Suppress"] = "All"
 
     # Plain text FIRST, then HTML — RFC 2046 says last part is preferred,
     # so mail clients show HTML but spam filters see we have both.
@@ -86,8 +88,8 @@ def _email_html_wrapper(content: str) -> str:
           <tr>
             <td style="padding: 20px 32px; background-color: #fafafa; border-top: 1px solid #eee; text-align: center;">
               <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 12px; color: #999; line-height: 1.5;">
-                Nutrition Hub Bangladesh &mdash; 100% Authentic Supplements<br />
-                Delivered nationwide via Pathao Courier
+                Nutrition Hub Bangladesh<br />
+                Account and security notification
               </p>
               <p style="margin: 8px 0 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 11px; color: #bbb;">
                 This is a transactional email from Nutrition Hub Bangladesh.<br />
@@ -105,14 +107,14 @@ def _email_html_wrapper(content: str) -> str:
 
 def send_verification_email(to: str, verify_url: str) -> bool:
     """Send an email verification link to a newly registered user."""
-    subject = "Verify your email - Nutrition Hub Bangladesh"
+    subject = "Verify your Nutrition Hub account"
 
     content = f"""\
               <h2 style="margin: 0 0 16px; font-size: 22px; font-weight: 800; color: #1a1a2e;">
                 Verify Your Email Address
               </h2>
               <p style="margin: 0 0 8px; font-size: 15px; color: #444; line-height: 1.6;">
-                Hi there! Thanks for creating your Nutrition Hub Bangladesh account.
+                Thanks for creating your Nutrition Hub Bangladesh account.
               </p>
               <p style="margin: 0 0 24px; font-size: 15px; color: #444; line-height: 1.6;">
                 Please confirm your email address by clicking the button below.
@@ -143,7 +145,7 @@ def send_verification_email(to: str, verify_url: str) -> bool:
     plain = f"""\
 Verify Your Email Address
 
-Hi there! Thanks for creating your Nutrition Hub Bangladesh account.
+Thanks for creating your Nutrition Hub Bangladesh account.
 
 Please confirm your email address by visiting the link below.
 This link is valid for 24 hours.
@@ -153,8 +155,8 @@ Verify here: {verify_url}
 If you didn't create an account with us, you can safely ignore this email.
 
 ---
-Nutrition Hub Bangladesh - 100% Authentic Supplements
-Delivered nationwide via Pathao Courier
+Nutrition Hub Bangladesh
+Account and security notification
 """
 
     return send_email(to, subject, html, plain)
@@ -162,7 +164,7 @@ Delivered nationwide via Pathao Courier
 
 def send_password_reset_email(to: str, reset_url: str) -> bool:
     """Send a password reset email with the given reset link."""
-    subject = "Reset your password - Nutrition Hub Bangladesh"
+    subject = "Reset your Nutrition Hub password"
 
     content = f"""\
               <h2 style="margin: 0 0 16px; font-size: 22px; font-weight: 800; color: #1a1a2e;">
@@ -212,8 +214,8 @@ If you didn't request a password reset, you can safely ignore this email.
 Your password will not be changed.
 
 ---
-Nutrition Hub Bangladesh - 100% Authentic Supplements
-Delivered nationwide via Pathao Courier
+Nutrition Hub Bangladesh
+Account and security notification
 """
 
     return send_email(to, subject, html, plain)
