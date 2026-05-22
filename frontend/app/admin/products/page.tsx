@@ -1163,7 +1163,55 @@ function OrdersSection({ orders, saving, onStatusChange }: { orders: Order[]; sa
         <h2 className="text-lg font-black text-cream">Order Management</h2>
         <p className="text-xs text-cream/40 mt-0.5">{orders.length} order(s) logged</p>
       </div>
-      <div className="overflow-x-auto scrollbar-thin">
+      {/* Mobile Card Layout */}
+      <div className="md:hidden divide-y divide-cream/[0.06]">
+        {orders.map((order) => (
+          <div key={order.id} className="p-4 space-y-2.5">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <strong className="text-sm font-bold text-cream">#{order.id.slice(0, 8)}</strong>
+                <span className="ml-2 text-[10px] font-black tracking-wider text-cream/35">{order.payment_method.toUpperCase()}</span>
+              </div>
+              <span className="text-xs font-semibold text-cream/40">
+                {order.created_at ? new Date(order.created_at).toLocaleDateString() : "Unknown"}
+              </span>
+            </div>
+            <div>
+              <strong className="text-sm text-cream font-bold">{order.customer_name}</strong>
+              <span className="block text-xs text-cream/50 mt-0.5">{order.phone}</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-cream/50">
+              <span>{order.items.reduce((sum, item) => sum + item.quantity, 0)} item(s)</span>
+              <span className="font-black text-cream">Tk {Number(order.total).toLocaleString("en-BD")}</span>
+            </div>
+            <div className="relative inline-block">
+              <select
+                value={order.status}
+                disabled={saving}
+                onChange={(e) => onStatusChange(order.id, e.target.value as OrderStatus)}
+                className="h-9 appearance-none rounded-xl border border-cream/[0.12] bg-forest/60 pl-3 pr-8 text-xs font-bold text-cream outline-none focus:border-gold/50 transition-all capitalize cursor-pointer disabled:opacity-50"
+              >
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-cream/40">
+                <svg className="h-3.5 w-3.5 fill-current" viewBox="0 0 20 20">
+                  <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        ))}
+        {orders.length === 0 && (
+          <div className="px-5 py-16 text-center text-xs font-bold text-cream/30">No orders logged yet.</div>
+        )}
+      </div>
+
+      {/* Desktop Table Layout */}
+      <div className="hidden md:block overflow-x-auto scrollbar-thin">
         <table className="w-full min-w-[980px] border-collapse text-left">
           <thead>
             <tr className="border-b border-cream/[0.08] bg-forest/40 text-[10px] uppercase tracking-wider font-black text-cream/40">
@@ -1246,19 +1294,19 @@ function OrdersSection({ orders, saving, onStatusChange }: { orders: Order[]; sa
 function AnalyticsSection({ stats, products, orders }: { stats: AdminStats | null; products: Product[]; orders: Order[] }) {
   const avgOrder = orders.length ? orders.reduce((sum, order) => sum + Number(order.total), 0) / orders.length : 0;
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
-      <div className="premium-card p-6">
-        <h2 className="text-lg font-black text-cream">Business Snapshot</h2>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+    <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+      <div className="premium-card p-4 sm:p-6">
+        <h2 className="text-base sm:text-lg font-black text-cream">Business Snapshot</h2>
+        <div className="mt-4 sm:mt-6 grid grid-cols-2 gap-3 sm:gap-4">
           <Metric label="Revenue" value={`Tk ${Number(stats?.revenue || 0).toLocaleString("en-BD")}`} />
           <Metric label="Orders" value={String(stats?.orders || 0)} />
           <Metric label="Pending orders" value={String(stats?.pending_orders || 0)} />
           <Metric label="Average order" value={`Tk ${Math.round(avgOrder).toLocaleString("en-BD")}`} />
         </div>
       </div>
-      <div className="premium-card p-6">
-        <h2 className="text-lg font-black text-cream">Inventory Health</h2>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+      <div className="premium-card p-4 sm:p-6">
+        <h2 className="text-base sm:text-lg font-black text-cream">Inventory Health</h2>
+        <div className="mt-4 sm:mt-6 grid grid-cols-2 gap-3 sm:gap-4">
           <Metric label="Products" value={String(stats?.products || products.length)} />
           <Metric label="Published" value={String(stats?.published_products || 0)} />
           <Metric label="Low stock" value={String(stats?.low_stock_products || 0)} />
@@ -1368,7 +1416,7 @@ function CustomersSection({
 
   return (
     <>
-      <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatCard icon={UserRound} label="Total customers" value={customers.length} />
         <StatCard icon={ShoppingBag} label="Customers w/ orders" value={totals.active} />
         <StatCard icon={ClipboardList} label="Total orders" value={totals.orders} />
@@ -1398,7 +1446,49 @@ function CustomersSection({
           </div>
         </div>
 
-        <div className="overflow-x-auto overscroll-none scrollbar-thin">
+        {/* Mobile Card Layout */}
+        <div className="md:hidden divide-y divide-cream/[0.06]">
+          {filtered.map((c) => (
+            <div key={c.id} className="flex items-start gap-3 p-4">
+              <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-cream/[0.06] border border-cream/[0.08]">
+                {c.photo_url ? (
+                  <Image src={c.photo_url} alt={c.name} fill className="object-cover" sizes="40px" />
+                ) : (
+                  <span className="absolute inset-0 grid place-items-center text-[10px] font-black text-cream/60">
+                    {c.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <strong className="text-sm font-bold text-cream truncate">{c.name}</strong>
+                  <button
+                    onClick={() => setSelected(c)}
+                    className="shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-lg border border-cream/[0.12] bg-cream/[0.02] text-cream/60 transition-all"
+                  >
+                    <Eye size={13} />
+                  </button>
+                </div>
+                <span className="block text-xs text-cream/40 truncate">{c.email}</span>
+                <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-cream/50">
+                  <span>Orders: <span className="font-black text-cream">{c.order_count}</span></span>
+                  <span>Spent: <span className="font-black text-gold">Tk {Number(c.total_spent).toLocaleString("en-BD")}</span></span>
+                  {c.pending_count > 0 && (
+                    <span className="font-black text-amber-400">Pending: {c.pending_count}</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+          {!loading && filtered.length === 0 && (
+            <div className="px-5 py-16 text-center text-xs font-bold text-cream/30">
+              No customers match the current search.
+            </div>
+          )}
+        </div>
+
+        {/* Desktop Table Layout */}
+        <div className="hidden md:block overflow-x-auto overscroll-none scrollbar-thin">
           <table className="w-full min-w-[920px] border-collapse text-left">
             <thead>
               <tr className="border-b border-cream/[0.08] bg-forest/40 text-[10px] uppercase tracking-wider font-black text-cream/40">
