@@ -272,14 +272,11 @@ export function Hero({
             </div>
 
             {visualProducts.length > 0 && (
-              <div className="relative mx-auto mt-4 h-[clamp(210px,72vw,340px)] w-full max-w-[430px] overflow-hidden px-1 sm:mt-6 sm:h-[clamp(300px,48vw,380px)] sm:max-w-[560px] lg:hidden">
-                {/* Symmetric edge fade so the side product cards blend out gracefully */}
-                <div className="pointer-events-none absolute inset-y-0 left-0 z-40 w-10 bg-gradient-to-r from-[#04060d] via-[#04060d]/70 to-transparent" />
-                <div className="pointer-events-none absolute inset-y-0 right-0 z-40 w-10 bg-gradient-to-l from-[#04060d] via-[#04060d]/70 to-transparent" />
+              <div className="relative mx-auto mt-4 h-[clamp(210px,72vw,340px)] w-full max-w-[430px] overflow-hidden px-2 sm:mt-6 sm:h-[clamp(300px,48vw,380px)] sm:max-w-[560px] lg:hidden">
                 <div className="absolute left-1/2 top-4 z-30 w-[clamp(150px,54vw,250px)] -translate-x-1/2 sm:top-5 sm:w-[clamp(230px,36vw,290px)]">
                   <div
-                    className="animate-float-1 overflow-hidden rounded-[1.35rem] sm:rounded-3xl"
-                    style={{ boxShadow: `0 28px 70px -18px ${visualProducts[0].accent || "#60A5FA"}55` }}
+                    className="animate-float-1 overflow-hidden rounded-[1.5rem] sm:rounded-3xl"
+                    style={{ boxShadow: `0 22px 48px -16px ${visualProducts[0].accent || "#60A5FA"}55` }}
                   >
                     <div className="relative aspect-square">
                       <Image
@@ -298,14 +295,14 @@ export function Hero({
                   <div
                     key={product.id}
                     className={`absolute bottom-2 w-[clamp(118px,42vw,205px)] sm:bottom-0 sm:w-[clamp(190px,30vw,245px)] ${index === 0
-                        ? "left-0 z-20 -rotate-6 sm:left-3"
-                        : "right-0 z-10 rotate-6 sm:right-3"
+                        ? "left-2 z-20 -rotate-6 sm:left-3"
+                        : "right-2 z-10 rotate-6 sm:right-3"
                       }`}
                   >
                     <div
                       className={`overflow-hidden rounded-[1.25rem] sm:rounded-3xl ${index === 0 ? "animate-float-2" : "animate-float-3"
                         }`}
-                      style={{ boxShadow: `0 22px 55px -18px ${product.accent || "#F59E0B"}50` }}
+                      style={{ boxShadow: `0 16px 36px -14px ${product.accent || "#F59E0B"}55` }}
                     >
                       <div className="relative aspect-square">
                         <Image
