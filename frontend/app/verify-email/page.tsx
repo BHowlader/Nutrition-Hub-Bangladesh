@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle, Loader2, XCircle } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -20,6 +21,7 @@ function VerifyEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") || "";
+  const { refreshUser } = useAuth();
 
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [error, setError] = useState("");
@@ -40,6 +42,7 @@ function VerifyEmailContent() {
         const data = await res.json().catch(() => null);
         throw new Error(data?.detail || "Verification failed");
       }
+      await refreshUser();
       setStatus("success");
       // Auto-redirect after 3 seconds (user is now logged in via cookie)
       setTimeout(() => router.replace("/"), 3000);
@@ -47,7 +50,7 @@ function VerifyEmailContent() {
       setStatus("error");
       setError(err instanceof Error ? err.message : "Verification failed");
     }
-  }, [token, router]);
+  }, [token, router, refreshUser]);
 
   useEffect(() => {
     verify();

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, CheckCircle, Eye, EyeOff, Lock } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -20,6 +21,7 @@ function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") || "";
+  const { refreshUser } = useAuth();
 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -53,6 +55,7 @@ function ResetPasswordContent() {
         const data = await res.json().catch(() => null);
         throw new Error(data?.detail || "Failed to reset password");
       }
+      await refreshUser();
       setSuccess(true);
       // Auto-redirect after 3 seconds (user is now logged in via cookie)
       setTimeout(() => router.replace("/"), 3000);
