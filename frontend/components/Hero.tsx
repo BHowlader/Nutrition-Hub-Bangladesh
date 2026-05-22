@@ -229,27 +229,28 @@ export function Hero({
 
           {/* Left Column - Content */}
           <div className="flex max-w-3xl flex-col items-start">
-            <div className="hero-badge mb-4 inline-flex max-w-full items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 backdrop-blur-md sm:mb-5 sm:px-4 sm:py-2">
+            <div className="hero-badge mb-3.5 inline-flex max-w-full items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 shadow-[0_0_24px_rgba(96,165,250,0.08)] backdrop-blur-md sm:mb-5 sm:px-4 sm:py-2">
               <span className="relative flex h-1.5 w-1.5 shrink-0 sm:h-2 sm:w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-mint opacity-75"></span>
                 <span className="relative inline-flex h-full w-full rounded-full bg-mint"></span>
               </span>
-              <span className="truncate text-[9px] font-bold uppercase tracking-[0.16em] text-cream/90 min-[390px]:text-[10px] sm:text-xs sm:tracking-wide">
+              <span className="truncate text-[9px] font-bold uppercase tracking-[0.18em] text-cream/90 min-[390px]:text-[10px] sm:text-xs sm:tracking-wide">
                 Premium Supplements Bangladesh
               </span>
             </div>
 
-            <h1 className="max-w-[10.5ch] text-[clamp(2.25rem,10.5vw,4.75rem)] font-extrabold leading-[0.98] tracking-tight text-cream sm:max-w-none sm:leading-[1.08]">
-              <span className="block">Power Your</span>
-              <span className="bg-gradient-to-r from-gold via-champagne to-mint bg-clip-text text-transparent block sm:inline">
+            <h1 className="max-w-[11ch] text-[clamp(2.35rem,10.4vw,4.75rem)] font-extrabold leading-[0.94] tracking-[-0.025em] text-cream sm:max-w-none sm:leading-[1.08] sm:tracking-tight">
+              <span className="block text-cream/95">Power Your</span>
+              <span className="block bg-gradient-to-r from-gold via-champagne to-mint bg-clip-text text-transparent drop-shadow-[0_0_28px_rgba(96,165,250,0.18)] sm:inline">
                 Performance.
               </span>
-              <span className="mt-3 block max-w-[16ch] text-[clamp(1.22rem,5.4vw,3.2rem)] font-bold leading-tight text-cream/78 sm:mt-2 sm:max-w-none">
+              <span className="mt-2.5 flex max-w-[18ch] items-center gap-2.5 text-[clamp(1.12rem,5vw,3.2rem)] font-bold leading-[1.1] tracking-[-0.01em] text-cream/72 sm:mt-2 sm:max-w-none sm:gap-0 sm:tracking-tight sm:text-cream/78">
+                <span aria-hidden className="inline-block h-px w-6 shrink-0 rounded-full bg-gradient-to-r from-gold/70 via-champagne/40 to-transparent sm:hidden" />
                 Without Compromise.
               </span>
             </h1>
 
-            <p className="hero-desc mt-4 max-w-[34rem] text-[0.9rem] leading-6 text-cream/62 sm:mt-6 sm:text-lg sm:leading-relaxed">
+            <p className="hero-desc mt-4 max-w-[34rem] text-[0.92rem] leading-[1.7] text-cream/65 sm:mt-6 sm:text-lg sm:leading-relaxed">
               {heroDescription}
             </p>
 
