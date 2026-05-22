@@ -104,7 +104,7 @@ export function Hero({
     <>
       <section
         ref={rootRef}
-        className="relative flex min-h-[100svh] items-start overflow-hidden bg-[#04060d] pb-7 pt-[5.25rem] sm:items-center sm:pb-10 sm:pt-[7.25rem] md:pt-[7.75rem] lg:pb-12 lg:pt-[7.75rem]"
+        className="relative flex min-h-[100svh] items-center overflow-hidden bg-[#04060d] pb-7 pt-[5.25rem] sm:pb-10 sm:pt-[7.25rem] md:pt-[7.75rem] lg:pb-12 lg:pt-[7.75rem]"
       >
         {/* Cinematic Loader Shutter Panels */}
         {loading && (
@@ -374,7 +374,7 @@ export function Hero({
       </section>
 
       {/* Feature Row - Sits naturally below the 100svh viewport fold */}
-      <div className="relative z-20 bg-[#04060d] py-6 border-b border-white/[0.05]">
+      <div className="relative z-20 bg-gradient-to-b from-[#04060d] to-ink py-6">
         <div className="shell">
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[11px] font-semibold text-cream/40 uppercase tracking-widest sm:gap-8 sm:text-xs">
             <div className="flex items-center gap-2">

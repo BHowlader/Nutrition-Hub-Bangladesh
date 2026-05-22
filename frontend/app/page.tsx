@@ -104,22 +104,30 @@ export default async function HomePage() {
 
       {/* Trust Strip */}
       <section id="trust" className="relative z-10 -mt-1 bg-ink">
-        <div className="shell">
-          <div className="grid gap-px overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.06] md:grid-cols-3">
+        <div className="mx-auto w-full md:w-[min(1180px,calc(100%-40px))]">
+          <div className="grid gap-px overflow-hidden bg-white/[0.06] md:grid-cols-3 md:rounded-2xl md:border md:border-white/[0.06]">
             {[
               { num: "01", title: "Authenticity first", text: "Visible batch, expiry, importer, and sealed-stock checks before dispatch.", icon: ShieldCheck },
               { num: "02", title: "Bangladesh checkout", text: "Cash on Delivery (COD) nationwide, with phone-first order confirmation.", icon: CheckCircle2 },
               { num: "03", title: "Fast delivery", text: "Dhaka priority delivery with nationwide courier support for supplement orders.", icon: Truck }
             ].map(({ num, title, text, icon: Icon }) => (
-              <article className="bg-[#0c1324] p-7 backdrop-blur-md" key={title}>
-                <div className="mb-4 flex items-center gap-3">
+              <article className="flex items-start gap-4 bg-[#0c1324] p-5 backdrop-blur-md md:block md:p-7" key={title}>
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-gold/15 md:hidden">
+                  <Icon size={20} className="text-gold" />
+                </span>
+                <div className="mb-4 hidden items-center gap-3 md:flex">
                   <span className="grid h-10 w-10 place-items-center rounded-lg bg-gold/15">
                     <Icon size={18} className="text-gold" />
                   </span>
                   <span className="text-xs font-black text-gold">{num}</span>
                 </div>
-                <h2 className="text-lg font-black text-cream">{title}</h2>
-                <p className="mt-2 text-sm leading-relaxed text-cream/55">{text}</p>
+                <div className="min-w-0 flex-1 md:flex-none">
+                  <div className="flex items-baseline gap-2">
+                    <h2 className="text-base font-black text-cream md:text-lg">{title}</h2>
+                    <span className="text-[10px] font-black tracking-wider text-gold md:hidden">{num}</span>
+                  </div>
+                  <p className="mt-1 text-sm leading-relaxed text-cream/55 md:mt-2">{text}</p>
+                </div>
               </article>
             ))}
           </div>
