@@ -17,6 +17,7 @@ ALGORITHM = "HS256"
 CUSTOMER_TOKEN_EXPIRE_HOURS = 24 * 7  # 7 days for storefront customers
 ADMIN_TOKEN_EXPIRE_HOURS = 4  # M5: short-lived sessions for admin accounts
 AUTH_COOKIE_NAME = "nhb_session"
+ADMIN_AUTH_COOKIE_NAME = "nhb_admin_session"
 
 
 def hash_password(password: str) -> str:
@@ -74,6 +75,29 @@ def clear_auth_cookie(response: Response) -> None:
     )
 
 
+def set_admin_auth_cookie(response: Response, token: str, *, max_age_seconds: int) -> None:
+    """Set the admin-specific session cookie (independent of storefront session)."""
+    response.set_cookie(
+        key=ADMIN_AUTH_COOKIE_NAME,
+        value=token,
+        max_age=max_age_seconds,
+        httponly=True,
+        secure=settings.cookie_secure,
+        samesite="lax",
+        domain=settings.cookie_domain,
+        path="/",
+    )
+
+
+def clear_admin_auth_cookie(response: Response) -> None:
+    """Clear the admin-specific session cookie without touching the storefront session."""
+    response.delete_cookie(
+        key=ADMIN_AUTH_COOKIE_NAME,
+        domain=settings.cookie_domain,
+        path="/",
+    )
+
+
 def _resolve_token(
     creds: HTTPAuthorizationCredentials | None,
     cookie_token: str | None,
@@ -121,7 +145,23 @@ def get_optional_user(
     return _user_from_token(token, db)
 
 
-def require_admin(user: User = Depends(get_current_user)) -> User:
+def get_admin_user(
+    creds: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+    admin_cookie_token: str | None = Cookie(default=None, alias=ADMIN_AUTH_COOKIE_NAME),
+    db: Session = Depends(get_db),
+) -> User:
+    """Resolve the admin session from the dedicated admin cookie.
+    This is independent of the storefront `nhb_session` cookie."""
+    token = _resolve_token(creds, admin_cookie_token)
+    if not token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin session required")
+    user = _user_from_token(token, db)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired admin session")
+    return user
+
+
+def require_admin(user: User = Depends(get_admin_user)) -> User:
     if not user.is_admin and user.role not in {UserRole.editor, UserRole.admin, UserRole.owner}:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
     return user
@@ -138,7 +178,7 @@ def require_admin_google(user: User = Depends(require_admin)) -> User:
     return user
 
 
-def require_owner(user: User = Depends(get_current_user)) -> User:
+def require_owner(user: User = Depends(get_admin_user)) -> User:
     if user.role != UserRole.owner:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Owner access required")
     return user

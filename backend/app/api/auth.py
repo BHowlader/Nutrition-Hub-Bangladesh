@@ -13,12 +13,16 @@ from google.oauth2 import id_token as google_id_token
 from sqlalchemy.orm import Session
 
 from app.core.auth import (
+    ADMIN_TOKEN_EXPIRE_HOURS,
     ALGORITHM,
     _token_expiry_hours_for,
+    clear_admin_auth_cookie,
     clear_auth_cookie,
     create_access_token,
+    get_admin_user,
     get_current_user,
     hash_password,
+    set_admin_auth_cookie,
     set_auth_cookie,
     verify_password,
 )
@@ -534,3 +538,113 @@ def resend_verification(request: Request, body: ForgotPassword, db: Session = De
             logger.info("Email verification link (SMTP not configured): %s", verify_url)
 
     return {"message": "If an unverified account with that email exists, a verification link has been sent."}
+
+
+# ── Admin-Specific Auth (independent session) ─────────────────────
+
+
+def _admin_token_response(user: User, response: Response) -> TokenResponse:
+    """Issue a JWT in the admin-specific cookie (nhb_admin_session).
+    Does NOT touch the storefront nhb_session cookie."""
+    hours = ADMIN_TOKEN_EXPIRE_HOURS
+    token = create_access_token(user.id, token_version=int(user.token_version or 0), hours=hours)
+    set_admin_auth_cookie(response, token, max_age_seconds=hours * 3600)
+    return TokenResponse(access_token=token, user=UserOut.model_validate(user))
+
+
+@router.post("/admin/login", response_model=TokenResponse)
+@limiter.limit("10/minute")
+def admin_login(
+    request: Request,
+    response: Response,
+    body: GoogleCodeExchange,
+    db: Session = Depends(get_db),
+):
+    """Admin-specific login via Google OAuth code exchange.
+    Sets the nhb_admin_session cookie (independent of storefront session)."""
+    if not settings.google_client_id or not settings.google_client_secret:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Google OAuth code flow is not configured on this server",
+        )
+
+    # Defense in depth: only accept redirect_uris whose origin we already trust.
+    parsed = urlparse(body.redirect_uri)
+    if not parsed.scheme or not parsed.netloc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Malformed redirect_uri")
+    redirect_origin = f"{parsed.scheme}://{parsed.netloc}".rstrip("/")
+    allowed_origins = {
+        item.strip().rstrip("/")
+        for item in settings.backend_cors_origins.split(",")
+        if item.strip()
+    }
+    if redirect_origin not in allowed_origins:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="redirect_uri is not on the allow-list",
+        )
+
+    try:
+        token_res = requests.post(
+            "https://oauth2.googleapis.com/token",
+            data={
+                "code": body.code,
+                "client_id": settings.google_client_id,
+                "client_secret": settings.google_client_secret,
+                "redirect_uri": body.redirect_uri,
+                "grant_type": "authorization_code",
+                "code_verifier": body.code_verifier,
+            },
+            timeout=15,
+        )
+    except requests.RequestException:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Could not reach Google token endpoint",
+        )
+
+    if not token_res.ok:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Google token exchange failed",
+        )
+
+    payload = token_res.json()
+    id_token_str = payload.get("id_token")
+    if not id_token_str:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Google response missing id_token",
+        )
+
+    idinfo = _verify_google_id_token(id_token_str, expected_nonce=body.nonce)
+    user = _upsert_google_user(db, idinfo)
+
+    # Verify user is actually an admin
+    is_admin = user.is_admin or user.role in {UserRole.editor, UserRole.admin, UserRole.owner}
+    if not is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Your account does not have admin privileges.",
+        )
+    if user.auth_provider != AuthProvider.google:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access requires Google authentication.",
+        )
+
+    return _admin_token_response(user, response)
+
+
+@router.post("/admin/logout", status_code=status.HTTP_204_NO_CONTENT)
+def admin_logout(response: Response):
+    """Clear the admin session cookie only. Storefront session is untouched."""
+    clear_admin_auth_cookie(response)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/admin/me", response_model=UserOut)
+def admin_me(user: User = Depends(get_admin_user)):
+    """Return the admin user from the admin-specific session cookie."""
+    return UserOut.model_validate(user)
+

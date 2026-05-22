@@ -31,8 +31,8 @@ import {
   LogOut,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { csrfHeader, useAuth } from "@/lib/auth";
-import { clearAdminSession } from "@/lib/adminSession";
+import { csrfHeader } from "@/lib/auth";
+import { useAdminAuth } from "@/lib/adminAuth";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -263,14 +263,13 @@ function cleanProductPayload(form: FormState) {
 }
 
 export default function AdminProductsPage() {
-  const { user, logout } = useAuth();
+  const { adminUser: user, adminLogout } = useAdminAuth();
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
 
   const handleSignOut = async () => {
     try {
-      await logout();
-      clearAdminSession();
+      await adminLogout();
       router.replace("/admin/login");
       window.setTimeout(() => {
         if (window.location.pathname !== "/admin/login") {
@@ -279,7 +278,6 @@ export default function AdminProductsPage() {
       }, 300);
     } catch (e) {
       console.error("Sign out failed", e);
-      clearAdminSession();
       window.location.replace("/admin/login");
     }
   };

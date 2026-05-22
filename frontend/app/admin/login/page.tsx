@@ -5,9 +5,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Shield, AlertCircle, Lock, ShieldCheck } from "lucide-react";
-import { useAuth } from "@/lib/auth";
+import { useAdminAuth } from "@/lib/adminAuth";
 import { PageLoading } from "@/components/PageLoading";
-import { activateAdminSession, clearAdminSession, isAdminSessionActive } from "@/lib/adminSession";
 
 declare global {
   interface Window {
@@ -48,7 +47,7 @@ async function sha256Base64Url(input: string): Promise<string> {
 }
 
 export default function AdminLoginPage() {
-  const { googleCodeExchange, logout, user, loading } = useAuth();
+  const { adminLogin, adminLogout, adminUser, adminLoading } = useAdminAuth();
   const router = useRouter();
 
   const [error, setError] = useState("");
@@ -77,26 +76,22 @@ export default function AdminLoginPage() {
         }
 
         const redirectUri = window.location.origin + "/admin/login";
-        const loggedUser = await googleCodeExchange({ code, code_verifier: codeVerifier, redirect_uri: redirectUri, nonce });
+        const loggedUser = await adminLogin({ code, code_verifier: codeVerifier, redirect_uri: redirectUri, nonce });
         const isAdmin =
           loggedUser.is_admin || ["admin", "owner", "editor"].includes(loggedUser.role);
 
         if (!isAdmin) {
-          await logout();
-          clearAdminSession();
+          await adminLogout();
           setError(
             "Access Denied: Your Google account is not registered as an administrator. Please contact the system owner."
           );
         } else if (loggedUser.auth_provider !== "google") {
-          await logout();
-          clearAdminSession();
+          await adminLogout();
           setError("Security Policy: Admin accounts must authenticate using Google OAuth.");
         } else {
-          activateAdminSession();
           router.replace("/admin/products");
         }
       } catch (err) {
-        clearAdminSession();
         setError(
           err instanceof Error
             ? err.message
@@ -106,7 +101,7 @@ export default function AdminLoginPage() {
         setAuthenticating(false);
       }
     },
-    [googleCodeExchange, logout, router]
+    [adminLogin, adminLogout, router]
   );
 
   // Parse ?code=&state= from the OAuth redirect (Authorization Code flow).
@@ -135,7 +130,7 @@ export default function AdminLoginPage() {
 
   // Session verification and redirection logic
   useEffect(() => {
-    if (loading || authenticating) return;
+    if (adminLoading || authenticating) return;
 
     // If returning from Google OAuth (?code=&state=), let that flow complete
     if (typeof window !== "undefined") {
@@ -143,29 +138,20 @@ export default function AdminLoginPage() {
       if (u.searchParams.has("code") && u.searchParams.has("state")) return;
     }
 
-    if (user) {
-      const isAdmin = user.is_admin || ["editor", "admin", "owner"].includes(user.role);
-      const isGoogle = user.auth_provider === "google";
-      const isSessionActive = isAdminSessionActive();
+    if (adminUser) {
+      const isAdmin = adminUser.is_admin || ["editor", "admin", "owner"].includes(adminUser.role);
+      const isGoogle = adminUser.auth_provider === "google";
 
-      if (isAdmin && isGoogle && isSessionActive) {
+      if (isAdmin && isGoogle) {
         router.replace("/admin/products");
       } else if (!isAdmin) {
-        clearAdminSession();
-        logout();
+        adminLogout();
       } else if (!isGoogle) {
-        clearAdminSession();
-        logout();
+        adminLogout();
         setError("Security Policy: Admin accounts must authenticate using Google OAuth.");
-      } else {
-        activateAdminSession();
-        router.replace("/admin/products");
       }
-    } else {
-      // Guest user -> clear session state cleanly
-      clearAdminSession();
     }
-  }, [user, loading, authenticating, router, logout]);
+  }, [adminUser, adminLoading, authenticating, router, adminLogout]);
 
   const handleCustomGoogleLogin = async () => {
     setError("");
@@ -201,7 +187,7 @@ export default function AdminLoginPage() {
     window.location.href = googleAuthUrl;
   };
 
-  if (loading) return <PageLoading label="Verifying session" />;
+  if (adminLoading) return <PageLoading label="Verifying session" />;
 
   return (
     <div className="flex min-h-screen w-screen items-center justify-center bg-gradient-to-br from-ink via-forest to-ink px-4 py-12 relative overflow-hidden select-none">
@@ -312,6 +298,7 @@ export default function AdminLoginPage() {
             <li>Google OAuth is strictly mandated for console access</li>
             <li>Plain email / password access paths are inactive</li>
             <li>All administrative session changes are recorded</li>
+            <li>Admin session is independent of storefront login</li>
           </ul>
         </div>
 

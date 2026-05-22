@@ -64,6 +64,8 @@ CSRF_EXEMPT_PATHS: set[str] = {
     "/api/auth/reset-password",
     "/api/auth/verify-email",
     "/api/auth/resend-verification",
+    "/api/auth/admin/login",
+    "/api/auth/admin/logout",
 }
 
 
