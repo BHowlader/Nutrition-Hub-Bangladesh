@@ -132,7 +132,7 @@ export function Header() {
             onFocus={prefetchCartTarget}
             onMouseEnter={prefetchCartTarget}
             aria-label={user ? `Cart with ${totalCount} ${totalCount === 1 ? "item" : "items"}` : "Cart"}
-            className="relative inline-flex min-h-10 w-10 items-center justify-center gap-1.5 rounded-lg bg-cream text-sm font-black text-ink sm:min-h-11 sm:w-auto sm:gap-2 sm:px-4 sm:text-base"
+            className="relative inline-flex min-h-10 w-10 items-center justify-center gap-1.5 rounded-lg text-cream transition hover:text-champagne sm:min-h-11 sm:w-auto sm:gap-2 sm:bg-cream sm:px-4 sm:text-base sm:font-black sm:text-ink sm:hover:text-ink"
           >
             <ShoppingBag size={18} />
             <span className="hidden sm:inline">Cart</span>
@@ -190,7 +190,7 @@ export function Header() {
               ) : (
                 <Link
                   href="/login"
-                  className="inline-flex min-h-10 w-10 items-center justify-center gap-2 rounded-lg border border-cream/15 bg-cream/[0.04] font-bold text-cream transition hover:border-gold/50 hover:text-champagne sm:min-h-11 sm:w-auto sm:px-4"
+                  className="inline-flex min-h-10 w-10 items-center justify-center gap-2 rounded-lg font-bold text-cream transition hover:text-champagne sm:min-h-11 sm:w-auto sm:border sm:border-cream/15 sm:bg-cream/[0.04] sm:px-4 sm:hover:border-gold/50"
                 >
                   <LogIn size={18} />
                   <span className="hidden sm:inline">Login</span>

@@ -193,7 +193,7 @@ export function Hero({
         </div>
 
         {/* Laser scans running down vertical grid lines */}
-        <div className="absolute inset-0 pointer-events-none z-0">
+        <div className="absolute inset-0 pointer-events-none z-0 hidden sm:block">
           <div className="absolute left-[15%] top-0 h-full w-[1px] bg-white/[0.01]">
             <div className="animate-laser absolute h-[250px] w-full bg-gradient-to-b from-transparent via-gold/30 to-transparent" style={{ animationDuration: '7s' }} />
           </div>
@@ -250,7 +250,7 @@ export function Hero({
               </span>
             </h1>
 
-            <p className="hero-desc mt-4 max-w-[34rem] text-[0.92rem] leading-[1.7] text-cream/65 sm:mt-6 sm:text-lg sm:leading-relaxed">
+            <p className="hero-desc mt-4 max-w-[34rem] text-[0.92rem] leading-[1.7] text-cream/80 sm:mt-6 sm:text-lg sm:leading-relaxed">
               {heroDescription}
             </p>
 
@@ -272,11 +272,13 @@ export function Hero({
             </div>
 
             {visualProducts.length > 0 && (
-              <div className="relative mx-auto mt-7 h-[clamp(210px,72vw,340px)] w-full max-w-[430px] overflow-hidden px-1 sm:mt-8 sm:h-[clamp(300px,48vw,380px)] sm:max-w-[560px] lg:hidden">
-                <div className="absolute inset-x-4 bottom-3 top-8 rounded-[2rem] border border-white/[0.06] bg-white/[0.025]" />
+              <div className="relative mx-auto mt-4 h-[clamp(210px,72vw,340px)] w-full max-w-[430px] overflow-hidden px-1 sm:mt-6 sm:h-[clamp(300px,48vw,380px)] sm:max-w-[560px] lg:hidden">
+                {/* Symmetric edge fade so the side product cards blend out gracefully */}
+                <div className="pointer-events-none absolute inset-y-0 left-0 z-40 w-10 bg-gradient-to-r from-[#04060d] via-[#04060d]/70 to-transparent" />
+                <div className="pointer-events-none absolute inset-y-0 right-0 z-40 w-10 bg-gradient-to-l from-[#04060d] via-[#04060d]/70 to-transparent" />
                 <div className="absolute left-1/2 top-4 z-30 w-[clamp(150px,54vw,250px)] -translate-x-1/2 sm:top-5 sm:w-[clamp(230px,36vw,290px)]">
                   <div
-                    className="animate-float-1 overflow-hidden rounded-[1.35rem] border border-white/10 bg-[#0c1324] shadow-[0_28px_70px_rgba(0,0,0,0.45)] sm:rounded-3xl"
+                    className="animate-float-1 overflow-hidden rounded-[1.35rem] sm:rounded-3xl"
                     style={{ boxShadow: `0 28px 70px -18px ${visualProducts[0].accent || "#60A5FA"}55` }}
                   >
                     <div className="relative aspect-square">
@@ -301,7 +303,7 @@ export function Hero({
                       }`}
                   >
                     <div
-                      className={`overflow-hidden rounded-[1.25rem] border border-white/10 bg-[#0c1324] shadow-[0_22px_55px_rgba(0,0,0,0.38)] sm:rounded-3xl ${index === 0 ? "animate-float-2" : "animate-float-3"
+                      className={`overflow-hidden rounded-[1.25rem] sm:rounded-3xl ${index === 0 ? "animate-float-2" : "animate-float-3"
                         }`}
                       style={{ boxShadow: `0 22px 55px -18px ${product.accent || "#F59E0B"}50` }}
                     >
