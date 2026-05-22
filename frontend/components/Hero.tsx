@@ -228,7 +228,7 @@ export function Hero({
         <div className="shell relative z-10 mx-auto grid items-start gap-6 py-2 sm:items-center sm:gap-10 sm:py-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-8 lg:py-0 xl:grid-cols-[minmax(680px,0.95fr)_minmax(0,1.05fr)]">
 
           {/* Left Column - Content */}
-          <div className="flex max-w-3xl flex-col items-start">
+          <div className="flex max-w-3xl flex-col items-center text-center lg:items-start lg:text-left">
             <div className="hero-badge mb-3.5 inline-flex max-w-full items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 shadow-[0_0_24px_rgba(96,165,250,0.08)] backdrop-blur-md sm:mb-5 sm:px-4 sm:py-2">
               <span className="relative flex h-1.5 w-1.5 shrink-0 sm:h-2 sm:w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-mint opacity-75"></span>
@@ -244,8 +244,8 @@ export function Hero({
               <span className="block bg-gradient-to-r from-gold via-champagne to-mint bg-clip-text text-transparent drop-shadow-[0_0_28px_rgba(96,165,250,0.18)] sm:inline">
                 Performance.
               </span>
-              <span className="mt-2.5 flex max-w-[18ch] items-center gap-2.5 text-[clamp(1.12rem,5vw,3.2rem)] font-bold leading-[1.1] tracking-[-0.01em] text-cream/72 sm:mt-2 sm:max-w-none sm:gap-0 sm:tracking-tight sm:text-cream/78">
-                <span aria-hidden className="inline-block h-px w-6 shrink-0 rounded-full bg-gradient-to-r from-gold/70 via-champagne/40 to-transparent sm:hidden" />
+              <span className="mt-2.5 flex max-w-[18ch] items-center justify-center gap-2.5 text-[clamp(1.12rem,5vw,3.2rem)] font-bold leading-[1.1] tracking-[-0.01em] text-cream/72 sm:mt-2 sm:max-w-none sm:tracking-tight sm:text-cream/78 lg:justify-start lg:gap-0">
+                <span aria-hidden className="inline-block h-px w-6 shrink-0 rounded-full bg-gradient-to-r from-gold/70 via-champagne/40 to-transparent lg:hidden" />
                 Without Compromise.
               </span>
             </h1>
