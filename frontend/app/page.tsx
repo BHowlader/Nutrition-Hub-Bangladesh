@@ -418,28 +418,30 @@ export default async function HomePage() {
       {/* Footer */}
       <footer className="border-t border-white/[0.05] bg-[#0c1324] pb-8 pt-12 text-cream sm:pt-14 md:pt-16">
         <div className="shell">
-          {/* Brand block — centered on mobile/sm, left-aligned on md+ */}
-          <div className="text-center md:text-left">
-            <span className="inline-flex items-center gap-3 text-left">
-              <Image
-                src="/images/logo.png"
-                alt="Nutrition Hub Bangladesh Logo"
-                width={44}
-                height={44}
-                className="h-10 w-10 shrink-0 rounded-lg border border-white/5 object-contain shadow-md sm:h-11 sm:w-11"
-              />
-              <strong className="text-base font-black leading-tight text-cream sm:text-xl">
-                Nutrition Hub
-                <span className="mt-0.5 block text-[10px] font-bold uppercase tracking-wider text-cream/40 sm:text-xs">
-                  Bangladesh
-                </span>
-              </strong>
-            </span>
-            <p className="mx-auto mt-5 max-w-md text-[13px] leading-relaxed text-cream/55 sm:text-sm md:mx-0">
-              Premium supplement storefront for authentic sports nutrition, wellness,
-              and goal-based product guidance in Bangladesh.
-            </p>
-            <div className="mt-5 flex items-center justify-center gap-3 md:justify-start">
+          {/* Brand block + Social icons row */}
+          <div className="flex flex-col items-center gap-5 text-center md:flex-row md:items-center md:justify-between md:text-left">
+            <div>
+              <span className="inline-flex items-center gap-3 text-left">
+                <Image
+                  src="/images/logo.png"
+                  alt="Nutrition Hub Bangladesh Logo"
+                  width={44}
+                  height={44}
+                  className="h-10 w-10 shrink-0 rounded-lg border border-white/5 object-contain shadow-md sm:h-11 sm:w-11"
+                />
+                <strong className="text-base font-black leading-tight text-cream sm:text-xl">
+                  Nutrition Hub
+                  <span className="mt-0.5 block text-[10px] font-bold uppercase tracking-wider text-cream/40 sm:text-xs">
+                    Bangladesh
+                  </span>
+                </strong>
+              </span>
+              <p className="mx-auto mt-5 max-w-md text-[13px] leading-relaxed text-cream/55 sm:text-sm md:mx-0">
+                Premium supplement storefront for authentic sports nutrition, wellness,
+                and goal-based product guidance in Bangladesh.
+              </p>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
               <a href="https://www.facebook.com/share/18WRSVF1Ch/" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-cream/50 transition-all hover:border-[#1877F2]/40 hover:bg-[#1877F2]/10 hover:text-[#1877F2]">
                 <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4"><path d="M9.198 21.5h4v-8.01h3.604l.396-3.98h-4V7.5a1 1 0 0 1 1-1h3v-4h-3a5 5 0 0 0-5 5v2.01h-2l-.396 3.98h2.396v8.01Z" /></svg>
               </a>
