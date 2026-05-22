@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { PageLoading } from "@/components/PageLoading";
 
-import { isAdminSessionActive } from "@/lib/adminSession";
+import { clearAdminSession, isAdminSessionActive } from "@/lib/adminSession";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const { user, loading, logout } = useAuth();
@@ -54,18 +54,16 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     const isAdmin = user.is_admin || ["editor", "admin", "owner"].includes(user.role);
     if (!isAdmin) {
       setRedirecting(true);
-      logout().then(() => {
-        redirectToAdminLogin();
-      });
+      clearAdminSession();
+      redirectToAdminLogin();
       return;
     }
 
     // Security enforcement: admin must have used Google auth
     if (user.auth_provider !== "google") {
       setRedirecting(true);
-      logout().then(() => {
-        redirectToAdminLogin();
-      });
+      clearAdminSession();
+      redirectToAdminLogin();
       return;
     }
 
