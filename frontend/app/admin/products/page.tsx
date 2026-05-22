@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, Fragment } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -29,6 +29,8 @@ import {
   Users,
   X,
   LogOut,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { csrfHeader } from "@/lib/auth";
@@ -103,6 +105,9 @@ interface OrderItem {
   product_id: string;
   quantity: number;
   unit_price: string;
+  product_name?: string | null;
+  product_image_url?: string | null;
+  product_slug?: string | null;
 }
 
 interface Order {
@@ -1160,55 +1165,166 @@ function CouponsSection({
   );
 }
 
+const statusColors: Record<string, string> = {
+  pending: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+  confirmed: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+  shipped: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+  delivered: "bg-green-500/20 text-green-400 border-green-500/30",
+  cancelled: "bg-red-500/20 text-red-400 border-red-500/30",
+};
+
 function OrdersSection({ orders, saving, onStatusChange }: { orders: Order[]; saving: boolean; onStatusChange: (id: string, status: OrderStatus) => void }) {
+  const [expandedOrders, setExpandedOrders] = useState<Record<string, boolean>>({});
+
+  const toggleOrder = (orderId: string) => {
+    setExpandedOrders((prev) => ({
+      ...prev,
+      [orderId]: !prev[orderId],
+    }));
+  };
+
   return (
     <div className="premium-card overflow-hidden">
       <div className="border-b border-cream/[0.08] p-5">
         <h2 className="text-lg font-black text-cream">Order Management</h2>
         <p className="text-xs text-cream/40 mt-0.5">{orders.length} order(s) logged</p>
       </div>
+      
       {/* Mobile Card Layout */}
       <div className="md:hidden divide-y divide-cream/[0.06]">
-        {orders.map((order) => (
-          <div key={order.id} className="p-4 space-y-2.5">
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <strong className="text-sm font-bold text-cream">#{order.id.slice(0, 8)}</strong>
-                <span className="ml-2 text-[10px] font-black tracking-wider text-cream/35">{order.payment_method.toUpperCase()}</span>
+        {orders.map((order) => {
+          const isExpanded = !!expandedOrders[order.id];
+          const statusClass = statusColors[order.status] || "border-cream/20 bg-cream/10 text-cream/60";
+
+          return (
+            <div
+              key={order.id}
+              className="p-4 space-y-3 cursor-pointer hover:bg-cream/[0.01] transition-colors"
+              onClick={() => toggleOrder(order.id)}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-cream/45">
+                    {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  </span>
+                  <div>
+                    <strong className="text-sm font-bold text-cream">#{order.id.slice(0, 8).toUpperCase()}</strong>
+                    <span className="ml-2 text-[10px] font-black tracking-wider text-cream/35">{order.payment_method.toUpperCase()}</span>
+                  </div>
+                </div>
+                <span className="text-xs font-semibold text-cream/40">
+                  {order.created_at ? new Date(order.created_at).toLocaleDateString() : "Unknown"}
+                </span>
               </div>
-              <span className="text-xs font-semibold text-cream/40">
-                {order.created_at ? new Date(order.created_at).toLocaleDateString() : "Unknown"}
-              </span>
-            </div>
-            <div>
-              <strong className="text-sm text-cream font-bold">{order.customer_name}</strong>
-              <span className="block text-xs text-cream/50 mt-0.5">{order.phone}</span>
-            </div>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-cream/50">
-              <span>{order.items.reduce((sum, item) => sum + item.quantity, 0)} item(s)</span>
-              <span className="font-black text-cream">Tk {Number(order.total).toLocaleString("en-BD")}</span>
-            </div>
-            <div className="relative inline-block">
-              <select
-                value={order.status}
-                disabled={saving}
-                onChange={(e) => onStatusChange(order.id, e.target.value as OrderStatus)}
-                className="h-9 appearance-none rounded-xl border border-cream/[0.12] bg-forest/60 pl-3 pr-8 text-xs font-bold text-cream outline-none focus:border-gold/50 transition-all capitalize cursor-pointer disabled:opacity-50"
-              >
-                <option value="pending">Pending</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="shipped">Shipped</option>
-                <option value="delivered">Delivered</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-              <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-cream/40">
-                <svg className="h-3.5 w-3.5 fill-current" viewBox="0 0 20 20">
-                  <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                </svg>
+
+              <div className="flex justify-between items-start gap-4">
+                <div>
+                  <strong className="text-sm text-cream font-bold">{order.customer_name}</strong>
+                  <span className="block text-xs text-cream/50 mt-0.5">{order.phone}</span>
+                </div>
+                <div className="relative inline-block" onClick={(e) => e.stopPropagation()}>
+                  <select
+                    value={order.status}
+                    disabled={saving}
+                    onChange={(e) => onStatusChange(order.id, e.target.value as OrderStatus)}
+                    className={`h-8 appearance-none rounded-lg border pl-2.5 pr-7 text-[10px] font-black uppercase tracking-wider outline-none transition-all duration-300 disabled:opacity-50 cursor-pointer ${statusClass}`}
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                  <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-cream/40">
+                    <svg className="h-3 w-3 fill-current" viewBox="0 0 20 20">
+                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                    </svg>
+                  </div>
+                </div>
               </div>
+
+              <div className="flex justify-between items-center text-xs border-t border-cream/[0.04] pt-2.5">
+                <span className="text-cream/50">{order.items.reduce((sum, item) => sum + item.quantity, 0)} item(s)</span>
+                <span className="font-black text-gold">Tk {Number(order.total).toLocaleString("en-BD")}</span>
+              </div>
+
+              {/* Collapsible Mobile Details */}
+              {isExpanded && (
+                <div className="mt-4 pt-4 border-t border-dashed border-cream/[0.08] space-y-4" onClick={(e) => e.stopPropagation()}>
+                  {/* Products List */}
+                  <div className="space-y-2">
+                    <h5 className="text-[10px] font-black uppercase tracking-wider text-gold/80">Items</h5>
+                    <div className="divide-y divide-cream/[0.06] border border-cream/[0.06] rounded-xl bg-cream/[0.01] overflow-hidden">
+                      {order.items.map((item, idx) => {
+                        const imgUrl = productImage({ image_url: item.product_image_url || null });
+                        const hasSlug = !!item.product_slug;
+
+                        const ItemContent = (
+                          <div className="flex items-center gap-3 p-3">
+                            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-cream/[0.08] bg-cream/[0.02]">
+                              <img
+                                src={imgUrl}
+                                alt={item.product_name || "Product"}
+                                className="h-full w-full object-cover"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-bold text-cream truncate">
+                                {item.product_name || `Product (${item.product_id.slice(0, 8)})`}
+                              </p>
+                              <p className="text-[10px] text-cream/40 mt-0.5">
+                                Tk {Number(item.unit_price).toLocaleString()} × {item.quantity}
+                              </p>
+                            </div>
+                            <span className="text-xs font-extrabold text-gold shrink-0">
+                              Tk {(Number(item.unit_price) * item.quantity).toLocaleString()}
+                            </span>
+                          </div>
+                        );
+
+                        return hasSlug ? (
+                          <Link
+                            key={idx}
+                            href={`/products/${item.product_slug}`}
+                            target="_blank"
+                            className="block group"
+                          >
+                            {ItemContent}
+                          </Link>
+                        ) : (
+                          <div key={idx}>{ItemContent}</div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Delivery address & financial breakdown for mobile */}
+                  <div className="rounded-xl border border-cream/[0.06] bg-cream/[0.01] p-3 text-[11px] space-y-2 text-cream/70">
+                    <div>
+                      <span className="text-[9px] font-black uppercase tracking-wider text-cream/30 block">Address</span>
+                      <p className="text-cream/80 mt-0.5 leading-normal whitespace-pre-wrap">{order.address}</p>
+                    </div>
+                    <div className="h-px bg-cream/[0.06] my-1" />
+                    <div className="flex justify-between text-cream/50">
+                      <span>Subtotal</span>
+                      <span className="text-cream">Tk {Number(order.subtotal || 0).toLocaleString()}</span>
+                    </div>
+                    {order.coupon_code && (
+                      <div className="flex justify-between text-cream/50">
+                        <span>Discount ({order.coupon_code})</span>
+                        <span className="text-red-400">- Tk {Number(order.discount_amount || 0).toLocaleString()}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between font-black text-cream pt-1 border-t border-cream/[0.04]">
+                      <span className="text-gold">Total</span>
+                      <span className="text-gold">Tk {Number(order.total).toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
         {orders.length === 0 && (
           <div className="px-5 py-16 text-center text-xs font-bold text-cream/30">No orders logged yet.</div>
         )}
@@ -1219,8 +1335,8 @@ function OrdersSection({ orders, saving, onStatusChange }: { orders: Order[]; sa
         <table className="w-full min-w-[980px] border-collapse text-left">
           <thead>
             <tr className="border-b border-cream/[0.08] bg-forest/40 text-[10px] uppercase tracking-wider font-black text-cream/40">
-              <th className="w-[15%] pl-6 pr-4 py-3.5 text-left">Order</th>
-              <th className="w-[30%] px-4 py-3.5 text-left">Customer</th>
+              <th className="w-[18%] pl-6 pr-4 py-3.5 text-left">Order</th>
+              <th className="w-[28%] px-4 py-3.5 text-left">Customer</th>
               <th className="w-[12%] px-4 py-3.5">
                 <div className="flex justify-center">Items</div>
               </th>
@@ -1230,59 +1346,190 @@ function OrdersSection({ orders, saving, onStatusChange }: { orders: Order[]; sa
               <th className="w-[13%] px-4 py-3.5">
                 <div className="flex justify-center">Status</div>
               </th>
-              <th className="w-[15%] pl-4 pr-6 py-3.5 text-right">Created</th>
+              <th className="w-[14%] pl-4 pr-6 py-3.5 text-right">Created</th>
             </tr>
           </thead>
           <tbody>
-            {orders.map((order) => (
-              <tr key={order.id} className="border-b border-cream/[0.04] align-middle hover:bg-cream/[0.02] transition-colors duration-150">
-                <td className="pl-6 pr-4 py-4 !text-left">
-                  <strong className="block text-sm text-cream font-bold">#{order.id.slice(0, 8)}</strong>
-                  <span className="text-[10px] font-black tracking-wider text-cream/35 mt-0.5">{order.payment_method.toUpperCase()}</span>
-                </td>
-                <td className="px-4 py-4 !text-left">
-                  <strong className="block text-sm text-cream font-bold">{order.customer_name}</strong>
-                  <span className="block text-xs text-cream/50 mt-0.5">{order.phone}</span>
-                  <span className="block max-w-[260px] truncate text-xs text-cream/30 mt-0.5">{order.address}</span>
-                </td>
-                <td className="px-4 py-4 text-xs font-bold text-cream/70">
-                  <div className="flex justify-center">
-                    {order.items.reduce((sum, item) => sum + item.quantity, 0)}
-                  </div>
-                </td>
-                <td className="px-4 py-4 text-sm font-black text-cream">
-                  <div className="flex justify-center">
-                    Tk {Number(order.total).toLocaleString("en-BD")}
-                  </div>
-                </td>
-                <td className="px-4 py-4">
-                  <div className="flex justify-center">
-                    <div className="relative inline-block text-left">
-                      <select
-                        value={order.status}
-                        disabled={saving}
-                        onChange={(e) => onStatusChange(order.id, e.target.value as OrderStatus)}
-                        className="h-9 appearance-none rounded-xl border border-cream/[0.12] bg-forest/60 pl-3 pr-8 text-xs font-bold text-cream outline-none focus:border-gold/50 focus:ring-4 focus:ring-gold/10 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed capitalize cursor-pointer"
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="confirmed">Confirmed</option>
-                        <option value="shipped">Shipped</option>
-                        <option value="delivered">Delivered</option>
-                        <option value="cancelled">Cancelled</option>
-                      </select>
-                      <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-cream/40">
-                        <svg className="h-3.5 w-3.5 fill-current" viewBox="0 0 20 20">
-                          <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                        </svg>
+            {orders.map((order) => {
+              const isExpanded = !!expandedOrders[order.id];
+              const statusClass = statusColors[order.status] || "border-cream/20 bg-cream/10 text-cream/60";
+
+              return (
+                <Fragment key={order.id}>
+                  <tr
+                    className="border-b border-cream/[0.04] align-middle hover:bg-cream/[0.02] transition-colors duration-150 cursor-pointer select-none"
+                    onClick={() => toggleOrder(order.id)}
+                  >
+                    <td className="pl-6 pr-4 py-4 !text-left">
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-cream/40">
+                          {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        </span>
+                        <div>
+                          <strong className="block text-sm text-cream font-bold">#{order.id.slice(0, 8).toUpperCase()}</strong>
+                          <span className="text-[10px] font-black tracking-wider text-cream/35 mt-0.5">{order.payment_method.toUpperCase()}</span>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="pl-4 pr-6 py-4 text-xs font-semibold text-cream/40 text-right">
-                  {order.created_at ? new Date(order.created_at).toLocaleString() : "Unknown"}
-                </td>
-              </tr>
-            ))}
+                    </td>
+                    <td className="px-4 py-4 !text-left">
+                      <strong className="block text-sm text-cream font-bold">{order.customer_name}</strong>
+                      <span className="block text-xs text-cream/50 mt-0.5">{order.phone}</span>
+                      <span className="block max-w-[260px] truncate text-xs text-cream/30 mt-0.5">{order.address}</span>
+                    </td>
+                    <td className="px-4 py-4 text-xs font-bold text-cream/70">
+                      <div className="flex justify-center">
+                        {order.items.reduce((sum, item) => sum + item.quantity, 0)}
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 text-sm font-black text-cream">
+                      <div className="flex justify-center">
+                        Tk {Number(order.total).toLocaleString("en-BD")}
+                      </div>
+                    </td>
+                    <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex justify-center">
+                        <div className="relative inline-block text-left">
+                          <select
+                            value={order.status}
+                            disabled={saving}
+                            onChange={(e) => onStatusChange(order.id, e.target.value as OrderStatus)}
+                            className={`h-9 appearance-none rounded-xl border pl-3 pr-8 text-xs font-black uppercase tracking-wider outline-none focus:ring-4 focus:ring-gold/10 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${statusClass}`}
+                          >
+                            <option value="pending">Pending</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
+                          </select>
+                          <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-cream/40">
+                            <svg className="h-3.5 w-3.5 fill-current" viewBox="0 0 20 20">
+                              <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="pl-4 pr-6 py-4 text-xs font-semibold text-cream/40 text-right">
+                      {order.created_at ? new Date(order.created_at).toLocaleString() : "Unknown"}
+                    </td>
+                  </tr>
+
+                  {/* Desktop Expanded Details Drawer */}
+                  {isExpanded && (
+                    <tr className="bg-cream/[0.015] border-b border-cream/[0.06] transition-all duration-300">
+                      <td colSpan={6} className="p-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-left" onClick={(e) => e.stopPropagation()}>
+                          {/* Order Items List */}
+                          <div className="lg:col-span-2 space-y-4">
+                            <h4 className="text-xs font-black uppercase tracking-wider text-gold/80 mb-2">Order Items</h4>
+                            <div className="divide-y divide-cream/[0.06] border border-cream/[0.06] rounded-xl bg-cream/[0.01] overflow-hidden">
+                              {order.items.map((item, idx) => {
+                                const imgUrl = productImage({ image_url: item.product_image_url || null });
+                                const hasSlug = !!item.product_slug;
+
+                                const ItemContent = (
+                                  <div className="flex items-center gap-4 p-4 hover:bg-cream/[0.02] transition duration-150">
+                                    <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-cream/[0.08] bg-cream/[0.02]">
+                                      <img
+                                        src={imgUrl}
+                                        alt={item.product_name || "Product"}
+                                        className="h-full w-full object-cover"
+                                      />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm font-extrabold text-cream truncate">
+                                        {item.product_name || `Product (${item.product_id.slice(0, 8)})`}
+                                      </p>
+                                      <p className="mt-0.5 text-xs text-cream/40">
+                                        SKU/ID: {item.product_id}
+                                      </p>
+                                    </div>
+                                    <div className="text-right shrink-0">
+                                      <p className="text-sm font-black text-cream">
+                                        Tk {Number(item.unit_price).toLocaleString()} × {item.quantity}
+                                      </p>
+                                      <p className="mt-0.5 text-xs text-gold font-bold">
+                                        Tk {(Number(item.unit_price) * item.quantity).toLocaleString()}
+                                      </p>
+                                    </div>
+                                  </div>
+                                );
+
+                                return hasSlug ? (
+                                  <Link
+                                    key={idx}
+                                    href={`/products/${item.product_slug}`}
+                                    target="_blank"
+                                    className="block group"
+                                  >
+                                    {ItemContent}
+                                  </Link>
+                                ) : (
+                                  <div key={idx}>{ItemContent}</div>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* Customer & Shipping Summary */}
+                          <div className="space-y-6">
+                            <div>
+                              <h4 className="text-xs font-black uppercase tracking-wider text-gold/80 mb-2.5">Shipping Details</h4>
+                              <div className="rounded-xl border border-cream/[0.06] bg-cream/[0.01] p-4 text-xs space-y-2.5 text-cream/70">
+                                <div>
+                                  <span className="text-[10px] font-black uppercase tracking-wider text-cream/30 block mb-0.5">Recipient Name</span>
+                                  <p className="text-sm font-extrabold text-cream">{order.customer_name}</p>
+                                </div>
+                                <div>
+                                  <span className="text-[10px] font-black uppercase tracking-wider text-cream/30 block mb-0.5">Phone Number</span>
+                                  <a
+                                    href={`tel:${order.phone}`}
+                                    className="text-sm font-extrabold text-gold hover:underline"
+                                  >
+                                    {order.phone}
+                                  </a>
+                                </div>
+                                <div>
+                                  <span className="text-[10px] font-black uppercase tracking-wider text-cream/30 block mb-0.5">Delivery Address</span>
+                                  <p className="leading-relaxed text-cream/80 whitespace-pre-wrap">{order.address}</p>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div>
+                              <h4 className="text-xs font-black uppercase tracking-wider text-gold/80 mb-2.5">Payment Details</h4>
+                              <div className="rounded-xl border border-cream/[0.06] bg-cream/[0.01] p-4 text-xs space-y-2">
+                                <div className="flex justify-between items-center text-cream/60">
+                                  <span>Subtotal</span>
+                                  <span className="font-bold text-cream">Tk {Number(order.subtotal || 0).toLocaleString()}</span>
+                                </div>
+                                {order.coupon_code && (
+                                  <div className="flex justify-between items-center text-cream/60">
+                                    <span>Coupon ({order.coupon_code})</span>
+                                    <span className="font-bold text-red-400">- Tk {Number(order.discount_amount || 0).toLocaleString()}</span>
+                                  </div>
+                                )}
+                                <div className="h-px bg-cream/[0.06] my-2" />
+                                <div className="flex justify-between items-center">
+                                  <span className="font-bold text-cream">Grand Total</span>
+                                  <span className="text-sm font-black text-gold">Tk {Number(order.total).toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-cream/60 pt-1">
+                                  <span>Payment Method</span>
+                                  <span className="font-black text-cream uppercase text-[10px] tracking-wider bg-cream/[0.06] px-2 py-0.5 rounded">
+                                    {order.payment_method}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
+              );
+            })}
             {orders.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-5 py-16 text-center text-xs font-bold text-cream/30">No orders logged yet.</td>
