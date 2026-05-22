@@ -242,7 +242,7 @@ export default async function HomePage() {
           <div className="mt-8 sm:mt-14 sm:text-center">
             <Link
               href="/products"
-              className="group flex w-full items-center justify-center gap-2.5 border border-white/10 bg-white/[0.03] px-5 py-3.5 text-xs font-black uppercase tracking-[0.18em] text-cream/75 transition hover:border-gold hover:bg-gold hover:text-ink sm:inline-flex sm:w-auto sm:rounded-full sm:px-8 sm:py-4 sm:text-sm"
+              className="group flex w-full items-center justify-center gap-2.5 rounded-full border border-white/10 bg-white/[0.03] px-5 py-3.5 text-xs font-black uppercase tracking-[0.18em] text-cream/75 transition hover:border-gold hover:bg-gold hover:text-ink sm:inline-flex sm:w-auto sm:px-8 sm:py-4 sm:text-sm"
             >
               View All Products
               <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
