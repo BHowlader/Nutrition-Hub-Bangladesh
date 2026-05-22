@@ -924,7 +924,58 @@ function ProductsSection({
         </div>
       </div>
 
-      <div className="overflow-x-auto scrollbar-thin">
+      {/* Mobile Card Layout */}
+      <div className="md:hidden divide-y divide-cream/[0.06]">
+        {filteredProducts.map((product) => (
+          <div key={product.id} className="flex items-start gap-3 p-4">
+            <ProductThumb product={product} />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-2">
+                <strong className="text-sm font-bold text-cream line-clamp-1">{product.name}</strong>
+                <span className={`shrink-0 inline-flex items-center rounded-full border px-2 py-0.5 text-[9px] font-black capitalize tracking-wider ${statusStyles[product.status]}`}>
+                  {product.status}
+                </span>
+              </div>
+              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-cream/50">
+                <span className="font-black text-cream">Tk {Number(product.price).toLocaleString("en-BD")}</span>
+                <span>Stock: <span className={`font-black ${product.stock === 0 ? "text-red-400" : product.stock < 10 ? "text-amber-400" : "text-cream/70"}`}>{product.stock}</span></span>
+                <span>{product.category?.name || "Unassigned"}</span>
+              </div>
+              <div className="mt-1.5 flex items-center gap-2">
+                <span className="inline-block text-[8px] font-black tracking-wider text-gold bg-gold/10 px-1.5 py-0.5 rounded border border-gold/15 font-mono">{product.sku}</span>
+              </div>
+              <div className="mt-2.5 flex gap-2">
+                <Link
+                  href={`/products/${product.slug}`}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-cream/[0.12] bg-cream/[0.02] text-cream/60 transition-all"
+                >
+                  <Eye size={13} />
+                </Link>
+                <button
+                  onClick={() => setEditing(productToForm(product))}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gold text-ink transition-all"
+                >
+                  <Edit3 size={13} />
+                </button>
+                <button
+                  onClick={() => setDeleteTarget(product)}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-red-500/20 bg-red-500/5 text-red-400 transition-all"
+                >
+                  <Trash2 size={13} />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+        {!loading && filteredProducts.length === 0 && (
+          <div className="px-5 py-16 text-center text-xs font-bold text-cream/30">
+            No products match the current filters.
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Table Layout */}
+      <div className="hidden md:block overflow-x-auto scrollbar-thin">
         <table className="w-full min-w-[880px] border-collapse text-left">
           <thead>
             <tr className="border-b border-cream/[0.08] bg-forest/40 text-[10px] uppercase tracking-wider font-black text-cream/40">
