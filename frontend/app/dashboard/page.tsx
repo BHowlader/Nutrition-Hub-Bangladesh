@@ -22,6 +22,7 @@ import {
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/Header";
 import { PageLoading } from "@/components/PageLoading";
+import { productImage } from "@/lib/products";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -29,6 +30,9 @@ interface OrderItem {
   product_id: string;
   quantity: number;
   unit_price: number;
+  product_name?: string;
+  product_image_url?: string;
+  product_slug?: string;
 }
 
 interface Order {
@@ -40,6 +44,7 @@ interface Order {
   status: string;
   total: number;
   items: OrderItem[];
+  created_at?: string;
 }
 
 type Section = "profile" | "address" | "orders" | "security";
@@ -157,17 +162,11 @@ function DashboardContent() {
       <div className="min-h-screen bg-ink pt-24 md:pt-28 pb-10">
         <Header />
         <div className="mx-auto max-w-4xl px-4">
-          <div className="mb-6">
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-cream/50 transition hover:text-gold"
-            >
-              ← Back to Account
-            </Link>
+          <div className="mb-8">
+            <h1 className="text-3xl font-black text-cream tracking-tight sm:text-4xl">My Orders</h1>
+            <p className="mt-1.5 text-sm text-cream/50">Track the status of your recent orders and view details.</p>
           </div>
-          <div className="premium-card p-6 md:p-8 min-h-[500px]">
-            <OrdersSection orders={orders} loading={ordersLoading} />
-          </div>
+          <OrdersSection orders={orders} loading={ordersLoading} />
         </div>
       </div>
     );
@@ -529,53 +528,130 @@ function AddressSection({
 }
 
 function OrdersSection({ orders, loading }: { orders: Order[]; loading: boolean }) {
+  if (loading) {
+    return <p className="py-16 text-center text-sm text-cream/40">Loading orders…</p>;
+  }
+
+  if (orders.length === 0) {
+    return (
+      <div className="premium-card flex flex-col items-center justify-center py-16 text-center">
+        <ShoppingBag size={40} className="mb-4 text-cream/20" />
+        <p className="text-base font-bold text-cream/60">No orders yet</p>
+        <p className="mt-1 text-sm text-cream/40">Your purchases will show up here</p>
+        <Link href="/" className="btn-primary mt-6">Browse products</Link>
+      </div>
+    );
+  }
+
   return (
-    <>
-      <SectionHeader title="Orders" desc={`${orders.length} order${orders.length === 1 ? "" : "s"} placed`} />
-      {loading ? (
-        <p className="py-12 text-center text-sm text-cream/40">Loading orders…</p>
-      ) : orders.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <ShoppingBag size={40} className="mb-4 text-cream/20" />
-          <p className="text-base font-bold text-cream/60">No orders yet</p>
-          <p className="mt-1 text-sm text-cream/40">Your purchases will show up here</p>
-          <Link href="/" className="btn-primary mt-6">Browse products</Link>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {orders.map((order) => (
-            <div key={order.id} className="rounded-xl border border-cream/10 bg-cream/[0.02] p-4">
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+    <div className="space-y-6">
+      {orders.map((order) => {
+        const dateStr = order.created_at
+          ? new Date(order.created_at).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })
+          : "N/A";
+
+        return (
+          <div key={order.id} className="premium-card overflow-hidden">
+            {/* Order Top Bar */}
+            <div className="border-b border-cream/10 bg-cream/[0.02] px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-cream/40">
-                    #{order.id.slice(0, 8)}
-                  </p>
-                  <p className="text-lg font-black text-cream">৳{Number(order.total).toLocaleString()}</p>
+                  <p className="text-[10px] font-black uppercase tracking-wider text-cream/40">Order ID</p>
+                  <p className="font-mono text-sm font-bold text-cream">#{order.id.slice(0, 8).toUpperCase()}</p>
+                </div>
+                <div className="h-8 w-px bg-cream/10 hidden sm:block" />
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-wider text-cream/40">Date Placed</p>
+                  <p className="text-sm font-extrabold text-cream">{dateStr}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <p className="text-[10px] font-black uppercase tracking-wider text-cream/40">Total Amount</p>
+                  <p className="text-lg font-black text-gold">৳{Number(order.total).toLocaleString()}</p>
                 </div>
                 <span
-                  className={`rounded-full border px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${statusColors[order.status] || "bg-cream/10 text-cream/60 border-cream/20"
-                    }`}
+                  className={`rounded-full border px-3 py-1 text-xs font-black uppercase tracking-wider ${
+                    statusColors[order.status] || "bg-cream/10 text-cream/60 border-cream/20"
+                  }`}
                 >
                   {order.status}
                 </span>
               </div>
-              <div className="space-y-1 border-t border-cream/10 pt-3 text-xs text-cream/70">
-                {order.items.map((item, idx) => (
-                  <div key={idx} className="flex items-center justify-between">
-                    <span>Product {item.product_id.slice(0, 8)}… × {item.quantity}</span>
-                    <span className="font-bold">৳{(item.unit_price * item.quantity).toLocaleString()}</span>
+            </div>
+
+            {/* Order Items */}
+            <div className="divide-y divide-cream/10 px-6 py-2">
+              {order.items.map((item, idx) => {
+                const imgUrl = productImage({ image_url: item.product_image_url || null });
+                const hasSlug = !!item.product_slug;
+
+                const Content = (
+                  <div className="flex items-center gap-4 py-4">
+                    <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-cream/10 bg-cream/[0.02]">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={imgUrl}
+                        alt={item.product_name || "Product"}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-sm font-extrabold text-cream group-hover:text-gold transition truncate">
+                        {item.product_name || `Product (${item.product_id.slice(0, 8)})`}
+                      </h4>
+                      <p className="mt-1 text-xs text-cream/50">
+                        Unit Price: ৳{Number(item.unit_price).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-black text-cream">× {item.quantity}</p>
+                      <p className="mt-0.5 text-xs text-cream/40">
+                        ৳{(Number(item.unit_price) * item.quantity).toLocaleString()}
+                      </p>
+                    </div>
                   </div>
-                ))}
+                );
+
+                return hasSlug ? (
+                  <Link
+                    key={idx}
+                    href={`/products/${item.product_slug}`}
+                    className="group block transition hover:bg-cream/[0.01]"
+                  >
+                    {Content}
+                  </Link>
+                ) : (
+                  <div key={idx}>{Content}</div>
+                );
+              })}
+            </div>
+
+            {/* Order Footer / Metadata */}
+            <div className="border-t border-cream/10 bg-cream/[0.01] px-6 py-4 flex flex-wrap items-center justify-between gap-4 text-xs text-cream/60">
+              <div className="flex flex-wrap gap-x-6 gap-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-cream/30 uppercase text-[9px] font-black tracking-wider">Payment Method:</span>
+                  <span className="font-extrabold text-cream">{order.payment_method.toUpperCase()}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-cream/30 uppercase text-[9px] font-black tracking-wider">Delivery Phone:</span>
+                  <span className="font-extrabold text-cream">{order.phone}</span>
+                </div>
               </div>
-              <div className="mt-3 flex flex-wrap gap-3 text-[10px] uppercase tracking-wider text-cream/40">
-                <span>Payment: {order.payment_method.toUpperCase()}</span>
-                <span>Phone: {order.phone}</span>
+              <div className="flex items-center gap-2 max-w-sm sm:max-w-md md:max-w-lg">
+                <span className="text-cream/30 uppercase text-[9px] font-black tracking-wider shrink-0">Address:</span>
+                <span className="truncate text-cream/70" title={order.address}>{order.address}</span>
               </div>
             </div>
-          ))}
-        </div>
-      )}
-    </>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 

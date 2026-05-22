@@ -7,6 +7,7 @@ from sqlalchemy import DateTime, Enum as SqlEnum, ForeignKey, Integer, Numeric, 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.models.catalog import Product
 
 
 class OrderStatus(str, Enum):
@@ -47,3 +48,16 @@ class OrderItem(Base):
     unit_price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
 
     order: Mapped[Order] = relationship(back_populates="items")
+    product: Mapped[Product] = relationship("Product")
+
+    @property
+    def product_name(self) -> str | None:
+        return self.product.name if self.product else None
+
+    @property
+    def product_image_url(self) -> str | None:
+        return self.product.image_url if self.product else None
+
+    @property
+    def product_slug(self) -> str | None:
+        return self.product.slug if self.product else None

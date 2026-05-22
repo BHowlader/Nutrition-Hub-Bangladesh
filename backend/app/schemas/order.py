@@ -22,6 +22,9 @@ class OrderItemRead(BaseModel):
     product_id: str
     quantity: int
     unit_price: Decimal
+    product_name: str | None = None
+    product_image_url: str | None = None
+    product_slug: str | None = None
 
     model_config = {"from_attributes": True}
 

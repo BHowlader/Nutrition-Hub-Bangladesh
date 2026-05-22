@@ -108,7 +108,13 @@ def validate_coupon(
 
 @router.get("/my", response_model=list[OrderRead])
 def my_orders(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
-    return db.query(Order).filter(Order.user_id == user.id).order_by(Order.created_at.desc()).all()
+    return (
+        db.query(Order)
+        .options(selectinload(Order.items).selectinload(OrderItem.product))
+        .filter(Order.user_id == user.id)
+        .order_by(Order.created_at.desc())
+        .all()
+    )
 
 
 @router.get("/admin", response_model=list[OrderRead])
@@ -119,7 +125,7 @@ def admin_orders(
     limit: int = Query(default=100, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
 ) -> list[Order]:
-    stmt = select(Order).options(selectinload(Order.items)).order_by(Order.created_at.desc())
+    stmt = select(Order).options(selectinload(Order.items).selectinload(OrderItem.product)).order_by(Order.created_at.desc())
     if status_filter:
         stmt = stmt.where(Order.status == status_filter)
     return list(db.scalars(stmt.offset(offset).limit(limit)))
@@ -135,7 +141,7 @@ def update_order_status(
     admin: User = Depends(require_admin_google),
 ) -> Order:
     require_trusted_admin_origin(request)
-    order = db.scalars(select(Order).options(selectinload(Order.items)).where(Order.id == order_id)).first()
+    order = db.scalars(select(Order).options(selectinload(Order.items).selectinload(OrderItem.product)).where(Order.id == order_id)).first()
     if order is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
     try:
