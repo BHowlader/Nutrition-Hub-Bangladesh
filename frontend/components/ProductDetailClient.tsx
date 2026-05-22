@@ -213,7 +213,7 @@ export function ProductDetailClient({
 
                   <div className="mt-5 text-center">
                     <p className="text-xs text-cream/40">
-                      Orders are verified via phone-call within 12 hours. Nationwide COD shipping.
+                      Orders verified via phone-call within 12 hours. Shipped via Pathao Courier (COD).
                     </p>
                   </div>
                 </div>
@@ -233,8 +233,8 @@ export function ProductDetailClient({
                   <div className="flex items-start gap-4">
                     <Truck size={26} className="text-gold shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="text-base font-bold text-cream md:text-lg">COD & Nationwide Delivery</h4>
-                      <p className="text-sm text-cream/55 mt-1.5 leading-relaxed">Pay after product arrival in Dhaka and nationwide. Check package contents at delivery door.</p>
+                      <h4 className="text-base font-bold text-cream md:text-lg">COD & Pathao Delivery</h4>
+                      <p className="text-sm text-cream/55 mt-1.5 leading-relaxed">Delivered via Pathao Courier. Pay on arrival in Dhaka and nationwide. Check package contents at door.</p>
                     </div>
                   </div>
                 </div>
@@ -303,7 +303,7 @@ export function ProductDetailClient({
               <ul className="mt-4 space-y-3 text-sm text-cream/60">
                 <li className="flex items-center gap-2"><ShieldCheck size={14} className="text-gold" /> Authenticity checks</li>
                 <li className="flex items-center gap-2"><PackageCheck size={14} className="text-gold" /> Sealed stock</li>
-                <li className="flex items-center gap-2"><Truck size={14} className="text-gold" /> Bangladesh delivery</li>
+                <li className="flex items-center gap-2"><Truck size={14} className="text-gold" /> Pathao delivery</li>
               </ul>
             </div>
           </div>

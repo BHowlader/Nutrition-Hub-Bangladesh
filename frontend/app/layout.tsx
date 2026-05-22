@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { AuthProvider } from "@/lib/auth";
 import { CartProvider } from "@/lib/cart";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" data-scroll-behavior="smooth">
-      <body><AuthProvider><CartProvider>{children}</CartProvider></AuthProvider></body>
+      <body><AuthProvider><CartProvider>{children}<WhatsAppButton /></CartProvider></AuthProvider></body>
     </html>
   );
 }

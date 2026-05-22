@@ -383,7 +383,7 @@ export function Hero({
             </div>
             <div className="hidden h-4 w-[1px] bg-white/10 sm:block" />
             <div className="flex items-center gap-2">
-              <Zap size={16} className="text-mint" /> Fast Delivery
+              <Zap size={16} className="text-mint" /> Delivered by Pathao
             </div>
           </div>
         </div>

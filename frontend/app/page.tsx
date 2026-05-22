@@ -89,8 +89,8 @@ const testimonials = [
 ];
 
 const deliveryOptions: { icon: LucideIcon; title: string; text: string }[] = [
-  { icon: Truck, title: "Dhaka priority", text: "Same-day or next-day delivery target for available stock." },
-  { icon: MapPin, title: "Nationwide courier", text: "Coverage for major cities and district-level delivery." },
+  { icon: Truck, title: "Powered by Pathao", text: "All orders are fulfilled via Pathao Courier for fast, trackable nationwide delivery." },
+  { icon: MapPin, title: "Nationwide coverage", text: "Dhaka same-day priority with district-level reach across Bangladesh." },
   { icon: Banknote, title: "Cash on delivery", text: "Pay after product arrival for zero purchase friction." }
 ];
 
@@ -109,7 +109,7 @@ export default async function HomePage() {
             {[
               { num: "01", title: "Authenticity first", text: "Visible batch, expiry, importer, and sealed-stock checks before dispatch.", icon: ShieldCheck },
               { num: "02", title: "Bangladesh checkout", text: "Cash on Delivery (COD) nationwide, with phone-first order confirmation.", icon: CheckCircle2 },
-              { num: "03", title: "Fast delivery", text: "Dhaka priority delivery with nationwide courier support for supplement orders.", icon: Truck }
+              { num: "03", title: "Pathao delivery", text: "Fast, trackable delivery via Pathao Courier — Dhaka priority with nationwide reach.", icon: Truck }
             ].map(({ num, title, text, icon: Icon }) => (
               <article className="group relative flex items-start gap-4 bg-[#0c1324] p-5 backdrop-blur-md transition-colors duration-300 md:block md:p-7 md:hover:bg-[#0e162c]" key={title}>
                 {/* Subtle number watermark in the top-right corner on desktop */}
@@ -517,7 +517,7 @@ export default async function HomePage() {
                 </li>
                 <li className="flex items-center justify-center gap-2 md:justify-start">
                   <Truck size={13} className="shrink-0 text-gold" />
-                  <span>Bangladesh delivery</span>
+                  <span>Pathao delivery</span>
                 </li>
               </ul>
             </div>

@@ -328,7 +328,7 @@ export default function ProductsPage() {
             {[
               { Icon: ShieldCheck, title: "100% Authentic Stock", text: "Direct importer seals with verified batch codes." },
               { Icon: PackageCheck, title: "Sealed Packaging", text: "Dispatched in pristine tamper-evident condition." },
-              { Icon: Truck, title: "Nationwide Delivery", text: "Fast, reliable doorstep shipping across Bangladesh." }
+              { Icon: Truck, title: "Pathao Delivery", text: "Fast, trackable delivery via Pathao Courier nationwide." }
             ].map(({ Icon, title, text }) => (
               <li key={title} className="flex flex-col items-center">
                 <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-gold/10 text-gold sm:mb-4 sm:h-12 sm:w-12">
@@ -409,7 +409,7 @@ export default function ProductsPage() {
                   <PackageCheck size={14} className="shrink-0 text-gold" /> Sealed stock
                 </li>
                 <li className="flex items-center gap-2">
-                  <Truck size={14} className="shrink-0 text-gold" /> Bangladesh delivery
+                  <Truck size={14} className="shrink-0 text-gold" /> Pathao delivery
                 </li>
               </ul>
             </div>

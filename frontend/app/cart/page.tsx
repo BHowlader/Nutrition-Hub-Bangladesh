@@ -272,7 +272,7 @@ export default function CartPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/80 p-4">
           <div className="w-full max-w-md rounded-xl border border-cream/10 bg-ink p-6 shadow-2xl">
             <h2 className="text-xl font-black text-cream">Delivery details</h2>
-            <p className="mt-1 text-xs text-cream/50">Cash on delivery · Total ৳{payableTotal.toLocaleString()}</p>
+            <p className="mt-1 text-xs text-cream/50">Cash on delivery via Pathao · Total ৳{payableTotal.toLocaleString()}</p>
 
             {error && (
               <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-400">
