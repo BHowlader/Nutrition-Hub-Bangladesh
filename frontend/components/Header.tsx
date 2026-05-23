@@ -103,7 +103,7 @@ export function Header() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 pt-2 sm:pt-4">
-      <nav className="shell flex min-h-[58px] items-center justify-between gap-2 rounded-lg border border-cream/10 bg-ink/75 px-3 text-cream backdrop-blur-xl sm:min-h-[72px] sm:gap-6 sm:px-5">
+      <nav className="shell flex min-h-[58px] items-center justify-between gap-2 rounded-lg border border-cream/10 bg-ink/95 px-3 text-cream sm:min-h-[72px] sm:gap-6 sm:px-5 sm:bg-ink/75 sm:backdrop-blur-xl">
         <Link href="/" onClick={handleLogoClick} className="flex min-w-0 items-center gap-2 sm:gap-3">
           <Image
             src="/images/logo.png"
