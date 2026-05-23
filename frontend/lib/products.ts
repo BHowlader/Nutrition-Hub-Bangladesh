@@ -1,6 +1,7 @@
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const PRODUCT_CACHE_TTL = 60_000;
 const PRODUCT_REVALIDATE_SECONDS = 300;
+const SERVER_FETCH_TIMEOUT_MS = 8_000;
 
 type ProductCacheEntry = {
   expiresAt: number;
@@ -70,7 +71,10 @@ function productCacheKey(opts: FetchProductsOptions) {
 
 function publicProductFetchInit(): RequestInit & { next?: { revalidate: number; tags: string[] } } {
   if (typeof window !== "undefined") return {};
-  return { next: { revalidate: PRODUCT_REVALIDATE_SECONDS, tags: ["products"] } };
+  return {
+    signal: AbortSignal.timeout(SERVER_FETCH_TIMEOUT_MS),
+    next: { revalidate: PRODUCT_REVALIDATE_SECONDS, tags: ["products"] },
+  };
 }
 
 export async function fetchProductPage(opts: FetchProductsOptions = {}): Promise<ProductPage> {
@@ -158,12 +162,16 @@ export async function fetchProducts(opts: FetchProductsOptions = {}): Promise<Pr
 }
 
 export async function fetchProductBySlug(slug: string): Promise<Product | null> {
-  const res = await fetch(
-    `${API}/api/products/by-slug/${encodeURIComponent(slug)}`,
-    publicProductFetchInit()
-  );
-  if (!res.ok) return null;
-  return res.json();
+  try {
+    const res = await fetch(
+      `${API}/api/products/by-slug/${encodeURIComponent(slug)}`,
+      publicProductFetchInit()
+    );
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
 }
 
 export interface HeroSettings {
@@ -177,7 +185,7 @@ export async function fetchHeroSettings(): Promise<HeroSettings | null> {
   try {
     const init: RequestInit & { next?: { revalidate: number; tags: string[] } } =
       typeof window === "undefined"
-        ? { next: { revalidate: 60, tags: ["hero-settings"] } }
+        ? { signal: AbortSignal.timeout(SERVER_FETCH_TIMEOUT_MS), next: { revalidate: 60, tags: ["hero-settings"] } }
         : {};
     const res = await fetch(`${API}/api/settings/hero`, init);
     if (!res.ok) return null;
