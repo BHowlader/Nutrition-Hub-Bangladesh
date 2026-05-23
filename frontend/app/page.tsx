@@ -131,7 +131,7 @@ export default async function HomePage() {
               <Reveal className="h-full" delay={index * 0.06} key={title}>
                 <Link
                   href={`/products?category=${encodeURIComponent(title)}`}
-                  className="group relative flex h-full min-h-[210px] overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0c1324]/30 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.2)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-gold/30 hover:bg-[#0c1324]/40 sm:min-h-[250px] sm:p-6 lg:min-h-[300px]"
+                  className="group relative flex h-full min-h-[210px] overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0c1324] p-5 shadow-[0_18px_55px_rgba(0,0,0,0.2)] transition-all duration-300 hover:-translate-y-1 hover:border-gold/30 hover:bg-[#0c1324]/80 sm:min-h-[250px] sm:p-6 lg:min-h-[300px]"
                 >
                   {/* Photo background with dark gradients for maximum typography contrast */}
                   {image && (

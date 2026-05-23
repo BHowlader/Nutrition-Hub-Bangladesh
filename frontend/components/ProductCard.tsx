@@ -28,14 +28,14 @@ export function ProductCard({ product }: { product: Product }) {
       }}
     >
       {/* Authentic badge */}
-      <div className="absolute left-2 top-2 z-20 inline-flex items-center gap-1 rounded-full border border-white/10 bg-[#050811]/90 px-2 py-1 text-[8px] font-black uppercase tracking-wider text-mint backdrop-blur-md sm:left-3 sm:top-3 sm:px-2.5 sm:text-[9px]">
+      <div className="absolute left-2 top-2 z-20 inline-flex items-center gap-1 rounded-full border border-white/10 bg-[#050811]/90 px-2 py-1 text-[8px] font-black uppercase tracking-wider text-mint sm:backdrop-blur-md sm:left-3 sm:top-3 sm:px-2.5 sm:text-[9px]">
         <ShieldCheck size={10} className="shrink-0 text-mint" />
         <span className="hidden xs:inline sm:inline">Authentic</span>
       </div>
 
       {/* Sold-out overlay */}
       {product.stock === 0 && (
-        <div className="absolute right-2 top-2 z-20 inline-flex items-center gap-1 rounded-full border border-red-500/20 bg-red-500/10 px-2 py-1 text-[8px] font-black uppercase tracking-wider text-red-400 backdrop-blur-md sm:right-3 sm:top-3 sm:px-2.5 sm:text-[9px]">
+        <div className="absolute right-2 top-2 z-20 inline-flex items-center gap-1 rounded-full border border-red-500/20 bg-red-500/10 px-2 py-1 text-[8px] font-black uppercase tracking-wider text-red-400 sm:backdrop-blur-md sm:right-3 sm:top-3 sm:px-2.5 sm:text-[9px]">
           Sold Out
         </div>
       )}
@@ -59,7 +59,7 @@ export function ProductCard({ product }: { product: Product }) {
       </div>
 
       {/* Info */}
-      <div className="flex min-w-0 flex-1 flex-col bg-[#0c1324]/50 p-3 backdrop-blur-md sm:p-5">
+      <div className="flex min-w-0 flex-1 flex-col bg-[#0c1324]/50 p-3 sm:backdrop-blur-md sm:p-5">
         {/* Category + rating */}
         <div className="mb-1.5 flex min-w-0 items-center justify-between gap-2 sm:mb-2">
           <span className="min-w-0 truncate text-[9px] font-black uppercase tracking-[0.12em] text-cream/40 sm:text-[10px]">

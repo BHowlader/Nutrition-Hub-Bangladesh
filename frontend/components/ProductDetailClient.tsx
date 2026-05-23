@@ -60,7 +60,7 @@ export function ProductDetailClient({
             <div className="relative w-full">
               <Reveal>
                 <div 
-                  className="relative aspect-square w-full overflow-hidden rounded-[32px] border border-white/10 bg-[#0c1324]/40 p-8 backdrop-blur-md shadow-2xl flex items-center justify-center"
+                  className="relative aspect-square w-full overflow-hidden rounded-[32px] border border-white/10 bg-[#0c1324]/40 p-8 sm:backdrop-blur-md shadow-2xl flex items-center justify-center"
                   onMouseEnter={() => setHoveredImage(true)}
                   onMouseLeave={() => setHoveredImage(false)}
                 >
@@ -149,7 +149,7 @@ export function ProductDetailClient({
 
               {/* Checkout details Card */}
               <Reveal delay={0.05}>
-                <div className="mt-8 rounded-3xl border border-white/[0.08] bg-[#0c1324]/60 p-6 md:p-8 backdrop-blur-md relative overflow-hidden">
+                <div className="mt-8 rounded-3xl border border-white/[0.08] bg-[#0c1324]/60 p-6 md:p-8 sm:backdrop-blur-md relative overflow-hidden">
                   <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.01)_0%,rgba(0,0,0,0)_100%)] pointer-events-none" />
                   
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">

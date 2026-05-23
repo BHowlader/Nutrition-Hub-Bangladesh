@@ -234,7 +234,7 @@ export function Hero({
 
           {/* Left Column - Content */}
           <div className="flex max-w-3xl flex-col items-center text-center lg:items-start lg:text-left">
-            <div className="hero-badge mb-3.5 inline-flex max-w-full items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 shadow-[0_0_24px_rgba(96,165,250,0.08)] backdrop-blur-md sm:mb-5 sm:px-4 sm:py-2">
+            <div className="hero-badge mb-3.5 inline-flex max-w-full items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 shadow-[0_0_24px_rgba(96,165,250,0.08)] sm:backdrop-blur-md sm:mb-5 sm:px-4 sm:py-2">
               <span className="relative flex h-1.5 w-1.5 shrink-0 sm:h-2 sm:w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-mint opacity-75"></span>
                 <span className="relative inline-flex h-full w-full rounded-full bg-mint"></span>
@@ -269,7 +269,7 @@ export function Hero({
               </a>
               <a
                 href="#authenticity"
-                className="group hero-btn btn-secondary min-h-[44px] w-full justify-center whitespace-nowrap border-white/10 bg-white/5 px-5 text-sm backdrop-blur-md sm:min-h-[52px] sm:w-auto sm:max-w-none sm:px-6 sm:text-base"
+                className="group hero-btn btn-secondary min-h-[44px] w-full justify-center whitespace-nowrap border-white/10 bg-white/5 px-5 text-sm sm:backdrop-blur-md sm:min-h-[52px] sm:w-auto sm:max-w-none sm:px-6 sm:text-base"
               >
                 <ShieldCheck size={18} className="mr-2 text-mint transition-transform group-hover:scale-110" />
                 Verify Authenticity
@@ -342,7 +342,7 @@ export function Hero({
                 }}
               >
                 <div
-                  className={`hero-visual-card animate-float-${i + 1} w-[260px] overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0c1324] shadow-[0_30px_60px_rgba(0,0,0,0.4)] backdrop-blur-2xl transition-all duration-300 hover:border-white/20`}
+                  className={`hero-visual-card animate-float-${i + 1} w-[260px] overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0c1324] shadow-[0_30px_60px_rgba(0,0,0,0.4)] sm:backdrop-blur-2xl transition-all duration-300 hover:border-white/20`}
                   style={{
                     boxShadow: `0 30px 60px -10px ${product.accent || "#F59E0B"}15`
                   }}
@@ -364,7 +364,7 @@ export function Hero({
                     <h3 className="text-base font-bold text-cream truncate">{product.name}</h3>
                     <div className="mt-3 flex items-center justify-between">
                       <span className="font-black text-gold">{formatTaka(product.price)}</span>
-                      <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold text-cream/70 backdrop-blur-md">
+                      <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold text-cream/70 sm:backdrop-blur-md">
                         {product.badge || ""}
                       </span>
                     </div>
@@ -374,8 +374,8 @@ export function Hero({
             ))}
 
             {/* Decorative floating elements */}
-            <div className="animate-float-1 absolute -right-4 top-32 h-20 w-20 rounded-2xl border border-white/10 bg-gradient-to-tr from-mint/20 to-transparent backdrop-blur-xl" style={{ transform: 'translateZ(-50px) rotate(15deg)' }}></div>
-            <div className="animate-float-3 absolute bottom-24 -left-8 h-24 w-24 rounded-full border border-white/10 bg-gradient-to-br from-gold/20 to-transparent backdrop-blur-xl" style={{ transform: 'translateZ(-20px)' }}></div>
+            <div className="animate-float-1 absolute -right-4 top-32 h-20 w-20 rounded-2xl border border-white/10 bg-gradient-to-tr from-mint/20 to-transparent sm:backdrop-blur-xl" style={{ transform: 'translateZ(-50px) rotate(15deg)' }}></div>
+            <div className="animate-float-3 absolute bottom-24 -left-8 h-24 w-24 rounded-full border border-white/10 bg-gradient-to-br from-gold/20 to-transparent sm:backdrop-blur-xl" style={{ transform: 'translateZ(-20px)' }}></div>
           </div>
         </div>
       </section>
