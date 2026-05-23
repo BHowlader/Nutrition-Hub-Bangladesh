@@ -54,15 +54,8 @@ export function formatTaka(value: number | string) {
   return `Tk ${new Intl.NumberFormat("en-BD").format(n)}`;
 }
 
-export function productImage(p?: { image_url: string | null } | null, width = 600): string {
+export function productImage(p?: { image_url: string | null } | null): string {
   if (!p || !p.image_url) return "/images/logo.png";
-  if (p.image_url.startsWith("https://res.cloudinary.com")) {
-    // Inject Cloudinary transformation: resize + auto quality + WebP
-    return p.image_url.replace(
-      "/image/upload/",
-      `/image/upload/w_${width},q_auto,f_auto/`
-    );
-  }
   if (p.image_url.startsWith("http")) return p.image_url;
   if (p.image_url.startsWith("/static")) return `${API}${p.image_url}`;
   return p.image_url;
