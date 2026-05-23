@@ -56,21 +56,21 @@ export function Hero({
   useEffect(() => {
     setMounted(true);
     const skipLoader = shouldSkipHomeLoader();
-    if (skipLoader) {
+    // Skip loader on mobile — prevents ~900ms content block
+    const isMobile = window.innerWidth < 768;
+    if (skipLoader || isMobile) {
       window.sessionStorage.removeItem(SKIP_HOME_LOADER_KEY);
       setLoading(false);
       setProgress(100);
     }
 
     // Disable browser scroll restoration and force scroll to top on reload
-    if (typeof window !== "undefined") {
-      if ("scrollRestoration" in window.history) {
-        window.history.scrollRestoration = "manual";
-      }
-      window.scrollTo(0, 0);
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
     }
+    window.scrollTo(0, 0);
 
-    if (skipLoader) return;
+    if (skipLoader || isMobile) return;
 
     const interval = setInterval(() => {
       setProgress((prev) => {
@@ -168,19 +168,24 @@ export function Hero({
           <div className="absolute inset-y-0 left-0 w-full lg:w-[55%] bg-gradient-to-r from-[#04060d] via-[#04060d]/75 to-transparent" />
         </div>
 
-        {/* Living Aurora Borealis / Cinematic Nebula Backdrop */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-          <div className="animate-aurora-1 absolute -left-20 -top-20 h-[360px] w-[360px] rounded-full bg-mint/10 blur-[110px] mix-blend-screen sm:h-[650px] sm:w-[650px] sm:blur-[130px]" />
-          <div className="animate-aurora-2 absolute -right-20 -bottom-20 h-[420px] w-[420px] rounded-full bg-gold/10 blur-[120px] mix-blend-screen sm:h-[750px] sm:w-[750px] sm:blur-[150px]" />
-          <div className="animate-aurora-3 absolute left-1/3 top-1/4 h-[320px] w-[320px] rounded-full bg-indigo-500/8 blur-[100px] mix-blend-screen sm:h-[550px] sm:w-[550px] sm:blur-[120px]" />
-          <div className="animate-aurora-4 absolute right-1/4 top-10 h-[340px] w-[340px] rounded-full bg-cyan-400/8 blur-[105px] mix-blend-screen sm:h-[600px] sm:w-[600px] sm:blur-[130px]" />
+        {/* Living Aurora Borealis / Cinematic Nebula Backdrop — desktop only to prevent mobile scroll jank */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 hidden sm:block">
+          <div className="animate-aurora-1 absolute -left-20 -top-20 h-[650px] w-[650px] rounded-full bg-mint/10 blur-[130px] mix-blend-screen" />
+          <div className="animate-aurora-2 absolute -right-20 -bottom-20 h-[750px] w-[750px] rounded-full bg-gold/10 blur-[150px] mix-blend-screen" />
+          <div className="animate-aurora-3 absolute left-1/3 top-1/4 h-[550px] w-[550px] rounded-full bg-indigo-500/8 blur-[120px] mix-blend-screen" />
+          <div className="animate-aurora-4 absolute right-1/4 top-10 h-[600px] w-[600px] rounded-full bg-cyan-400/8 blur-[130px] mix-blend-screen" />
+        </div>
+        {/* Mobile: static subtle glow instead of animated aurora */}
+        <div className="absolute inset-0 pointer-events-none z-0 sm:hidden">
+          <div className="absolute -left-20 -top-20 h-[300px] w-[300px] rounded-full bg-mint/8 blur-[100px]" />
+          <div className="absolute -right-20 -bottom-20 h-[300px] w-[300px] rounded-full bg-gold/8 blur-[100px]" />
         </div>
 
-        {/* Dynamic Background Noise */}
-        <div className="absolute inset-0 opacity-[0.12] mix-blend-overlay pointer-events-none z-0" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} />
+        {/* Dynamic Background Noise — desktop only */}
+        <div className="absolute inset-0 opacity-[0.12] mix-blend-overlay pointer-events-none z-0 hidden sm:block" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} />
 
-        {/* Perspective 3D Grid Flooring at the bottom */}
-        <div className="absolute inset-x-0 bottom-0 h-[450px] overflow-hidden pointer-events-none z-0 opacity-[0.15]">
+        {/* Perspective 3D Grid Flooring — desktop only */}
+        <div className="absolute inset-x-0 bottom-0 h-[450px] overflow-hidden pointer-events-none z-0 opacity-[0.15] hidden sm:block">
           <div
             className="animate-grid-travel w-[200%] h-[900px] absolute left-[-50%] top-[-250px]"
             style={{
@@ -189,11 +194,10 @@ export function Hero({
               transformOrigin: 'top center',
             }}
           />
-          {/* Shading overlay to mask 3D grid at edges */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#04060d] via-[#04060d]/80 to-transparent" />
         </div>
 
-        {/* Laser scans running down vertical grid lines */}
+        {/* Laser scans — desktop only */}
         <div className="absolute inset-0 pointer-events-none z-0 hidden sm:block">
           <div className="absolute left-[15%] top-0 h-full w-[1px] bg-white/[0.01]">
             <div className="animate-laser absolute h-[250px] w-full bg-gradient-to-b from-transparent via-gold/30 to-transparent" style={{ animationDuration: '7s' }} />
@@ -209,8 +213,8 @@ export function Hero({
           </div>
         </div>
 
-        {/* Floating Cinematic Dust Particles */}
-        <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+        {/* Floating Dust Particles — desktop only */}
+        <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden hidden sm:block">
           {mounted && Array.from({ length: 18 }).map((_, i) => (
             <div
               key={i}
