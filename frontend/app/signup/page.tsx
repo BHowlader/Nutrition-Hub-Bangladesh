@@ -46,6 +46,8 @@ function SignupContent() {
 
   // Load Google Identity Services
   useEffect(() => {
+    if (loading) return;
+
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     if (!clientId) return;
 
@@ -118,7 +120,7 @@ function SignupContent() {
     script.onload = () => onScriptReady();
     document.head.appendChild(script);
     return () => { cancelled = true; script.remove(); };
-  }, [googleLogin, router, redirect]);
+  }, [googleLogin, router, redirect, loading]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
