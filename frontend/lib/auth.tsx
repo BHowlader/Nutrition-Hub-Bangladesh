@@ -6,6 +6,7 @@ const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const CSRF_COOKIE_NAME = "nhb_csrf";
 const CSRF_HEADER_NAME = "X-CSRF-Token";
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
+const AUTH_SIGNAL_KEY = "nhb-authed";
 
 export function readCsrfToken(): string | null {
   if (typeof document === "undefined") return null;
@@ -90,6 +91,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    // Skip the Railway auth call for visitors who have never logged in.
+    // This eliminates a cross-origin round-trip to Railway on every page load
+    // for the majority of users who are anonymous.
+    const maybeLoggedIn = localStorage.getItem(AUTH_SIGNAL_KEY) === "1";
+    if (!maybeLoggedIn) {
+      setLoading(false);
+      return;
+    }
     fetchMe().finally(() => setLoading(false));
   }, [fetchMe]);
 
@@ -98,6 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       method: "POST",
       body: JSON.stringify({ email, password }),
     });
+    localStorage.setItem(AUTH_SIGNAL_KEY, "1");
     setUser(data.user);
   }, []);
 
@@ -114,6 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       method: "POST",
       body: JSON.stringify(nonce ? { credential, nonce } : { credential }),
     });
+    localStorage.setItem(AUTH_SIGNAL_KEY, "1");
     setUser(data.user);
   }, []);
 
@@ -123,6 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         method: "POST",
         body: JSON.stringify(params),
       });
+      localStorage.setItem(AUTH_SIGNAL_KEY, "1");
       setUser(data.user);
       return data.user;
     },
@@ -135,6 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       // ignore — clear local state regardless
     }
+    localStorage.removeItem(AUTH_SIGNAL_KEY);
     setUser(null);
   }, []);
 
