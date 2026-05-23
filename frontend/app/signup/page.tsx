@@ -275,7 +275,7 @@ function SignupContent() {
               </div>
 
               {/* Google Sign-Up — GSI renders here when client ID is configured */}
-              <div ref={googleBtnRef} className={gsiReady ? "flex justify-center" : "hidden"} />
+              <div ref={googleBtnRef} className={`flex justify-center overflow-hidden transition-all duration-300 ${gsiReady ? "max-h-20 opacity-100" : "max-h-0 opacity-0"}`} />
 
               {/* Fallback styled button when GSI not loaded */}
               {!gsiReady && (
