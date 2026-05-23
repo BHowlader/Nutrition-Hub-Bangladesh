@@ -1,4 +1,4 @@
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API = typeof window === "undefined" ? (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000") : "";
 const PRODUCT_CACHE_TTL = 60_000;
 const PRODUCT_REVALIDATE_SECONDS = 3600;
 const SERVER_FETCH_TIMEOUT_MS = 4_000;
