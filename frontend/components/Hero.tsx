@@ -104,7 +104,7 @@ export function Hero({
     <>
       <section
         ref={rootRef}
-        className="relative flex min-h-[100svh] items-center justify-center bg-[#04060d] pb-7 pt-[7.5rem] sm:pb-10 sm:pt-[7.25rem] md:pt-[7.75rem] lg:pb-12 lg:pt-[7.75rem]"
+        className="relative flex min-h-screen items-center justify-center bg-[#04060d] pb-7 pt-[7.5rem] sm:pb-10 sm:pt-[7.25rem] md:pt-[7.75rem] lg:pb-12 lg:pt-[7.75rem]"
       >
         {/* Cinematic Loader Shutter Panels */}
         {loading && (
@@ -282,7 +282,7 @@ export function Hero({
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 h-20 bg-gradient-to-t from-[#04060d] via-[#04060d]/70 to-transparent sm:h-24" />
                 <div className="absolute left-1/2 top-4 z-30 w-[clamp(150px,54vw,250px)] -translate-x-1/2 sm:top-5 sm:w-[clamp(230px,36vw,290px)]">
                   <div
-                    className="animate-float-1 overflow-hidden rounded-[1.5rem] sm:rounded-3xl"
+                    className="overflow-hidden rounded-[1.5rem] sm:rounded-3xl"
                     style={{ boxShadow: `0 22px 48px -16px ${visualProducts[0].accent || "#60A5FA"}55` }}
                   >
                     <div className="relative aspect-square">
@@ -307,8 +307,7 @@ export function Hero({
                       }`}
                   >
                     <div
-                      className={`overflow-hidden rounded-[1.25rem] sm:rounded-3xl ${index === 0 ? "animate-float-2" : "animate-float-3"
-                        }`}
+                      className="overflow-hidden rounded-[1.25rem] sm:rounded-3xl"
                       style={{ boxShadow: `0 16px 36px -14px ${product.accent || "#F59E0B"}55` }}
                     >
                       <div className="relative aspect-square">

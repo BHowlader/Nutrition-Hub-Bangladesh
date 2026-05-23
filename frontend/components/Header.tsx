@@ -159,7 +159,7 @@ export function Header() {
                   </button>
 
                   {dropdownOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-56 overflow-hidden rounded-xl border border-cream/10 bg-ink/95 shadow-2xl backdrop-blur-xl">
+                    <div className="absolute right-0 top-full mt-2 w-56 overflow-hidden rounded-xl border border-cream/10 bg-ink/95 shadow-2xl sm:backdrop-blur-xl">
                       <div className="border-b border-cream/10 px-4 py-3">
                         <p className="text-sm font-bold text-cream">{user.name}</p>
                         <p className="text-xs text-cream/50">{user.email}</p>
@@ -220,7 +220,7 @@ export function Header() {
 
       {/* Mobile Drawer Overlay */}
       {menuOpen && (
-        <div className="fixed inset-x-3 top-[74px] z-40 overflow-hidden rounded-xl border border-cream/10 bg-ink/95 shadow-2xl backdrop-blur-xl sm:inset-x-4 sm:top-[92px] md:hidden">
+        <div className="fixed inset-x-3 top-[74px] z-40 overflow-hidden rounded-xl border border-cream/10 bg-ink/95 shadow-2xl sm:inset-x-4 sm:top-[92px] md:hidden">
           <nav className="flex flex-col gap-1 p-3">
             {navItems.map(([label, href]) => (
               <Link
