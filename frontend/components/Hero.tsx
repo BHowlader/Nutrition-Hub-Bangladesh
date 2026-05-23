@@ -152,16 +152,18 @@ export function Hero({
           </div>
         )}
 
-        {/* Gymnasium Background Image with Soft Cinematic Blending */}
+        {/* Gymnasium Background Image with Soft Cinematic Blending — desktop only */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          <Image
-            src="/images/gym-bg.png"
-            alt="Luxury Gymnasium Studio"
-            fill
-            sizes="100vw"
-            className="object-cover opacity-[0.28] -scale-x-100 scale-105"
-            priority
-          />
+          <div className="hidden sm:block absolute inset-0">
+            <Image
+              src="/images/gym-bg.png"
+              alt="Luxury Gymnasium Studio"
+              fill
+              sizes="100vw"
+              className="object-cover opacity-[0.28] -scale-x-100 scale-105"
+              priority
+            />
+          </div>
           {/* Soft vertical vignette to keep header and grid travel smooth */}
           <div className="absolute inset-0 bg-gradient-to-b from-[#04060d] via-transparent to-[#04060d]" />
           {/* Left-side soft reading scrim to guarantee absolute text readability */}
@@ -277,52 +279,24 @@ export function Hero({
             </div>
 
             {visualProducts.length > 0 && (
-              <div className="relative mx-auto mt-4 h-[clamp(220px,76vw,360px)] w-full max-w-[430px] overflow-hidden px-2 sm:mt-6 sm:h-[clamp(310px,50vw,400px)] sm:max-w-[560px] lg:hidden">
-                {/* Bottom fade so card edges blend into the page bg instead of looking like contained rectangles */}
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 h-20 bg-gradient-to-t from-[#04060d] via-[#04060d]/70 to-transparent sm:h-24" />
-                <div className="absolute left-1/2 top-4 z-30 w-[clamp(150px,54vw,250px)] -translate-x-1/2 sm:top-5 sm:w-[clamp(230px,36vw,290px)]">
-                  <div
-                    className="overflow-hidden rounded-[1.5rem] sm:rounded-3xl"
-                    style={{ boxShadow: `0 22px 48px -16px ${visualProducts[0].accent || "#60A5FA"}55` }}
-                  >
-                    <div className="relative aspect-square">
-                      <Image
-                        src={productImage(visualProducts[0])}
-                        alt={visualProducts[0].name}
-                        fill
-                        sizes="(max-width: 640px) 54vw, 290px"
-                        className="object-cover"
-                        priority
-                      />
-                    </div>
+              <div className="relative mx-auto mt-4 h-[clamp(200px,68vw,320px)] w-[clamp(150px,56vw,280px)] sm:mt-6 sm:h-[clamp(310px,50vw,400px)] sm:w-[clamp(230px,36vw,290px)] lg:hidden">
+                {/* Bottom fade */}
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-gradient-to-t from-[#04060d] via-[#04060d]/60 to-transparent" />
+                <div
+                  className="overflow-hidden rounded-[1.5rem] sm:rounded-3xl"
+                  style={{ boxShadow: `0 22px 48px -16px ${visualProducts[0].accent || "#60A5FA"}55` }}
+                >
+                  <div className="relative aspect-square">
+                    <Image
+                      src={productImage(visualProducts[0])}
+                      alt={visualProducts[0].name}
+                      fill
+                      sizes="(max-width: 640px) 56vw, 290px"
+                      className="object-cover"
+                      priority
+                    />
                   </div>
                 </div>
-
-                {visualProducts.slice(1, 3).map((product, index) => (
-                  <div
-                    key={product.id}
-                    className={`absolute -bottom-6 w-[clamp(118px,42vw,205px)] sm:-bottom-8 sm:w-[clamp(190px,30vw,245px)] ${index === 0
-                        ? "left-2 z-20 -rotate-6 sm:left-3"
-                        : "right-2 z-10 rotate-6 sm:right-3"
-                      }`}
-                  >
-                    <div
-                      className="overflow-hidden rounded-[1.25rem] sm:rounded-3xl"
-                      style={{ boxShadow: `0 16px 36px -14px ${product.accent || "#F59E0B"}55` }}
-                    >
-                      <div className="relative aspect-square">
-                        <Image
-                          src={productImage(product)}
-                          alt={product.name}
-                          fill
-                          sizes="(max-width: 640px) 42vw, 245px"
-                          className="object-cover"
-                          priority
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
               </div>
             )}
           </div>
