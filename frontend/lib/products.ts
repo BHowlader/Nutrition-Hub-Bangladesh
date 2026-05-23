@@ -195,6 +195,20 @@ export async function fetchHeroSettings(): Promise<HeroSettings | null> {
   }
 }
 
+export async function fetchCategories(): Promise<Category[]> {
+  try {
+    const init: RequestInit & { next?: { revalidate: number; tags: string[] } } =
+      typeof window === "undefined"
+        ? { signal: AbortSignal.timeout(SERVER_FETCH_TIMEOUT_MS), next: { revalidate: PRODUCT_REVALIDATE_SECONDS, tags: ["categories"] } }
+        : {};
+    const res = await fetch(`${API}/api/categories`, init);
+    if (!res.ok) return [];
+    return res.json();
+  } catch {
+    return [];
+  }
+}
+
 export function warmProductCache() {
   if (typeof window === "undefined") return;
   void fetchProducts();
