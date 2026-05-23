@@ -61,9 +61,18 @@ function LoginContent() {
     if (!clientId) return;
 
     let cancelled = false;
+    let attempts = 0;
 
     function renderButton() {
       if (cancelled || !window.google || !googleBtnRef.current) return;
+
+      const offsetWidth = googleBtnRef.current.offsetWidth;
+      if (offsetWidth === 0 && attempts < 5) {
+        attempts++;
+        requestAnimationFrame(() => renderButton());
+        return;
+      }
+
       // Clear any previous render
       googleBtnRef.current.innerHTML = "";
       window.google.accounts.id.initialize({
@@ -78,10 +87,24 @@ function LoginContent() {
           }
         },
       });
+
+      let btnWidth = 400;
+      if (offsetWidth && offsetWidth > 0) {
+        btnWidth = Math.min(offsetWidth, 400);
+      } else {
+        if (typeof window !== "undefined") {
+          if (window.innerWidth < 640) {
+            btnWidth = Math.max(200, Math.min(window.innerWidth - 48, 400));
+          } else {
+            btnWidth = 400;
+          }
+        }
+      }
+
       window.google.accounts.id.renderButton(googleBtnRef.current, {
         theme: "outline",
         size: "large",
-        width: Math.min(googleBtnRef.current.offsetWidth, 400),
+        width: btnWidth,
         text: "signin_with",
         shape: "rectangular",
         locale: "en",

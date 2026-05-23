@@ -44,14 +44,24 @@ function SignupContent() {
     if (!loading && user) router.replace(redirect);
   }, [loading, user, router, redirect]);
 
+  // Load Google Identity Services
   useEffect(() => {
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     if (!clientId) return;
 
     let cancelled = false;
+    let attempts = 0;
 
     function renderButton() {
       if (cancelled || !window.google || !googleBtnRef.current) return;
+
+      const offsetWidth = googleBtnRef.current.offsetWidth;
+      if (offsetWidth === 0 && attempts < 5) {
+        attempts++;
+        requestAnimationFrame(() => renderButton());
+        return;
+      }
+
       googleBtnRef.current.innerHTML = "";
       window.google.accounts.id.initialize({
         client_id: clientId,
@@ -65,10 +75,24 @@ function SignupContent() {
           }
         },
       });
+
+      let btnWidth = 400;
+      if (offsetWidth && offsetWidth > 0) {
+        btnWidth = Math.min(offsetWidth, 400);
+      } else {
+        if (typeof window !== "undefined") {
+          if (window.innerWidth < 640) {
+            btnWidth = Math.max(200, Math.min(window.innerWidth - 48, 400));
+          } else {
+            btnWidth = 400;
+          }
+        }
+      }
+
       window.google.accounts.id.renderButton(googleBtnRef.current, {
         theme: "outline",
         size: "large",
-        width: Math.min(googleBtnRef.current.offsetWidth, 400),
+        width: btnWidth,
         text: "signup_with",
         shape: "rectangular",
         locale: "en",
