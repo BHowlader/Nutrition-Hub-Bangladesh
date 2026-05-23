@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 import { csrfHeader } from "@/lib/auth";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const ADMIN_AUTH_SIGNAL_KEY = "nhb-admin-authed";
 
 export interface AdminUser {
   id: string;
@@ -71,6 +72,11 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    const maybeLoggedIn = typeof window !== "undefined" && localStorage.getItem(ADMIN_AUTH_SIGNAL_KEY) === "1";
+    if (!maybeLoggedIn) {
+      setAdminLoading(false);
+      return;
+    }
     fetchAdminMe().finally(() => setAdminLoading(false));
   }, [fetchAdminMe]);
 
@@ -80,6 +86,9 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
         method: "POST",
         body: JSON.stringify(params),
       });
+      if (typeof window !== "undefined") {
+        localStorage.setItem(ADMIN_AUTH_SIGNAL_KEY, "1");
+      }
       setAdminUser(data.user);
       return data.user;
     },
@@ -91,6 +100,9 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       await adminApiFetch("/api/auth/admin/logout", { method: "POST" });
     } catch {
       // ignore — clear local state regardless
+    }
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(ADMIN_AUTH_SIGNAL_KEY);
     }
     setAdminUser(null);
   }, []);
