@@ -6,7 +6,6 @@ import {
   ArrowRight,
   BadgeCheck,
   Banknote,
-  CheckCircle2,
   MapPin,
   Pill,
   ShieldCheck,
@@ -103,41 +102,6 @@ export default async function HomePage() {
     <main className="min-h-screen bg-ink text-cream antialiased">
       <Header />
       <Hero initialProducts={allProducts} settings={heroSettings} />
-
-      {/* Trust Strip */}
-      <section id="trust" className="relative z-10 -mt-1 bg-ink md:py-10 lg:py-14">
-        <div className="mx-auto w-full md:w-[min(1180px,calc(100%-40px))]">
-          <div className="grid gap-px overflow-hidden bg-white/[0.06] md:grid-cols-3 md:rounded-2xl md:border md:border-white/[0.06]">
-            {[
-              { num: "01", title: "Authenticity first", text: "Visible batch, expiry, importer, and sealed-stock checks before dispatch.", icon: ShieldCheck },
-              { num: "02", title: "Bangladesh checkout", text: "Cash on Delivery (COD) nationwide, with phone-first order confirmation.", icon: CheckCircle2 },
-              { num: "03", title: "Pathao delivery", text: "Fast, trackable delivery via Pathao Courier — Dhaka priority with nationwide reach.", icon: Truck }
-            ].map(({ num, title, text, icon: Icon }) => (
-              <article className="group relative flex items-start gap-4 bg-[#0c1324] p-5 backdrop-blur-md transition-colors duration-300 md:block md:p-7 md:hover:bg-[#0e162c]" key={title}>
-                {/* Subtle number watermark in the top-right corner on desktop */}
-                <span className="pointer-events-none absolute right-6 top-6 hidden font-mono text-[11px] font-black tracking-[0.18em] text-gold/40 transition-colors duration-300 group-hover:text-gold/70 md:block">
-                  {num}
-                </span>
-                {/* Mobile icon (left of content) */}
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-gold/15 bg-gold/10 md:hidden">
-                  <Icon size={20} className="text-gold" />
-                </span>
-                {/* Desktop icon */}
-                <span className="mb-5 hidden h-11 w-11 place-items-center rounded-xl border border-gold/15 bg-gold/10 transition-transform duration-300 group-hover:scale-105 md:grid">
-                  <Icon size={20} className="text-gold" />
-                </span>
-                <div className="min-w-0 flex-1 md:flex-none">
-                  <div className="flex items-baseline gap-2">
-                    <h2 className="text-base font-black text-cream md:text-lg">{title}</h2>
-                    <span className="text-[10px] font-black tracking-wider text-gold md:hidden">{num}</span>
-                  </div>
-                  <p className="mt-1 text-sm leading-relaxed text-cream/60 md:mt-2.5 md:text-[0.95rem]">{text}</p>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Spacer line */}
       <div className="h-[1px] bg-white/[0.05]" />
