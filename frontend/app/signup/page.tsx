@@ -48,14 +48,11 @@ function SignupContent() {
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     if (!clientId) return;
 
-    const script = document.createElement("script");
-    script.src = "https://accounts.google.com/gsi/client?hl=en";
-    script.async = true;
-    script.onload = () => {
-      window.google?.accounts.id.initialize({
+    function tryRenderButton() {
+      if (!window.google || !googleBtnRef.current) return;
+      window.google.accounts.id.initialize({
         client_id: clientId,
         auto_select: false,
-        prompt_parent_id: googleBtnRef.current?.id,
         callback: async (response: { credential: string }) => {
           try {
             await googleLogin(response.credential);
@@ -65,21 +62,30 @@ function SignupContent() {
           }
         },
       });
-      if (googleBtnRef.current) {
-        window.google?.accounts.id.renderButton(googleBtnRef.current, {
-          theme: "filled_black",
-          size: "large",
-          width: 360,
-          text: "signup_with",
-          shape: "pill",
-          locale: "en",
-          click_listener: () => {
-            window.google?.accounts.id.disableAutoSelect();
-          },
-        });
-      }
+      window.google.accounts.id.renderButton(googleBtnRef.current, {
+        theme: "filled_black",
+        size: "large",
+        width: 360,
+        text: "signup_with",
+        shape: "pill",
+        locale: "en",
+        click_listener: () => {
+          window.google?.accounts.id.disableAutoSelect();
+        },
+      });
       setGsiReady(true);
-    };
+    }
+
+    // If GSI script already loaded (e.g. cached from prior navigation)
+    if (window.google?.accounts) {
+      tryRenderButton();
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client?hl=en";
+    script.async = true;
+    script.onload = () => tryRenderButton();
     document.head.appendChild(script);
     return () => { script.remove(); };
   }, [googleLogin, router, redirect]);
