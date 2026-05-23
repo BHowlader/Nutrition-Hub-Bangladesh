@@ -79,11 +79,11 @@ function LoginContent() {
         },
       });
       window.google.accounts.id.renderButton(googleBtnRef.current, {
-        theme: "filled_black",
+        theme: "outline",
         size: "large",
-        width: googleBtnRef.current.offsetWidth || 360,
+        width: Math.min(googleBtnRef.current.offsetWidth, 400),
         text: "signin_with",
-        shape: "pill",
+        shape: "rectangular",
         locale: "en",
         click_listener: () => {
           window.google?.accounts.id.disableAutoSelect();
