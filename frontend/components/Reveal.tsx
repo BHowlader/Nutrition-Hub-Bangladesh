@@ -18,6 +18,8 @@ export function Reveal({
     const node = ref.current;
     if (!node) return;
 
+    const isMobile = window.innerWidth < 768;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -25,7 +27,7 @@ export function Reveal({
           observer.disconnect();
         }
       },
-      { rootMargin: "-80px" }
+      { rootMargin: isMobile ? "0px" : "-80px" }
     );
 
     observer.observe(node);
