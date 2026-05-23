@@ -104,7 +104,7 @@ export function Hero({
     <>
       <section
         ref={rootRef}
-        className="relative flex min-h-[100svh] items-center justify-center overflow-hidden bg-[#04060d] pb-7 pt-[7.5rem] sm:pb-10 sm:pt-[7.25rem] md:pt-[7.75rem] lg:pb-12 lg:pt-[7.75rem]"
+        className="relative flex min-h-[100svh] items-center justify-center bg-[#04060d] pb-7 pt-[7.5rem] sm:pb-10 sm:pt-[7.25rem] md:pt-[7.75rem] lg:pb-12 lg:pt-[7.75rem]"
       >
         {/* Cinematic Loader Shutter Panels */}
         {loading && (
