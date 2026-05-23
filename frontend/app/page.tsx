@@ -107,7 +107,7 @@ export default async function HomePage() {
       <div className="h-[1px] bg-white/[0.05]" />
 
       {/* Shop by Goal */}
-      <section className="relative overflow-hidden bg-ink py-16 sm:py-20 lg:py-28">
+      <section className="relative bg-ink py-16 sm:py-20 lg:py-28">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(96,165,250,0.13),transparent_32%),radial-gradient(circle_at_85%_15%,rgba(16,185,129,0.08),transparent_30%)]" />
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/[0.06]" />
         <div className="shell">
@@ -177,7 +177,7 @@ export default async function HomePage() {
       <div className="h-[1px] bg-white/[0.05]" />
 
       {/* Best Sellers (Catalog) */}
-      <section id="catalog" className="relative overflow-hidden bg-[#080d18] py-14 text-cream sm:py-20 lg:py-28">
+      <section id="catalog" className="relative bg-[#080d18] py-14 text-cream sm:py-20 lg:py-28">
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),transparent_22%),radial-gradient(circle_at_85%_0%,rgba(245,158,11,0.12),transparent_30%)]" />
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/[0.06]" />
         <div className="shell">
