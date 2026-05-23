@@ -13,49 +13,53 @@ export function Reveal({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    const mobile = window.innerWidth < 768;
+    setIsMobile(mobile);
+
+    // Skip animation entirely on mobile — show content immediately
+    if (mobile) {
+      setVisible(true);
+      return;
+    }
+
     const node = ref.current;
     if (!node) return;
 
-    // Use a very generous rootMargin for mobile compatibility and earlier triggering
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting || entry.intersectionRatio > 0) {
+        if (entry.isIntersecting) {
           setVisible(true);
           observer.disconnect();
         }
       },
-      { rootMargin: "150px 0px 150px 0px", threshold: 0 }
+      { rootMargin: "50px 0px 50px 0px", threshold: 0 }
     );
 
     observer.observe(node);
 
-    // Immediate viewport fallback (handles cases where element is already visible)
+    // Fallback for elements already in viewport on mount
     const rect = node.getBoundingClientRect();
-    if (rect.top < window.innerHeight + 100 && rect.bottom > -100) {
+    if (rect.top < window.innerHeight + 50 && rect.bottom > -50) {
       setVisible(true);
       observer.disconnect();
     }
 
-    // Safety fallback: guaranteed reveal after 1.2s to prevent UX freezing
-    // This perfectly addresses the issue where elements get "stucked" indefinitely.
-    const fallbackTimer = setTimeout(() => {
-      setVisible(true);
-      observer.disconnect();
-    }, 1200);
-
-    return () => {
-      observer.disconnect();
-      clearTimeout(fallbackTimer);
-    };
+    return () => observer.disconnect();
   }, []);
+
+  // Mobile: no animation wrapper, render children directly
+  if (isMobile) {
+    return <div className={className}>{children}</div>;
+  }
 
   return (
     <div
       ref={ref}
-      className={`${className} transition-all duration-700 ease-out motion-reduce:transition-none ${
-        visible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+      className={`${className} transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none ${
+        visible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
       }`}
       style={{ transitionDelay: visible && delay ? `${delay}s` : undefined }}
     >
