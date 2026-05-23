@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Star, ShieldCheck, ShoppingBag } from "lucide-react";
 import { formatTaka, productImage, type Product } from "@/lib/products";
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
   const [hovered, setHovered] = useState(false);
 
   const specs = (product.detail || "")
@@ -54,6 +54,7 @@ export function ProductCard({ product }: { product: Product }) {
             className="h-full w-full object-cover"
             sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 25vw"
             quality={72}
+            priority={priority}
           />
         </div>
       </div>
