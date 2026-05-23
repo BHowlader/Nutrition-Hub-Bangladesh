@@ -60,8 +60,12 @@ function LoginContent() {
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     if (!clientId) return;
 
-    function tryRenderButton() {
-      if (!window.google || !googleBtnRef.current) return;
+    let cancelled = false;
+
+    function renderButton() {
+      if (cancelled || !window.google || !googleBtnRef.current) return;
+      // Clear any previous render
+      googleBtnRef.current.innerHTML = "";
       window.google.accounts.id.initialize({
         client_id: clientId,
         auto_select: false,
@@ -77,7 +81,7 @@ function LoginContent() {
       window.google.accounts.id.renderButton(googleBtnRef.current, {
         theme: "filled_black",
         size: "large",
-        width: 360,
+        width: googleBtnRef.current.offsetWidth || 360,
         text: "signin_with",
         shape: "pill",
         locale: "en",
@@ -88,18 +92,23 @@ function LoginContent() {
       setGsiReady(true);
     }
 
+    function onScriptReady() {
+      // Delay render to next frame so container has layout dimensions
+      requestAnimationFrame(() => renderButton());
+    }
+
     // If GSI script already loaded (e.g. cached from prior navigation)
     if (window.google?.accounts) {
-      tryRenderButton();
+      onScriptReady();
       return;
     }
 
     const script = document.createElement("script");
     script.src = "https://accounts.google.com/gsi/client?hl=en";
     script.async = true;
-    script.onload = () => tryRenderButton();
+    script.onload = () => onScriptReady();
     document.head.appendChild(script);
-    return () => { script.remove(); };
+    return () => { cancelled = true; script.remove(); };
   }, [googleLogin, router, redirect]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -197,15 +206,15 @@ function LoginContent() {
             <div className="h-px flex-1 bg-cream/10" />
           </div>
 
-          {/* Google Sign-In — GSI renders here when client ID is configured */}
-          <div ref={googleBtnRef} className={`flex justify-center overflow-hidden transition-all duration-300 ${gsiReady ? "max-h-20 opacity-100" : "max-h-0 opacity-0"}`} />
+          {/* Google Sign-In — GSI renders here; always in DOM so it has layout dimensions */}
+          <div ref={googleBtnRef} className="flex justify-center min-h-[44px]" />
 
-          {/* Fallback styled button when GSI not loaded */}
+          {/* Fallback styled button shown until GSI renders */}
           {!gsiReady && (
             <button
               type="button"
-              onClick={() => setError("Google Sign-In is not configured yet. Please set NEXT_PUBLIC_GOOGLE_CLIENT_ID.")}
-              className="flex w-full items-center justify-center gap-3 rounded-xl border border-cream/10 bg-cream/[0.04] px-4 py-2.5 md:py-3 font-bold text-sm md:text-base text-cream transition hover:border-cream/20 hover:bg-cream/[0.08]"
+              onClick={() => setError("Google Sign-In is loading. Please wait a moment and try again.")}
+              className="-mt-[44px] relative z-10 flex w-full items-center justify-center gap-3 rounded-xl border border-cream/10 bg-cream/[0.04] px-4 py-2.5 md:py-3 font-bold text-sm md:text-base text-cream transition hover:border-cream/20 hover:bg-cream/[0.08]"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
