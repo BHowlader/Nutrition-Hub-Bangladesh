@@ -18,8 +18,7 @@ export function Reveal({
     const node = ref.current;
     if (!node) return;
 
-    const isMobile = window.innerWidth < 768;
-
+    // Use a generous bottom margin so elements trigger well before entering the viewport
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -27,10 +26,18 @@ export function Reveal({
           observer.disconnect();
         }
       },
-      { rootMargin: isMobile ? "0px" : "-80px" }
+      { rootMargin: "0px 0px 100px 0px", threshold: 0 }
     );
 
     observer.observe(node);
+
+    // Fallback: if element is already in viewport on mount, reveal immediately
+    const rect = node.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      setVisible(true);
+      observer.disconnect();
+    }
+
     return () => observer.disconnect();
   }, []);
 
