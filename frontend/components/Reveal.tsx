@@ -12,21 +12,27 @@ export function Reveal({
   delay?: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  // Start visible so SSR HTML is never hidden — prevents FOIC on mobile
+  const [animated, setAnimated] = useState(false);
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    const mobile = window.innerWidth < 768;
-    setIsMobile(mobile);
+    const node = ref.current;
+    if (!node) return;
 
-    // Skip animation entirely on mobile — show content immediately
-    if (mobile) {
+    // Skip animation on mobile entirely
+    if (window.innerWidth < 768) return;
+
+    // Desktop: briefly hide, then animate in via IntersectionObserver
+    setVisible(false);
+    setAnimated(true);
+
+    // If already in viewport, reveal immediately (no flash)
+    const rect = node.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
       setVisible(true);
       return;
     }
-
-    const node = ref.current;
-    if (!node) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -39,29 +45,20 @@ export function Reveal({
     );
 
     observer.observe(node);
-
-    // Fallback for elements already in viewport on mount
-    const rect = node.getBoundingClientRect();
-    if (rect.top < window.innerHeight + 50 && rect.bottom > -50) {
-      setVisible(true);
-      observer.disconnect();
-    }
-
     return () => observer.disconnect();
   }, []);
-
-  // Mobile: no animation wrapper, render children directly
-  if (isMobile) {
-    return <div className={className}>{children}</div>;
-  }
 
   return (
     <div
       ref={ref}
-      className={`${className} transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none ${
-        visible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+      className={`${className}${
+        animated
+          ? ` transition-[opacity,transform] duration-500 ease-out ${
+              visible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+            }`
+          : ""
       }`}
-      style={{ transitionDelay: visible && delay ? `${delay}s` : undefined }}
+      style={animated && visible && delay ? { transitionDelay: `${delay}s` } : undefined}
     >
       {children}
     </div>
