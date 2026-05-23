@@ -5,8 +5,7 @@ const nextConfig = {
     optimizePackageImports: ["lucide-react"]
   },
   images: {
-    loader: "custom",
-    loaderFile: "./lib/cloudinary-loader.ts",
+    formats: ["image/webp"],
     qualities: [55, 60, 72, 85],
     remotePatterns: [
       {
