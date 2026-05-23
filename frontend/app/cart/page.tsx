@@ -23,14 +23,11 @@ export default function CartPage() {
   const [couponCode, setCouponCode] = useState("");
   const [couponApplying, setCouponApplying] = useState(false);
   const [coupon, setCoupon] = useState<{ code: string; discount_amount: string; total: string; message: string } | null>(null);
+  const [orderSuccess, setOrderSuccess] = useState<{ id: string; customer_name: string; phone: string; address: string; total: string } | null>(null);
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
-
-  useEffect(() => {
-    if (!authLoading && !user) router.replace("/login?redirect=/cart");
-  }, [authLoading, user, router]);
 
   useEffect(() => {
     if (user) {
@@ -64,11 +61,31 @@ export default function CartPage() {
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body.detail || "Checkout failed");
+        let errMsg = "Checkout failed";
+        if (body.detail) {
+          if (typeof body.detail === "string") {
+            errMsg = body.detail;
+          } else if (Array.isArray(body.detail)) {
+            errMsg = body.detail
+              .map((err: any) => {
+                const fieldName = err.loc[err.loc.length - 1];
+                return `${fieldName}: ${err.msg}`;
+              })
+              .join("; ");
+          }
+        }
+        throw new Error(errMsg);
       }
+      const createdOrder = await res.json();
       await clear();
       await refresh();
-      router.push("/dashboard?tab=orders");
+      setOrderSuccess({
+        id: createdOrder.id,
+        customer_name: createdOrder.customer_name,
+        phone: createdOrder.phone,
+        address: createdOrder.address,
+        total: String(createdOrder.total),
+      });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Checkout failed");
     } finally {
@@ -106,7 +123,72 @@ export default function CartPage() {
   const discountAmount = coupon ? Number(coupon.discount_amount) : 0;
   const payableTotal = Math.max(totalPrice - discountAmount, 0);
 
-  if (authLoading || !user) return <PageLoading label="Loading cart" />;
+  if (authLoading) return <PageLoading label="Loading cart" />;
+
+  if (orderSuccess) {
+    return (
+      <div className="min-h-screen bg-[#04060d] text-cream selection:bg-gold selection:text-ink pt-24 md:pt-28 pb-10 flex items-center justify-center">
+        <Header />
+        <div className="mx-auto max-w-xl px-4 w-full">
+          <div className="premium-card p-6 md:p-8 text-center flex flex-col items-center">
+            {/* Green glowing checkmark */}
+            <div className="relative mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-mint/30 bg-mint/5 shadow-[0_0_50px_rgba(16,185,129,0.15)]">
+              <svg className="h-10 w-10 text-mint animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h1 className="text-3xl font-black text-cream">Order Confirmed!</h1>
+            <p className="mt-2 text-sm text-cream/55">Thank you for shopping with Nutrition Hub Bangladesh.</p>
+            
+            <div className="w-full mt-8 border-t border-white/[0.08] pt-6 text-left space-y-4">
+              <div className="flex justify-between items-center bg-white/[0.02] border border-white/[0.05] rounded-xl p-3.5">
+                <span className="text-xs uppercase tracking-wider text-cream/40 font-bold">Order ID</span>
+                <span className="font-mono text-sm font-black text-gold truncate max-w-[200px]">{orderSuccess.id}</span>
+              </div>
+
+              <div className="space-y-2.5 rounded-xl border border-white/[0.05] bg-white/[0.01] p-4 text-sm text-cream/70">
+                <div className="flex justify-between">
+                  <span className="text-cream/40">Customer Name</span>
+                  <span className="font-bold text-cream">{orderSuccess.customer_name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-cream/40">Phone Number</span>
+                  <span className="font-bold text-cream">{orderSuccess.phone}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-cream/40">Shipping Address</span>
+                  <span className="font-bold text-cream text-right max-w-[200px] truncate">{orderSuccess.address}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-cream/40">Payment Method</span>
+                  <span className="font-bold text-cream uppercase">Cash on Delivery (COD)</span>
+                </div>
+                <div className="flex justify-between border-t border-white/[0.08] pt-3 text-base">
+                  <span className="font-bold text-cream">Amount Payable</span>
+                  <strong className="font-black text-gold">৳{Number(orderSuccess.total).toLocaleString()}</strong>
+                </div>
+              </div>
+            </div>
+
+            <p className="mt-6 text-xs leading-relaxed text-cream/50">
+              Our customer support team will call you at <strong className="text-cream">{orderSuccess.phone}</strong> within 12 hours to confirm your details. Your order will be dispatched via Pathao Courier right after confirmation.
+            </p>
+
+            <div className="mt-8 flex flex-col sm:flex-row gap-3 w-full">
+              <Link href="/" className="btn-primary w-full text-center py-3.5 text-sm uppercase tracking-wider justify-center">
+                Continue Shopping
+              </Link>
+              {user && (
+                <Link href="/dashboard?tab=orders" className="btn-secondary w-full text-center py-3.5 text-sm uppercase tracking-wider justify-center">
+                  Track in Dashboard
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-ink pt-24 md:pt-28 pb-10">
@@ -278,15 +360,34 @@ export default function CartPage() {
             )}
 
             <form onSubmit={handleCheckout} className="mt-4 space-y-3">
-              <CheckoutField label="Full name" value={name} onChange={setName} required />
-              <CheckoutField label="Phone" value={phone} onChange={setPhone} type="tel" required placeholder="+880 1XXX XXXXXX" />
+              <CheckoutField
+                label="Full name"
+                value={name}
+                onChange={setName}
+                required
+                minLength={2}
+                maxLength={160}
+              />
+              <CheckoutField
+                label="Phone"
+                value={phone}
+                onChange={setPhone}
+                type="tel"
+                required
+                placeholder="+880 1XXX XXXXXX"
+                minLength={8}
+                maxLength={40}
+                pattern="^[+\d][\d\s\-()]{6,38}\d$"
+              />
               <div>
-                <label className="mb-1 block text-xs font-black uppercase tracking-wider text-cream/40">Address</label>
+                <label className="mb-1 block text-xs font-black uppercase tracking-wider text-cream/40">Address (min. 8 characters)</label>
                 <textarea
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   rows={3}
                   required
+                  minLength={8}
+                  maxLength={500}
                   className="w-full resize-none rounded-xl border border-cream/10 bg-cream/[0.03] px-3 py-2 text-sm text-cream outline-none focus:border-gold/50"
                 />
               </div>
@@ -317,6 +418,9 @@ function CheckoutField({
   type = "text",
   placeholder,
   required,
+  minLength,
+  maxLength,
+  pattern,
 }: {
   label: string;
   value: string;
@@ -324,6 +428,9 @@ function CheckoutField({
   type?: string;
   placeholder?: string;
   required?: boolean;
+  minLength?: number;
+  maxLength?: number;
+  pattern?: string;
 }) {
   return (
     <div>
@@ -334,6 +441,9 @@ function CheckoutField({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         required={required}
+        minLength={minLength}
+        maxLength={maxLength}
+        pattern={pattern}
         className="w-full rounded-xl border border-cream/10 bg-cream/[0.03] px-3 py-2 text-sm text-cream outline-none focus:border-gold/50"
       />
     </div>

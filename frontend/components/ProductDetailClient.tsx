@@ -177,14 +177,10 @@ export function ProductDetailClient({
                     {product.stock > 0 ? (
                       <button
                         onClick={async () => {
-                          if (!user) {
-                            router.push(`/login?redirect=/products/${product.slug}`);
-                            return;
-                          }
                           setAdding(true);
                           setAddMsg("");
                           try {
-                            await setQuantity(product.id, inCart + 1);
+                            await setQuantity(product.id, inCart + 1, product);
                             setAddMsg(`Added to cart (${inCart + 1})`);
                           } catch (e) {
                             setAddMsg(e instanceof Error ? e.message : "Failed to add");

@@ -25,7 +25,7 @@ interface CartState {
   loading: boolean;
   totalCount: number;
   totalPrice: number;
-  setQuantity: (productId: string, quantity: number) => Promise<void>;
+  setQuantity: (productId: string, quantity: number, product?: any) => Promise<void>;
   removeItem: (productId: string) => Promise<void>;
   clear: () => Promise<void>;
   refresh: () => Promise<void>;
@@ -65,7 +65,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     if (!user) {
-      setItems([]);
+      if (typeof window !== "undefined") {
+        let localItems: CartItem[] = [];
+        try {
+          const stored = window.localStorage.getItem("nhb_guest_cart");
+          if (stored) localItems = JSON.parse(stored);
+        } catch {}
+        setItems(localItems);
+      } else {
+        setItems([]);
+      }
       return;
     }
     setLoading(true);
@@ -83,33 +92,126 @@ export function CartProvider({ children }: { children: ReactNode }) {
     refresh();
   }, [refresh]);
 
-  const setQuantity = useCallback(
-    async (productId: string, quantity: number) => {
-      if (quantity < 1) {
-        await api(`/api/cart/items/${productId}`, { method: "DELETE" });
-      } else {
-        await api(`/api/cart/items/${productId}`, {
-          method: "PUT",
-          body: JSON.stringify({ quantity }),
-        });
+  // Sync guest cart to database cart upon login
+  useEffect(() => {
+    if (user && typeof window !== "undefined") {
+      const stored = window.localStorage.getItem("nhb_guest_cart");
+      if (stored) {
+        try {
+          const localItems = JSON.parse(stored) as CartItem[];
+          if (localItems.length > 0) {
+            const syncCart = async () => {
+              setLoading(true);
+              try {
+                for (const item of localItems) {
+                  await fetch(`${API}/api/cart/items/${item.product_id}`, {
+                    method: "PUT",
+                    credentials: "include",
+                    headers: {
+                      "Content-Type": "application/json",
+                      ...csrfHeader("PUT"),
+                    },
+                    body: JSON.stringify({ quantity: item.quantity }),
+                  });
+                }
+                window.localStorage.removeItem("nhb_guest_cart");
+              } catch (e) {
+                console.error("Failed to sync guest cart", e);
+              } finally {
+                setLoading(false);
+                refresh();
+              }
+            };
+            void syncCart();
+          }
+        } catch (e) {
+          console.error("Error parsing guest cart", e);
+        }
       }
-      await refresh();
+    }
+  }, [user, refresh]);
+
+  const setQuantity = useCallback(
+    async (productId: string, quantity: number, product?: any) => {
+      if (user) {
+        if (quantity < 1) {
+          await api(`/api/cart/items/${productId}`, { method: "DELETE" });
+        } else {
+          await api(`/api/cart/items/${productId}`, {
+            method: "PUT",
+            body: JSON.stringify({ quantity }),
+          });
+        }
+        await refresh();
+      } else {
+        if (typeof window !== "undefined") {
+          let localItems: CartItem[] = [];
+          try {
+            const stored = window.localStorage.getItem("nhb_guest_cart");
+            if (stored) localItems = JSON.parse(stored);
+          } catch {}
+
+          if (quantity < 1) {
+            localItems = localItems.filter((it) => it.product_id !== productId);
+          } else {
+            const index = localItems.findIndex((it) => it.product_id === productId);
+            if (index > -1) {
+              localItems[index].quantity = quantity;
+            } else if (product) {
+              localItems.push({
+                product_id: productId,
+                quantity,
+                product: {
+                  id: product.id,
+                  name: product.name,
+                  slug: product.slug,
+                  price: product.price,
+                  image_url: product.image_url,
+                  stock: product.stock,
+                },
+              });
+            }
+          }
+          window.localStorage.setItem("nhb_guest_cart", JSON.stringify(localItems));
+          setItems(localItems);
+        }
+      }
     },
-    [refresh]
+    [user, refresh]
   );
 
   const removeItem = useCallback(
     async (productId: string) => {
-      await api(`/api/cart/items/${productId}`, { method: "DELETE" });
-      await refresh();
+      if (user) {
+        await api(`/api/cart/items/${productId}`, { method: "DELETE" });
+        await refresh();
+      } else {
+        if (typeof window !== "undefined") {
+          let localItems: CartItem[] = [];
+          try {
+            const stored = window.localStorage.getItem("nhb_guest_cart");
+            if (stored) localItems = JSON.parse(stored);
+          } catch {}
+          localItems = localItems.filter((it) => it.product_id !== productId);
+          window.localStorage.setItem("nhb_guest_cart", JSON.stringify(localItems));
+          setItems(localItems);
+        }
+      }
     },
-    [refresh]
+    [user, refresh]
   );
 
   const clear = useCallback(async () => {
-    await api("/api/cart", { method: "DELETE" });
-    setItems([]);
-  }, []);
+    if (user) {
+      await api("/api/cart", { method: "DELETE" });
+      setItems([]);
+    } else {
+      if (typeof window !== "undefined") {
+        window.localStorage.removeItem("nhb_guest_cart");
+      }
+      setItems([]);
+    }
+  }, [user]);
 
   const totalCount = items.reduce((n, it) => n + it.quantity, 0);
   const totalPrice = items.reduce((n, it) => n + Number(it.product.price) * it.quantity, 0);

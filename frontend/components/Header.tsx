@@ -99,7 +99,7 @@ export function Header() {
     const warmRoutes = () => {
       router.prefetch("/");
       router.prefetch("/products");
-      router.prefetch(user ? "/cart" : "/login?redirect=/cart");
+      router.prefetch("/cart");
       router.prefetch(user ? "/dashboard" : "/login");
       warmProductCache();
     };
@@ -114,14 +114,10 @@ export function Header() {
   }, [router, user]);
 
   function prefetchCartTarget() {
-    router.prefetch(user ? "/cart" : "/login?redirect=/cart");
+    router.prefetch("/cart");
   }
 
   function handleCartClick() {
-    if (!user) {
-      router.push("/login?redirect=/cart");
-      return;
-    }
     router.push("/cart");
   }
 
@@ -149,10 +145,6 @@ export function Header() {
         </Link>
 
         <div className="hidden items-center gap-7 text-sm font-bold text-cream/70 md:flex">
-          <Link className="transition hover:text-champagne" href="/products">
-            Products
-          </Link>
-
           {/* Categories Dropdown Menu */}
           <div className="relative group py-2">
             <button className="flex items-center gap-1.5 transition hover:text-champagne">
@@ -200,11 +192,9 @@ export function Header() {
           >
             <ShoppingBag size={18} />
             <span className="hidden sm:inline">Cart</span>
-            {user && (
+            {totalCount > 0 && (
               <span
-                className={`absolute -right-2 -top-2 flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-[10px] font-black ring-2 ring-ink ${
-                  totalCount > 0 ? "bg-gold text-ink" : "bg-ink text-cream/70"
-                }`}
+                className="absolute -right-2 -top-2 flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-[10px] font-black ring-2 ring-ink bg-gold text-ink"
               >
                 {totalCount}
               </span>
@@ -286,14 +276,6 @@ export function Header() {
       {menuOpen && (
         <div className="fixed inset-x-3 top-[74px] z-40 overflow-hidden rounded-xl border border-cream/10 bg-ink/95 shadow-2xl sm:inset-x-4 sm:top-[92px] md:hidden">
           <nav className="flex flex-col gap-1 p-3">
-            <Link
-              href="/products"
-              onClick={() => setMenuOpen(false)}
-              className="flex items-center gap-3 rounded-lg px-4 py-3 text-base font-bold text-cream/80 transition hover:bg-cream/5 hover:text-cream"
-            >
-              Products
-            </Link>
-
             {/* Mobile Categories Accordion */}
             <div>
               <button

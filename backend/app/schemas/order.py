@@ -42,6 +42,7 @@ class OrderRead(BaseModel):
     total: Decimal
     items: list[OrderItemRead]
     created_at: datetime | None = None
+    user_id: str | None = None
 
     model_config = {"from_attributes": True}
 

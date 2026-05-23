@@ -73,7 +73,16 @@ def _detect_photo_mime(content: bytes) -> str | None:
     return None
 
 
-def _token_response(user: User, response: Response) -> TokenResponse:
+def _token_response(user: User, response: Response, db: Session | None = None) -> TokenResponse:
+    if db and user.phone:
+        from sqlalchemy import update
+        from app.models.order import Order
+        db.execute(
+            update(Order)
+            .where(Order.user_id == None, Order.phone == user.phone)
+            .values(user_id=user.id)
+        )
+        db.commit()
     hours = _token_expiry_hours_for(user)
     token = create_access_token(user.id, token_version=int(user.token_version or 0), hours=hours)
     set_auth_cookie(response, token, max_age_seconds=hours * 3600)
@@ -133,7 +142,7 @@ def login(request: Request, response: Response, body: UserLogin, db: Session = D
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin accounts must sign in with Google. Email/password login is not permitted for administrative users.",
         )
-    return _token_response(user, response)
+    return _token_response(user, response, db)
 
 
 def _verify_google_id_token(id_token_str: str, expected_nonce: str | None) -> dict:
@@ -209,7 +218,7 @@ def google_auth(request: Request, response: Response, body: GoogleAuth, db: Sess
     """Implicit-style flow used by the Google Identity Services button on the storefront."""
     idinfo = _verify_google_id_token(body.credential, expected_nonce=body.nonce)
     user = _upsert_google_user(db, idinfo)
-    return _token_response(user, response)
+    return _token_response(user, response, db)
 
 
 @router.post("/google/exchange", response_model=TokenResponse)
@@ -285,7 +294,7 @@ def google_code_exchange(
 
     idinfo = _verify_google_id_token(id_token_str, expected_nonce=body.nonce)
     user = _upsert_google_user(db, idinfo)
-    return _token_response(user, response)
+    return _token_response(user, response, db)
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
@@ -320,6 +329,16 @@ def update_me(body: UserUpdate, db: Session = Depends(get_db), user: User = Depe
         setattr(user, field, value)
     db.commit()
     db.refresh(user)
+    if user.phone:
+        from sqlalchemy import update
+        from app.models.order import Order
+        db.execute(
+            update(Order)
+            .where(Order.user_id == None, Order.phone == user.phone)
+            .values(user_id=user.id)
+        )
+        db.commit()
+        db.refresh(user)
     return UserOut.model_validate(user)
 
 
@@ -488,7 +507,7 @@ def reset_password(request: Request, response: Response, body: ResetPassword, db
     db.refresh(user)
 
     # Log the user in automatically after reset
-    return _token_response(user, response)
+    return _token_response(user, response, db)
 
 
 # ── Email Verification ────────────────────────────────────────────
@@ -511,13 +530,13 @@ def verify_email(request: Request, response: Response, token: str, db: Session =
 
     if user.email_verified:
         # Already verified — just log them in
-        return _token_response(user, response)
+        return _token_response(user, response, db)
 
     user.email_verified = True
     db.commit()
     db.refresh(user)
 
-    return _token_response(user, response)
+    return _token_response(user, response, db)
 
 
 @router.post("/resend-verification", status_code=status.HTTP_200_OK)

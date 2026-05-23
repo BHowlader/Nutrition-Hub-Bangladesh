@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowRight, ShieldCheck, Zap } from "lucide-react";
 import { fetchProducts, formatTaka, productImage, type Product } from "@/lib/products";
 
@@ -279,11 +280,14 @@ export function Hero({
             </div>
 
             {visualProducts.length > 0 && (
-              <div className="relative mx-auto mt-4 h-[clamp(200px,68vw,320px)] w-[clamp(150px,56vw,280px)] sm:mt-6 sm:h-[clamp(310px,50vw,400px)] sm:w-[clamp(230px,36vw,290px)] lg:hidden">
+              <Link
+                href={`/products/${visualProducts[0].slug}`}
+                className="relative mx-auto mt-4 block h-[clamp(200px,68vw,320px)] w-[clamp(150px,56vw,280px)] sm:mt-6 sm:h-[clamp(310px,50vw,400px)] sm:w-[clamp(230px,36vw,290px)] lg:hidden group"
+              >
                 {/* Bottom fade */}
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-gradient-to-t from-[#04060d] via-[#04060d]/60 to-transparent" />
                 <div
-                  className="overflow-hidden rounded-[1.5rem] sm:rounded-3xl"
+                  className="overflow-hidden rounded-[1.5rem] sm:rounded-3xl transition-transform duration-300 group-hover:scale-[1.02]"
                   style={{ boxShadow: `0 22px 48px -16px ${visualProducts[0].accent || "#60A5FA"}55` }}
                 >
                   <div className="relative aspect-square">
@@ -292,12 +296,12 @@ export function Hero({
                       alt={visualProducts[0].name}
                       fill
                       sizes="(max-width: 640px) 56vw, 290px"
-                      className="object-cover"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
                       priority
                     />
                   </div>
                 </div>
-              </div>
+              </Link>
             )}
           </div>
 
@@ -315,35 +319,40 @@ export function Hero({
                   perspective: "1200px"
                 }}
               >
-                <div
-                  className={`hero-visual-card animate-float-${i + 1} w-[260px] overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0c1324] shadow-[0_30px_60px_rgba(0,0,0,0.4)] sm:backdrop-blur-2xl transition-all duration-300 hover:border-white/20`}
-                  style={{
-                    boxShadow: `0 30px 60px -10px ${product.accent || "#F59E0B"}15`
-                  }}
+                <Link
+                  href={`/products/${product.slug}`}
+                  className="block group"
                 >
-                  <div className="relative aspect-square w-full overflow-hidden bg-[#050811] border-b border-white/[0.04]">
-                    <div className="absolute inset-0">
-                      <Image
-                        src={productImage(product)}
-                        alt={product.name}
-                        fill
-                        sizes="260px"
-                        className="object-cover w-full h-full"
-                        priority
-                      />
+                  <div
+                    className={`hero-visual-card animate-float-${i + 1} w-[260px] overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0c1324] shadow-[0_30px_60px_rgba(0,0,0,0.4)] sm:backdrop-blur-2xl transition-all duration-300 group-hover:border-white/20 group-hover:scale-[1.02] cursor-pointer`}
+                    style={{
+                      boxShadow: `0 30px 60px -10px ${product.accent || "#F59E0B"}15`
+                    }}
+                  >
+                    <div className="relative aspect-square w-full overflow-hidden bg-[#050811] border-b border-white/[0.04]">
+                      <div className="absolute inset-0">
+                        <Image
+                          src={productImage(product)}
+                          alt={product.name}
+                          fill
+                          sizes="260px"
+                          className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+                          priority
+                        />
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <div className="text-[10px] font-bold uppercase tracking-widest text-cream/50 mb-1">{product.category?.name || ""}</div>
+                      <h3 className="text-base font-bold text-cream truncate group-hover:text-gold transition-colors">{product.name}</h3>
+                      <div className="mt-3 flex items-center justify-between">
+                        <span className="font-black text-gold">{formatTaka(product.price)}</span>
+                        <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold text-cream/70 sm:backdrop-blur-md">
+                          {product.badge || ""}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <div className="p-4">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-cream/50 mb-1">{product.category?.name || ""}</div>
-                    <h3 className="text-base font-bold text-cream truncate">{product.name}</h3>
-                    <div className="mt-3 flex items-center justify-between">
-                      <span className="font-black text-gold">{formatTaka(product.price)}</span>
-                      <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold text-cream/70 sm:backdrop-blur-md">
-                        {product.badge || ""}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                </Link>
               </div>
             ))}
 

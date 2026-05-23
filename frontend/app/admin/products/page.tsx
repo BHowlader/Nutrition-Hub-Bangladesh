@@ -123,6 +123,7 @@ interface Order {
   total: string;
   items: OrderItem[];
   created_at: string | null;
+  user_id?: string | null;
 }
 
 interface AdminStats {
@@ -1219,7 +1220,14 @@ function OrdersSection({ orders, saving, onStatusChange }: { orders: Order[]; sa
 
               <div className="flex justify-between items-start gap-4">
                 <div>
-                  <strong className="text-sm text-cream font-bold">{order.customer_name}</strong>
+                  <div className="flex items-center gap-2">
+                    <strong className="text-sm text-cream font-bold">{order.customer_name}</strong>
+                    {!order.user_id && (
+                      <span className="inline-flex items-center rounded bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 text-[8px] font-black tracking-wider uppercase text-amber-400">
+                        Guest
+                      </span>
+                    )}
+                  </div>
                   <span className="block text-xs text-cream/50 mt-0.5">{order.phone}</span>
                 </div>
                 <div className="relative inline-block" onClick={(e) => e.stopPropagation()}>
@@ -1372,7 +1380,14 @@ function OrdersSection({ orders, saving, onStatusChange }: { orders: Order[]; sa
                       </div>
                     </td>
                     <td className="px-4 py-4 !text-left">
-                      <strong className="block text-sm text-cream font-bold">{order.customer_name}</strong>
+                      <div className="flex items-center gap-2">
+                        <strong className="block text-sm text-cream font-bold">{order.customer_name}</strong>
+                        {!order.user_id && (
+                          <span className="inline-flex items-center rounded bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 text-[8px] font-black tracking-wider uppercase text-amber-400">
+                            Guest
+                          </span>
+                        )}
+                      </div>
                       <span className="block text-xs text-cream/50 mt-0.5">{order.phone}</span>
                       <span className="block max-w-[260px] truncate text-xs text-cream/30 mt-0.5">{order.address}</span>
                     </td>
@@ -1478,7 +1493,14 @@ function OrdersSection({ orders, saving, onStatusChange }: { orders: Order[]; sa
                               <div className="rounded-xl border border-cream/[0.06] bg-cream/[0.01] p-4 text-xs space-y-2.5 text-cream/70">
                                 <div>
                                   <span className="text-[10px] font-black uppercase tracking-wider text-cream/30 block mb-0.5">Recipient Name</span>
-                                  <p className="text-sm font-extrabold text-cream">{order.customer_name}</p>
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-sm font-extrabold text-cream">{order.customer_name}</p>
+                                    {!order.user_id && (
+                                      <span className="inline-flex items-center rounded bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 text-[8px] font-black tracking-wider uppercase text-amber-400">
+                                        Guest
+                                      </span>
+                                    )}
+                                  </div>
                                 </div>
                                 <div>
                                   <span className="text-[10px] font-black uppercase tracking-wider text-cream/30 block mb-0.5">Phone Number</span>
