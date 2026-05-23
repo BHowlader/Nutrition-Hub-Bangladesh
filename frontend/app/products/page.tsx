@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { Header } from "@/components/Header";
 import { ProductCard } from "@/components/ProductCard";
-import { fetchProducts, formatTaka, productImage, type Product } from "@/lib/products";
+import { fetchProducts, type Product } from "@/lib/products";
 import {
   ArrowRight,
   CookingPot,
@@ -67,175 +66,24 @@ export default function ProductsPage() {
     return acc;
   }, {});
 
-  const availableCount = products.filter((product) => product.stock > 0).length;
-  const featuredProduct = products.find((product) => product.stock > 0) ?? products[0];
   const activeCategoryLabel = activeCategory === "all"
     ? "All products"
     : filterCategories.find((category) => category.id === activeCategory)?.label;
 
   return (
-    <div className="min-h-screen overflow-x-clip bg-[#04060d] text-cream selection:bg-gold selection:text-ink">
+    <div className="min-h-screen bg-[#04060d] text-cream selection:bg-gold selection:text-ink">
       <Header />
-
-      {/* HERO */}
-      <section className="relative overflow-hidden border-b border-white/[0.06] pb-12 pt-24 sm:pb-16 sm:pt-32 md:pb-24 md:pt-36">
-        {/* Background */}
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <Image
-            src="/images/gym-bg.png"
-            alt=""
-            fill
-            className="object-cover opacity-[0.12]"
-            sizes="100vw"
-            quality={55}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#04060d] via-[#04060d]/90 to-[#04060d]/60" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#04060d] via-transparent to-[#04060d]" />
-          <div className="absolute left-[10%] top-1/3 h-[420px] w-[420px] rounded-full bg-gold/[0.07] blur-[140px]" />
-        </div>
-
-        <div className="shell relative z-10 grid items-center gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(340px,0.9fr)] lg:gap-16">
-          {/* LEFT — editorial copy */}
-          <div className="min-w-0">
-            {/* Meta rule */}
-            <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.28em] text-cream/40 sm:text-[11px]">
-              <span className="tabular-nums">01</span>
-              <span className="h-px w-10 bg-gold/50 sm:w-14" />
-              <span>Premium Catalog</span>
-            </div>
-
-            {/* Editorial headline */}
-            <h1 className="mt-6 font-display text-[2.4rem] font-black leading-[1.02] tracking-[-0.035em] text-cream sm:mt-7 sm:text-[3.4rem] md:text-[4.2rem] lg:text-[4.8rem]">
-              Verified supplements,
-              <br className="hidden sm:block" />{" "}
-              <span className="italic font-light text-cream/70">for those who</span>
-              <br className="hidden sm:block" />{" "}
-              train with intent.
-            </h1>
-
-            {/* Lede */}
-            <p className="mt-6 max-w-md text-[15px] leading-[1.7] text-cream/55 sm:mt-7 sm:text-base lg:text-lg">
-              Authentic sports nutrition, wellness essentials, breakfast staples, and herbal
-              formulas — curated for Bangladesh, dispatched in sealed condition.
-            </p>
-
-            {/* Figures with hairline rules */}
-            <dl className="mt-9 grid grid-cols-3 border-y border-white/[0.08] sm:mt-12">
-              <div className="border-r border-white/[0.06] py-5 pr-4 sm:py-6">
-                <dd className="font-display text-3xl font-black leading-none tracking-tight text-cream tabular-nums sm:text-5xl">
-                  {String(products.length || 0).padStart(2, "0")}
-                </dd>
-                <dt className="mt-3 text-[9px] font-bold uppercase tracking-[0.2em] text-cream/40 sm:mt-4 sm:text-[10px]">
-                  Products
-                </dt>
-              </div>
-              <div className="border-r border-white/[0.06] px-4 py-5 sm:px-5 sm:py-6">
-                <dd className="font-display text-3xl font-black leading-none tracking-tight text-cream tabular-nums sm:text-5xl">
-                  {String(availableCount || 0).padStart(2, "0")}
-                </dd>
-                <dt className="mt-3 text-[9px] font-bold uppercase tracking-[0.2em] text-cream/40 sm:mt-4 sm:text-[10px]">
-                  In stock
-                </dt>
-              </div>
-              <div className="py-5 pl-4 sm:py-6 sm:pl-5">
-                <dd className="font-display text-3xl font-black leading-none tracking-tight text-cream sm:text-5xl">
-                  COD
-                </dd>
-                <dt className="mt-3 text-[9px] font-bold uppercase tracking-[0.2em] text-cream/40 sm:mt-4 sm:text-[10px]">
-                  Payment
-                </dt>
-              </div>
-            </dl>
-
-            {/* CTA row */}
-            <div className="mt-8 flex flex-col gap-4 sm:mt-10 sm:flex-row sm:items-center">
-              <button
-                type="button"
-                onClick={() => catalogRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
-                className="group inline-flex h-12 w-full items-center justify-center gap-3 rounded-none border border-cream bg-cream px-6 text-[11px] font-black uppercase tracking-[0.22em] text-ink transition hover:bg-transparent hover:text-cream sm:w-auto sm:px-8"
-              >
-                Explore catalog
-                <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
-              </button>
-              <div className="flex items-center gap-2.5 text-[10px] font-bold uppercase tracking-[0.18em] text-cream/45 sm:text-[11px]">
-                <ShieldCheck size={13} className="text-gold" />
-                100% Authentic · Sealed packaging
-              </div>
-            </div>
-          </div>
-
-          {/* RIGHT — quiet product portrait (lg+) */}
-          {featuredProduct && (
-            <div className="relative hidden lg:block">
-              <Link
-                href={`/products/${featuredProduct.slug}`}
-                className="group relative block"
-              >
-                {/* Vertical label */}
-                <div className="absolute -left-12 top-0 z-10 flex h-full items-start pt-2">
-                  <span className="rotate-180 text-[10px] font-bold uppercase tracking-[0.4em] text-cream/35 [writing-mode:vertical-rl]">
-                    Featured · {featuredProduct.category?.name || "In stock"}
-                  </span>
-                </div>
-
-                {/* Thin gold corner accents */}
-                <div className="pointer-events-none absolute -left-2 -top-2 h-10 w-10 border-l border-t border-gold/60" />
-                <div className="pointer-events-none absolute -bottom-2 -right-2 h-10 w-10 border-b border-r border-gold/60" />
-
-                <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#050811]">
-                  <Image
-                    src={productImage(featuredProduct)}
-                    alt={featuredProduct.name}
-                    fill
-                    className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.04]"
-                    sizes="420px"
-                    quality={72}
-                    priority
-                  />
-                  {/* Subtle vignette */}
-                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(4,6,13,0.55)_100%)]" />
-                </div>
-
-                {/* Meta strip */}
-                <div className="mt-5 flex items-end justify-between gap-4 border-t border-white/[0.1] pt-5">
-                  <div className="min-w-0">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-cream/40">
-                      Now showing
-                    </span>
-                    <h3 className="mt-1.5 truncate font-display text-lg font-black leading-tight tracking-tight text-cream">
-                      {featuredProduct.name}
-                    </h3>
-                  </div>
-                  <div className="shrink-0 text-right">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-cream/40">
-                      From
-                    </span>
-                    <strong className="mt-1.5 block font-display text-xl font-black leading-none tracking-tight text-gold tabular-nums">
-                      {formatTaka(featuredProduct.price)}
-                    </strong>
-                  </div>
-                </div>
-              </Link>
-            </div>
-          )}
-        </div>
-      </section>
 
       {/* CATALOG */}
       <main
         ref={catalogRef}
-        className="relative scroll-mt-[66px] py-8 md:scroll-mt-28 md:py-16"
+        className="relative pt-24 pb-8 sm:pt-28 md:pt-32 md:pb-16"
       >
         <div className="shell">
           {/* Catalog header — title + search */}
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:gap-6">
             <div className="min-w-0">
-              <p className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.28em] text-cream/40 sm:text-[11px]">
-                <span className="tabular-nums">02</span>
-                <span className="h-px w-10 bg-gold/50 sm:w-14" />
-                <span>Storefront</span>
-              </p>
-              <h2 className="mt-3 font-display text-2xl font-black tracking-tight text-cream sm:mt-4 sm:text-4xl lg:text-5xl">
+              <h2 className="font-display text-2xl font-black tracking-tight text-cream sm:text-4xl lg:text-5xl">
                 {activeCategoryLabel}
               </h2>
               <p className="mt-2 text-xs uppercase tracking-[0.2em] text-cream/45 sm:text-[11px]">
