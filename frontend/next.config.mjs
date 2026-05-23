@@ -17,6 +17,14 @@ const nextConfig = {
         hostname: "lh3.googleusercontent.com"
       },
       {
+        protocol: "https",
+        hostname: "*.onrender.com"
+      },
+      {
+        protocol: "https",
+        hostname: "api.nutritionhubbd.com"
+      },
+      {
         protocol: "http",
         hostname: "localhost",
         port: "8000"
