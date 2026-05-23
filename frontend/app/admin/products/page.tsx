@@ -223,6 +223,13 @@ async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
       ...init.headers,
     },
   });
+  if (res.status === 401) {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("nhb-admin-authed");
+      window.location.replace("/admin/login");
+    }
+    throw new Error("Admin session required");
+  }
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.detail || `Request failed (${res.status})`);
@@ -238,6 +245,13 @@ async function uploadApi<T>(path: string, formData: FormData): Promise<T> {
     headers: csrfHeader("POST"),
     body: formData,
   });
+  if (res.status === 401) {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("nhb-admin-authed");
+      window.location.replace("/admin/login");
+    }
+    throw new Error("Admin session required");
+  }
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.detail || `Request failed (${res.status})`);
@@ -270,7 +284,7 @@ function cleanProductPayload(form: FormState) {
 }
 
 export default function AdminProductsPage() {
-  const { adminUser: user, adminLogout } = useAdminAuth();
+  const { adminUser, adminLogout } = useAdminAuth();
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
 
@@ -320,7 +334,7 @@ export default function AdminProductsPage() {
         api<AdminStats>("/api/admin/stats"),
         api<Order[]>("/api/orders/admin"),
         api<AuditLog[]>("/api/admin/audit-logs"),
-        user?.role === "owner" ? api<AdminUser[]>("/api/admin/users") : Promise.resolve([]),
+        adminUser?.role === "owner" ? api<AdminUser[]>("/api/admin/users") : Promise.resolve([]),
         api<HeroSettings>("/api/settings/hero"),
         api<Customer[]>("/api/admin/customers"),
         api<Coupon[]>("/api/admin/coupons"),
@@ -339,7 +353,7 @@ export default function AdminProductsPage() {
     } finally {
       setLoading(false);
     }
-  }, [user?.role]);
+  }, [adminUser?.role]);
 
   useEffect(() => {
     load();
@@ -599,7 +613,7 @@ export default function AdminProductsPage() {
                 ["coupons", Percent, "Coupons"],
                 ["audit", History, "Audit Log"],
                 ["hero", Sparkles, "Hero Section"],
-                ...(user?.role === "owner" ? ([["users", Users, "Users"]] as const) : []),
+                ...(adminUser?.role === "owner" ? ([["users", Users, "Users"]] as const) : []),
               ] as const).map(([tab, Icon, label]) => {
                 const active = activeTab === tab;
                 return (
@@ -624,11 +638,11 @@ export default function AdminProductsPage() {
           <div className="pt-4 border-t border-cream/[0.06]">
             <div className="flex items-center gap-3 mb-4">
               <div className="h-8 w-8 rounded-full bg-cream/[0.08] flex items-center justify-center text-xs font-bold text-cream shrink-0">
-                {user?.name?.slice(0, 1).toUpperCase() || "A"}
+                {adminUser?.name?.slice(0, 1).toUpperCase() || "A"}
               </div>
               <div className="min-w-0">
-                <span className="block text-xs font-bold text-cream truncate">{user?.name || "Admin"}</span>
-                <span className="block text-[10px] text-cream/40 uppercase font-black tracking-wider truncate">{user?.role || "Editor"}</span>
+                <span className="block text-xs font-bold text-cream truncate">{adminUser?.name || "Admin"}</span>
+                <span className="block text-[10px] text-cream/40 uppercase font-black tracking-wider truncate">{adminUser?.role || "Editor"}</span>
               </div>
             </div>
             <button
@@ -671,7 +685,7 @@ export default function AdminProductsPage() {
               ["coupons", Percent, "Coupons"],
               ["audit", History, "Audit"],
               ["hero", Sparkles, "Hero"],
-              ...(user?.role === "owner" ? ([["users", Users, "Users"]] as const) : []),
+              ...(adminUser?.role === "owner" ? ([["users", Users, "Users"]] as const) : []),
             ] as const).map(([tab, Icon, label]) => {
               const active = activeTab === tab;
               return (
