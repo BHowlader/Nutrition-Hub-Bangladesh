@@ -108,7 +108,7 @@ export function Hero({
       >
         {/* Cinematic Loader Shutter Panels */}
         {loading && (
-          <div className="fixed inset-0 z-[999] flex flex-col items-center justify-center pointer-events-none">
+          <div className="fixed inset-0 z-[999] hidden sm:flex flex-col items-center justify-center pointer-events-none">
             {/* Layered vertical panels sliding away using clean, hardware-accelerated CSS transitions */}
             <div
               className={`absolute inset-0 bg-[#070b14] z-0 transition-transform duration-500 ease-in-out origin-top ${animatingOut ? "scale-y-0" : "scale-y-100"
