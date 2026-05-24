@@ -10,7 +10,6 @@ import { Header } from "@/components/Header";
 import { PageLoading } from "@/components/PageLoading";
 import { productImage } from "@/lib/products";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export default function CartPage() {
   const { user, loading: authLoading } = useAuth();
@@ -46,7 +45,7 @@ export default function CartPage() {
     setError("");
     setSubmitting(true);
     try {
-      const res = await fetch(`${API}/api/orders`, {
+      const res = await fetch("/api/orders", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json", ...csrfHeader("POST") },
@@ -99,7 +98,7 @@ export default function CartPage() {
     setError("");
     setCouponApplying(true);
     try {
-      const res = await fetch(`${API}/api/orders/coupon/validate`, {
+      const res = await fetch("/api/orders/coupon/validate", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json", ...csrfHeader("POST") },

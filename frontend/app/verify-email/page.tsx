@@ -7,8 +7,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle, Loader2, XCircle } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
 export default function VerifyEmailPage() {
   return (
     <Suspense>
@@ -34,7 +32,7 @@ function VerifyEmailContent() {
     }
 
     try {
-      const res = await fetch(`${API}/api/auth/verify-email?token=${encodeURIComponent(token)}`, {
+      const res = await fetch(`/api/auth/verify-email?token=${encodeURIComponent(token)}`, {
         method: "POST",
         credentials: "include",
       });

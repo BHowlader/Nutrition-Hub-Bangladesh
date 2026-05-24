@@ -23,7 +23,7 @@ import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
 import { fetchCategories, type Category, warmProductCache } from "@/lib/products";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const categoryIcons: Record<string, any> = {
   "Gym Supplements": Dumbbell,
@@ -36,7 +36,7 @@ const SKIP_HOME_LOADER_KEY = "nutrition-hub-skip-home-loader";
 
 function UserAvatar({ name, photoUrl }: { name: string; photoUrl: string | null }) {
   if (photoUrl) {
-    const src = photoUrl.startsWith("http") ? photoUrl : `${API}${photoUrl}`;
+    const src = photoUrl.startsWith("http") ? photoUrl : `${BACKEND_URL}${photoUrl}`;
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img

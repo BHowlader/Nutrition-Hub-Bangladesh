@@ -24,7 +24,7 @@ import { Header } from "@/components/Header";
 import { PageLoading } from "@/components/PageLoading";
 import { productImage } from "@/lib/products";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 interface OrderItem {
   product_id: string;
@@ -111,7 +111,7 @@ function DashboardContent() {
     if (!user) return;
     setOrdersLoading(true);
     try {
-      const res = await fetch(`${API}/api/orders/my`, { credentials: "include" });
+      const res = await fetch("/api/orders/my", { credentials: "include" });
       if (res.ok) setOrders(await res.json());
     } finally {
       setOrdersLoading(false);
@@ -152,7 +152,7 @@ function DashboardContent() {
   const photoSrc = user.photo_url
     ? user.photo_url.startsWith("http")
       ? user.photo_url
-      : `${API}${user.photo_url}`
+      : `${BACKEND_URL}${user.photo_url}`
     : null;
 
   const totalSpent = orders.reduce((sum, o) => sum + Number(o.total || 0), 0);
@@ -680,7 +680,7 @@ function SecuritySection({ user }: { user: { email: string; auth_provider: strin
 
     setSaving(true);
     try {
-      const res = await fetch(`${API}/api/auth/me/change-password`, {
+      const res = await fetch("/api/auth/me/change-password", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

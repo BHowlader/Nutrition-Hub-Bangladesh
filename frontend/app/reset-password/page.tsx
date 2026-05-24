@@ -7,8 +7,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, CheckCircle, Eye, EyeOff, Lock } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
 export default function ResetPasswordPage() {
   return (
     <Suspense>
@@ -45,7 +43,7 @@ function ResetPasswordContent() {
 
     setSubmitting(true);
     try {
-      const res = await fetch(`${API}/api/auth/reset-password`, {
+      const res = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

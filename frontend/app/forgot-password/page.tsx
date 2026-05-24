@@ -5,8 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Mail } from "lucide-react";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -18,7 +16,7 @@ export default function ForgotPasswordPage() {
     setError("");
     setSubmitting(true);
     try {
-      const res = await fetch(`${API}/api/auth/forgot-password`, {
+      const res = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
