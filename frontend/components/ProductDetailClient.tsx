@@ -321,14 +321,22 @@ export function ProductDetailClient({
               </ul>
             </div>
           </div>
-          <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-cream/[0.05] pt-8 text-center text-xs text-cream/30 sm:flex-row">
-            <span>Nutrition Hub Bangladesh. All rights reserved.</span>
-            <span>
-              Built by{" "}
-              <a href="https://mindrona.com" target="_blank" rel="noreferrer" className="mindrona-link">
-                Mindrona
-              </a>
-            </span>
+          <div className="mt-12 flex flex-col items-center gap-4 border-t border-cream/[0.05] pt-8 sm:flex-row sm:justify-between">
+            <span className="text-[11px] text-cream/35 sm:text-xs">Nutrition Hub Bangladesh. All rights reserved.</span>
+            <a
+              href="https://mindrona.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mindrona-badge group"
+            >
+              <span className="mindrona-badge-inner">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="shrink-0 mindrona-icon">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em] opacity-60 sm:text-[11px]">Crafted by</span>
+                <span className="text-xs font-black tracking-wide sm:text-[13px]">Mindrona</span>
+              </span>
+            </a>
           </div>
         </div>
       </footer>

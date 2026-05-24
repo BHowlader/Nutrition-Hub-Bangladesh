@@ -174,52 +174,55 @@ a {
 .animate-aurora-3 { animation: aurora-3 22s ease-in-out infinite; }
 .animate-aurora-4 { animation: aurora-4 18s ease-in-out infinite; }
 
-/* Mindrona Branding Hover Blink Animation */
-.mindrona-link {
-  color: #ffc72c; /* Theme-matched premium gold */
-  font-weight: 800;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: inline-block;
-  position: relative;
+/* Mindrona Branding — Premium Badge */
+.mindrona-badge {
+  display: inline-flex;
   text-decoration: none;
+  border-radius: 9999px;
+  padding: 2px;
+  background: linear-gradient(135deg, rgba(0,242,254,0.15), rgba(255,199,44,0.15), rgba(0,242,254,0.15));
+  background-size: 200% 200%;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.mindrona-link::after {
-  content: '';
-  position: absolute;
-  width: 100%;
-  transform: scaleX(0);
-  height: 2px;
-  bottom: -2px;
-  left: 0;
-  background-color: #00f2fe;
-  transform-origin: bottom right;
-  transition: transform 0.25s ease-out;
+.mindrona-badge:hover {
+  background: linear-gradient(135deg, rgba(0,242,254,0.35), rgba(255,199,44,0.3), rgba(0,242,254,0.35));
+  background-size: 200% 200%;
+  animation: mindrona-gradient 3s ease infinite;
+  box-shadow: 0 0 24px rgba(0,242,254,0.12), 0 0 48px rgba(255,199,44,0.06);
+  transform: translateY(-1px);
 }
 
-.mindrona-link:hover::after {
-  transform: scaleX(1);
-  transform-origin: bottom left;
+.mindrona-badge-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  background: rgb(var(--color-card));
+  color: rgb(var(--color-cream));
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.mindrona-link:hover {
-  animation: mindrona-blink 0.6s infinite ease-in-out alternate;
-  color: #00f2fe; /* Premium Cyan neon */
+.mindrona-badge:hover .mindrona-badge-inner {
+  background: rgb(var(--color-card) / 0.85);
 }
 
-@keyframes mindrona-blink {
-  0% {
-    opacity: 1;
-    text-shadow: 0 0 8px rgba(0, 242, 254, 0.8), 0 0 15px rgba(0, 242, 254, 0.3);
-  }
-  50% {
-    opacity: 0.35;
-    text-shadow: none;
-  }
-  100% {
-    opacity: 1;
-    text-shadow: 0 0 12px rgba(0, 242, 254, 1), 0 0 20px rgba(0, 242, 254, 0.5);
-  }
+.mindrona-icon {
+  color: #00f2fe;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: drop-shadow(0 0 3px rgba(0,242,254,0.3));
+}
+
+.mindrona-badge:hover .mindrona-icon {
+  filter: drop-shadow(0 0 6px rgba(0,242,254,0.6));
+  transform: rotate(12deg) scale(1.1);
+}
+
+@keyframes mindrona-gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 /* Mirror Split Screen Slide Transition Animations */
