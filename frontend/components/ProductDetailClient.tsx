@@ -18,15 +18,16 @@ import {
   BadgeCheck,
   PackageCheck,
   Truck,
-  Clock
+  Clock,
+  Check
 } from "lucide-react";
 
-export function ProductDetailClient({ 
-  product, 
-  relatedProducts 
-}: { 
-  product: Product; 
-  relatedProducts: Product[]; 
+export function ProductDetailClient({
+  product,
+  relatedProducts
+}: {
+  product: Product;
+  relatedProducts: Product[];
 }) {
   const { user } = useAuth();
   const { setQuantity, items } = useCart();
@@ -37,234 +38,243 @@ export function ProductDetailClient({
 
   const inCart = items.find((it) => it.product_id === product.id)?.quantity || 0;
 
-  // Force scroll to top on mount
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.scrollTo(0, 0);
-    }
+    if (typeof window !== "undefined") window.scrollTo(0, 0);
   }, []);
 
   const specs = (product.detail || "").split(/·|\|/).map((s) => s.trim()).filter(Boolean);
-  const accent = product.accent || "#F59E0B";
+  const accent = product.accent || "#B45309";
+
+  async function handleAddToCart() {
+    setAdding(true);
+    setAddMsg("");
+    try {
+      await setQuantity(product.id, inCart + 1, product);
+      setAddMsg(`Added to cart (${inCart + 1})`);
+    } catch (e) {
+      setAddMsg(e instanceof Error ? e.message : "Failed to add");
+    } finally {
+      setAdding(false);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-transparent text-cream selection:bg-gold selection:text-ink">
       <Header />
 
-      <main className="relative pt-[5.5rem] pb-20 md:pt-[6.5rem]">
+      <main className="relative pb-28 pt-[5.5rem] md:pb-20 md:pt-[6.5rem]">
         <div className="shell">
 
-          <div className="grid gap-12 lg:grid-cols-2 lg:items-start">
-            
-            {/* Left Column - Image Showcase */}
-            <div className="relative w-full">
-              <Reveal>
-                <div 
-                  className="relative aspect-square w-full overflow-hidden rounded-[32px] border border-cream/10 bg-card p-8 sm:backdrop-blur-md shadow-2xl flex items-center justify-center"
-                  onMouseEnter={() => setHoveredImage(true)}
-                  onMouseLeave={() => setHoveredImage(false)}
-                >
-                  <div className="absolute inset-0 rounded-[32px] border border-cream/5 pointer-events-none" />
-                  
-                  {/* Subtle decorative backing glow matching product accent */}
-                  <div
-                    className="absolute inset-0 opacity-20 blur-3xl transition-opacity duration-500 pointer-events-none"
-                    style={{
-                      background: `radial-gradient(circle at center, ${accent} 0%, transparent 70%)`
-                    }}
+          {/* Back link */}
+          <Reveal>
+            <button
+              onClick={() => router.back()}
+              className="mb-4 inline-flex items-center gap-1.5 text-xs font-bold text-cream/50 transition hover:text-cream md:mb-6"
+            >
+              <ArrowLeft size={14} /> Back
+            </button>
+          </Reveal>
+
+          <div className="grid gap-6 md:gap-10 lg:grid-cols-[1fr_1fr] lg:items-start xl:grid-cols-[1.1fr_0.9fr]">
+
+            {/* Left — Image */}
+            <Reveal>
+              <div
+                className="relative aspect-square w-full overflow-hidden rounded-2xl border border-cream/[0.08] bg-card md:rounded-3xl"
+                onMouseEnter={() => setHoveredImage(true)}
+                onMouseLeave={() => setHoveredImage(false)}
+              >
+                {/* Accent glow */}
+                <div
+                  className="pointer-events-none absolute inset-0 opacity-15 blur-3xl"
+                  style={{ background: `radial-gradient(circle at center, ${accent} 0%, transparent 70%)` }}
+                />
+                <div className={`relative h-full w-full transition-transform duration-700 ease-out ${hoveredImage ? "scale-105" : "scale-100"}`}>
+                  <Image
+                    src={productImage(product)}
+                    alt={product.name}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 550px"
+                    priority
+                    quality={85}
                   />
-
-                  <div className={`relative w-full h-full transition-transform duration-700 ease-out ${hoveredImage ? 'scale-105' : 'scale-100'}`}>
-                    <Image
-                      src={productImage(product)}
-                      alt={product.name}
-                      fill
-                      className="object-contain"
-                      sizes="(max-width: 1024px) 100vw, 550px"
-                      priority
-                      quality={85}
-                    />
-                  </div>
-                </div>
-              </Reveal>
-
-              {/* Quick Trust Checks under image */}
-              {/* Quick Trust Checks under image */}
-              <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-                <div className="rounded-2xl border border-cream/[0.08] bg-card p-5 md:p-6 flex items-center gap-4">
-                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-gold/15 text-gold border border-cream/5">
-                    <ShieldCheck size={24} />
-                  </div>
-                  <div>
-                    <h4 className="text-sm md:text-base font-bold text-cream">Importer Sealed</h4>
-                    <p className="text-xs text-cream/45 mt-1">Original hologram seals intact</p>
-                  </div>
                 </div>
 
-                <div className="rounded-2xl border border-cream/[0.08] bg-card p-5 md:p-6 flex items-center gap-4">
-                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-gold/15 text-gold border border-cream/5">
-                    <Clock size={24} />
-                  </div>
-                  <div>
-                    <h4 className="text-sm md:text-base font-bold text-cream">Fresh Expiry</h4>
-                    <p className="text-xs text-cream/45 mt-1">Long shelf-life guarantee</p>
-                  </div>
+                {/* Authentic badge */}
+                <div className="absolute left-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full border border-cream/10 bg-ink/80 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-mint backdrop-blur-md sm:left-4 sm:top-4 sm:px-3 sm:text-[10px]">
+                  <ShieldCheck size={12} className="text-mint" />
+                  Authentic
                 </div>
               </div>
-            </div>
+            </Reveal>
 
-            {/* Right Column - Product Info */}
+            {/* Right — Info */}
             <div className="flex flex-col">
               <Reveal>
+                {/* Category + Rating */}
                 <div className="flex items-center gap-3">
-                  <span className="text-xs font-black uppercase tracking-[0.18em] text-gold">
+                  <span className="text-[10px] font-black uppercase tracking-[0.16em] text-gold sm:text-xs">
                     {product.category?.name || ""}
                   </span>
-                  <span className="h-1.5 w-1.5 rounded-full bg-cream/20" />
-                  <div className="flex items-center gap-1 text-xs font-black text-gold">
-                    <Star size={12} className="fill-gold" /> 4.9 (Verified)
+                  <span className="h-1 w-1 rounded-full bg-cream/20" />
+                  <div className="flex items-center gap-1 text-[10px] font-black text-gold sm:text-xs">
+                    <Star size={11} className="fill-gold" /> 4.9
                   </div>
                 </div>
 
-                <h1 className="mt-3 text-2xl sm:text-3xl md:text-4xl font-black leading-tight text-cream">
+                {/* Title */}
+                <h1 className="mt-2 text-xl font-black leading-tight text-cream sm:mt-3 sm:text-2xl md:text-3xl lg:text-4xl">
                   {product.name}
                 </h1>
 
-                {/* Spec Tag Pills */}
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {specs.map((spec, index) => (
-                    <span 
-                      key={index}
-                      className="rounded-lg border border-cream/10 bg-cream/[0.04] px-3 py-1 text-xs font-bold uppercase tracking-wider text-cream/80"
-                    >
-                      {spec}
+                {/* Price — prominent on mobile */}
+                <div className="mt-3 flex items-baseline gap-3 sm:mt-4">
+                  <strong className="text-2xl font-black text-cream sm:text-3xl">{formatTaka(product.price)}</strong>
+                  {product.stock > 0 ? (
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-mint">
+                      <span className="h-1.5 w-1.5 rounded-full bg-mint" /> In Stock
                     </span>
-                  ))}
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-red-400">
+                      <span className="h-1.5 w-1.5 rounded-full bg-red-500" /> Sold Out
+                    </span>
+                  )}
                 </div>
 
-                <p className="mt-6 text-base md:text-lg leading-relaxed text-cream/60">
+                {/* Spec pills */}
+                {specs.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-1.5 sm:mt-4">
+                    {specs.map((spec, i) => (
+                      <span
+                        key={i}
+                        className="rounded-md border border-cream/[0.08] bg-cream/[0.03] px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-cream/70 sm:text-[10px]"
+                      >
+                        {spec}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Description */}
+                <p className="mt-4 text-sm leading-relaxed text-cream/55 sm:text-base sm:leading-7">
                   {product.description}
                 </p>
               </Reveal>
 
-              {/* Checkout details Card */}
+              {/* Desktop Add-to-Cart (hidden on mobile — sticky bar used instead) */}
               <Reveal delay={0.05}>
-                <div className="mt-8 rounded-3xl border border-cream/[0.08] bg-card p-6 md:p-8 sm:backdrop-blur-md relative overflow-hidden">
-                  <div className="absolute inset-0 bg-[linear-gradient(135deg,rgb(var(--color-cream)/0.01)_0%,rgba(0,0,0,0)_100%)] pointer-events-none" />
-                  
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                    <div className="flex flex-col">
-                      <span className="text-xs font-bold uppercase tracking-widest text-cream/40">Guaranteed BD Price</span>
-                      <strong className="text-3xl md:text-4xl font-black text-cream mt-1">{formatTaka(product.price)}</strong>
-                      <span className="text-[10px] text-mint font-semibold mt-1">Inclusive of VAT & Delivery checks</span>
-                    </div>
-
-                    <div className="flex flex-col items-start sm:items-end">
-                      <span className="text-xs font-bold uppercase tracking-widest text-cream/40">Stock Status</span>
-                      {product.stock > 0 ? (
-                        <span className="inline-flex items-center gap-1.5 text-sm font-bold text-mint mt-1">
-                          <span className="h-2 w-2 rounded-full bg-mint" /> In Stock ({product.stock} items)
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 text-sm font-bold text-red-400 mt-1">
-                          <span className="h-2 w-2 rounded-full bg-red-500" /> Sold Out
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="mt-8 border-t border-cream/[0.06] pt-6">
-                    {product.stock > 0 ? (
-                      <button
-                        onClick={async () => {
-                          setAdding(true);
-                          setAddMsg("");
-                          try {
-                            await setQuantity(product.id, inCart + 1, product);
-                            setAddMsg(`Added to cart (${inCart + 1})`);
-                          } catch (e) {
-                            setAddMsg(e instanceof Error ? e.message : "Failed to add");
-                          } finally {
-                            setAdding(false);
-                          }
-                        }}
-                        disabled={adding}
-                        className="flex w-full min-h-[56px] items-center justify-center gap-2 rounded-xl bg-gold text-ink text-base font-black uppercase tracking-wider transition-all duration-300 hover:bg-champagne shadow-[0_10px_30px_rgb(var(--color-gold)/0.2)] disabled:opacity-50"
-                      >
-                        <ShoppingBag size={18} />
-                        {adding ? "Adding…" : inCart > 0 ? `Add another (${inCart} in cart)` : "Add to cart"}
-                      </button>
-                    ) : (
-                      <button
-                        disabled
-                        className="flex w-full min-h-[56px] items-center justify-center rounded-xl border border-cream/5 bg-cream/[0.02] text-cream/35 cursor-not-allowed text-base font-black uppercase tracking-wider"
-                      >
-                        Sold Out
-                      </button>
-                    )}
-                    {addMsg && (
-                      <p className="mt-3 text-center text-xs text-cream/60">{addMsg}</p>
-                    )}
-                  </div>
-
-                  <div className="mt-5 text-center">
-                    <p className="text-xs text-cream/40">
-                      Orders verified via phone-call within 12 hours. Shipped via Pathao Courier (COD).
-                    </p>
-                  </div>
+                <div className="mt-6 hidden md:block">
+                  {product.stock > 0 ? (
+                    <button
+                      onClick={handleAddToCart}
+                      disabled={adding}
+                      className="flex w-full min-h-[52px] items-center justify-center gap-2 rounded-xl bg-gold text-ink text-sm font-black uppercase tracking-wider transition-all duration-300 hover:bg-champagne shadow-[0_10px_30px_rgb(var(--color-gold)/0.2)] disabled:opacity-50"
+                    >
+                      <ShoppingBag size={18} />
+                      {adding ? "Adding…" : inCart > 0 ? `Add another (${inCart} in cart)` : "Add to cart"}
+                    </button>
+                  ) : (
+                    <button
+                      disabled
+                      className="flex w-full min-h-[52px] cursor-not-allowed items-center justify-center rounded-xl border border-cream/5 bg-cream/[0.02] text-sm font-black uppercase tracking-wider text-cream/35"
+                    >
+                      Sold Out
+                    </button>
+                  )}
+                  {addMsg && <p className="mt-2 text-center text-xs text-cream/60">{addMsg}</p>}
                 </div>
               </Reveal>
 
-              {/* Product trust strip details */}
+              {/* Trust strip */}
               <Reveal delay={0.1}>
-                <div className="mt-8 rounded-2xl border border-cream/[0.08] bg-card p-8 space-y-6">
-                  <div className="flex items-start gap-4">
-                    <BadgeCheck size={26} className="text-gold shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="text-base font-bold text-cream md:text-lg">100% Genuine Importer Seal</h4>
-                      <p className="text-sm text-cream/55 mt-1.5 leading-relaxed">We source directly from officially recognized brand representatives. Batch certificates available upon request.</p>
+                <div className="mt-6 grid grid-cols-2 gap-2.5 sm:gap-3">
+                  {[
+                    { icon: ShieldCheck, label: "Importer Sealed", sub: "Original hologram intact" },
+                    { icon: Clock, label: "Fresh Expiry", sub: "Long shelf-life guarantee" },
+                    { icon: Truck, label: "Pathao Delivery", sub: "COD nationwide" },
+                    { icon: BadgeCheck, label: "Batch Verified", sub: "Certificate on request" },
+                  ].map(({ icon: Icon, label, sub }) => (
+                    <div key={label} className="flex items-start gap-2.5 rounded-xl border border-cream/[0.06] bg-card p-3 sm:gap-3 sm:p-4">
+                      <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-gold/10 text-gold sm:h-10 sm:w-10">
+                        <Icon size={16} className="sm:hidden" />
+                        <Icon size={18} className="hidden sm:block" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-cream sm:text-sm">{label}</p>
+                        <p className="mt-0.5 text-[10px] text-cream/40 sm:text-xs">{sub}</p>
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="flex items-start gap-4">
-                    <Truck size={26} className="text-gold shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="text-base font-bold text-cream md:text-lg">COD & Pathao Delivery</h4>
-                      <p className="text-sm text-cream/55 mt-1.5 leading-relaxed">Delivered via Pathao Courier. Pay on arrival in Dhaka and nationwide. Check package contents at door.</p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </Reveal>
 
+              {/* Order info note */}
+              <Reveal delay={0.15}>
+                <p className="mt-4 text-center text-[11px] text-cream/35 sm:text-xs">
+                  Orders verified via phone within 12 hours. Shipped via Pathao Courier (COD).
+                </p>
+              </Reveal>
             </div>
-
           </div>
 
-          {/* Related Products Section */}
+          {/* Related Products */}
           {relatedProducts.length > 0 && (
-            <section className="mt-24 border-t border-cream/[0.06] pt-16">
+            <section className="mt-16 border-t border-cream/[0.06] pt-10 sm:mt-20 sm:pt-14">
               <Reveal>
-                <div className="mb-10">
-                  <p className="eyebrow text-gold">Recommendations</p>
-                  <h2 className="heading-md text-cream mt-1">Related Products</h2>
+                <div className="mb-6 sm:mb-10">
+                  <p className="eyebrow text-gold">You may also like</p>
+                  <h2 className="heading-lg text-cream">Related Products</h2>
                 </div>
               </Reveal>
-
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {relatedProducts.map((p, index) => (
-                  <Reveal delay={index * 0.05} key={p.id}>
+              <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
+                {relatedProducts.map((p, i) => (
+                  <Reveal delay={i * 0.05} key={p.id}>
                     <ProductCard product={p} />
                   </Reveal>
                 ))}
               </div>
             </section>
           )}
-
         </div>
       </main>
 
+      {/* Mobile Sticky Add-to-Cart Bar */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-cream/10 bg-card/95 backdrop-blur-xl px-4 py-3 md:hidden">
+        <div className="flex items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs font-bold text-cream/70">{product.name}</p>
+            <strong className="text-base font-black text-cream">{formatTaka(product.price)}</strong>
+          </div>
+          {product.stock > 0 ? (
+            <button
+              onClick={handleAddToCart}
+              disabled={adding}
+              className="flex h-11 shrink-0 items-center gap-2 rounded-xl bg-gold px-5 text-sm font-black text-ink transition-all duration-300 hover:bg-champagne active:scale-[0.97] disabled:opacity-50"
+            >
+              {adding ? (
+                "Adding…"
+              ) : inCart > 0 ? (
+                <>
+                  <Check size={16} /> In Cart ({inCart})
+                </>
+              ) : (
+                <>
+                  <ShoppingBag size={16} /> Add to Cart
+                </>
+              )}
+            </button>
+          ) : (
+            <span className="flex h-11 shrink-0 items-center rounded-xl border border-cream/5 bg-cream/[0.02] px-5 text-sm font-black text-cream/35">
+              Sold Out
+            </span>
+          )}
+        </div>
+        {addMsg && <p className="mt-1 text-center text-[10px] text-cream/50">{addMsg}</p>}
+      </div>
+
       {/* Footer */}
-      <footer className="bg-card pt-14 pb-8 text-cream border-t border-cream/10">
+      <footer className="border-t border-cream/10 bg-card pb-8 pt-14 text-cream">
         <div className="shell">
           <div className="flex flex-col items-center gap-5 text-center md:flex-row md:items-center md:justify-between md:text-left">
             <div className="flex items-center gap-3">
@@ -273,14 +283,14 @@ export function ProductDetailClient({
                 alt="Nutrition Hub Bangladesh Logo"
                 width={40}
                 height={40}
-                className="rounded-lg object-contain border border-cream/5 shadow-md"
+                className="rounded-lg border border-cream/5 object-contain shadow-md"
               />
               <strong className="text-xl font-black leading-tight text-cream">
                 Nutrition Hub
-                <span className="block text-xs font-bold text-cream/40 tracking-wider uppercase mt-0.5">Bangladesh</span>
+                <span className="mt-0.5 block text-xs font-bold uppercase tracking-wider text-cream/40">Bangladesh</span>
               </strong>
             </div>
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex shrink-0 items-center gap-3">
               <a href="https://www.facebook.com/share/18WRSVF1Ch/" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="flex h-9 w-9 items-center justify-center rounded-full border border-cream/10 bg-cream/[0.04] text-cream/50 transition-all hover:border-[#1877F2]/40 hover:bg-[#1877F2]/10 hover:text-[#1877F2]">
                 <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4"><path d="M9.198 21.5h4v-8.01h3.604l.396-3.98h-4V7.5a1 1 0 0 1 1-1h3v-4h-3a5 5 0 0 0-5 5v2.01h-2l-.396 3.98h2.396v8.01Z" /></svg>
               </a>
@@ -311,16 +321,11 @@ export function ProductDetailClient({
               </ul>
             </div>
           </div>
-          <div className="mt-12 border-t border-cream/[0.05] pt-8 text-center text-xs text-cream/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-cream/[0.05] pt-8 text-center text-xs text-cream/30 sm:flex-row">
             <span>Nutrition Hub Bangladesh. All rights reserved.</span>
             <span>
               Built by{" "}
-              <a 
-                href="https://mindrona.com" 
-                target="_blank" 
-                rel="noreferrer"
-                className="font-bold text-gold transition hover:text-champagne"
-              >
+              <a href="https://mindrona.com" target="_blank" rel="noreferrer" className="mindrona-link">
                 Mindrona
               </a>
             </span>

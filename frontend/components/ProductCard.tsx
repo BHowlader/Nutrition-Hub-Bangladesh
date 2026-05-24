@@ -45,7 +45,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
       )}
  
       {/* Image */}
-      <div className="relative aspect-square w-full overflow-hidden border-b border-cream/[0.08] bg-transparent">
+      <div className="relative aspect-square w-full overflow-hidden border-b border-cream/[0.08] bg-card">
         <div
           className={`absolute inset-0 transition-transform duration-700 ease-out ${
             hovered ? "scale-105" : "scale-100"
@@ -57,7 +57,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
             fill
             className="h-full w-full object-cover"
             sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 25vw"
-            quality={72}
+            quality={80}
             priority={priority}
           />
         </div>
