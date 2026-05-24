@@ -17,7 +17,9 @@ import {
   Pill,
   CookingPot,
   UtensilsCrossed,
-  AlignLeft
+  AlignLeft,
+  Search,
+  MapPin
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
@@ -180,9 +182,19 @@ export function Header() {
           <Link className="transition hover:text-champagne" href="/#authenticity">
             Authenticity
           </Link>
+          <Link className="transition hover:text-champagne" href="/track-order">
+            Track Order
+          </Link>
         </div>
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          <Link
+            href="/products"
+            aria-label="Search products"
+            className="inline-flex min-h-10 w-10 items-center justify-center rounded-lg text-cream transition hover:text-champagne sm:min-h-11 sm:w-11"
+          >
+            <Search size={18} />
+          </Link>
           <button
             onClick={handleCartClick}
             onFocus={prefetchCartTarget}
@@ -322,6 +334,22 @@ export function Header() {
               className="flex items-center gap-3 rounded-lg px-4 py-3 text-base font-bold text-cream/80 transition hover:bg-cream/5 hover:text-cream"
             >
               Authenticity
+            </Link>
+            <Link
+              href="/track-order"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-3 rounded-lg px-4 py-3 text-base font-bold text-cream/80 transition hover:bg-cream/5 hover:text-cream"
+            >
+              <MapPin size={16} className="text-gold" />
+              Track Order
+            </Link>
+            <Link
+              href="/products"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-3 rounded-lg px-4 py-3 text-base font-bold text-cream/80 transition hover:bg-cream/5 hover:text-cream"
+            >
+              <Search size={16} className="text-gold" />
+              Search Products
             </Link>
           </nav>
         </div>

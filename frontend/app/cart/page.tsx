@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
+import { Check, Copy, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { csrfHeader, useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
 import { Header } from "@/components/Header";
@@ -142,7 +142,10 @@ export default function CartPage() {
             <div className="w-full mt-8 border-t border-white/[0.08] pt-6 text-left space-y-4">
               <div className="flex justify-between items-center bg-white/[0.02] border border-white/[0.05] rounded-xl p-3.5">
                 <span className="text-xs uppercase tracking-wider text-cream/40 font-bold">Order ID</span>
-                <span className="font-mono text-sm font-black text-gold truncate max-w-[200px]">{orderSuccess.id}</span>
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="font-mono text-sm font-black text-gold truncate">{orderSuccess.id}</span>
+                  <CopyButton text={orderSuccess.id} />
+                </div>
               </div>
 
               <div className="space-y-2.5 rounded-xl border border-white/[0.05] bg-white/[0.01] p-4 text-sm text-cream/70">
@@ -453,5 +456,23 @@ function CheckoutField({
         className="w-full rounded-xl border border-cream/10 bg-cream/[0.03] px-3 py-2 text-sm text-cream outline-none focus:border-gold/50"
       />
     </div>
+  );
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }}
+      className="shrink-0 rounded-lg border border-white/10 p-1.5 text-cream/40 transition hover:border-gold/30 hover:text-gold"
+      aria-label="Copy order ID"
+    >
+      {copied ? <Check size={14} className="text-mint" /> : <Copy size={14} />}
+    </button>
   );
 }
