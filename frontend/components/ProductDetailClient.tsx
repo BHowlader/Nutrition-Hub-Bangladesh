@@ -48,7 +48,7 @@ export function ProductDetailClient({
   const accent = product.accent || "#F59E0B";
 
   return (
-    <div className="min-h-screen bg-[#04060d] text-cream selection:bg-gold selection:text-ink">
+    <div className="min-h-screen bg-ink text-cream selection:bg-gold selection:text-ink">
       <Header />
 
       <main className="relative pt-[5.5rem] pb-20 md:pt-[6.5rem]">
@@ -60,7 +60,7 @@ export function ProductDetailClient({
             <div className="relative w-full">
               <Reveal>
                 <div 
-                  className="relative aspect-square w-full overflow-hidden rounded-[32px] border border-white/10 bg-[#0c1324]/40 p-8 sm:backdrop-blur-md shadow-2xl flex items-center justify-center"
+                  className="relative aspect-square w-full overflow-hidden rounded-[32px] border border-white/10 bg-forest/40 p-8 sm:backdrop-blur-md shadow-2xl flex items-center justify-center"
                   onMouseEnter={() => setHoveredImage(true)}
                   onMouseLeave={() => setHoveredImage(false)}
                 >
@@ -91,7 +91,7 @@ export function ProductDetailClient({
               {/* Quick Trust Checks under image */}
               {/* Quick Trust Checks under image */}
               <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-                <div className="rounded-2xl border border-white/[0.05] bg-[#0c1324]/20 p-5 md:p-6 flex items-center gap-4">
+                <div className="rounded-2xl border border-white/[0.05] bg-forest/20 p-5 md:p-6 flex items-center gap-4">
                   <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-gold/15 text-gold border border-white/5">
                     <ShieldCheck size={24} />
                   </div>
@@ -101,7 +101,7 @@ export function ProductDetailClient({
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-white/[0.05] bg-[#0c1324]/20 p-5 md:p-6 flex items-center gap-4">
+                <div className="rounded-2xl border border-white/[0.05] bg-forest/20 p-5 md:p-6 flex items-center gap-4">
                   <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-gold/15 text-gold border border-white/5">
                     <Clock size={24} />
                   </div>
@@ -149,7 +149,7 @@ export function ProductDetailClient({
 
               {/* Checkout details Card */}
               <Reveal delay={0.05}>
-                <div className="mt-8 rounded-3xl border border-white/[0.08] bg-[#0c1324]/60 p-6 md:p-8 sm:backdrop-blur-md relative overflow-hidden">
+                <div className="mt-8 rounded-3xl border border-white/[0.08] bg-forest/60 p-6 md:p-8 sm:backdrop-blur-md relative overflow-hidden">
                   <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.01)_0%,rgba(0,0,0,0)_100%)] pointer-events-none" />
                   
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
@@ -217,7 +217,7 @@ export function ProductDetailClient({
 
               {/* Product trust strip details */}
               <Reveal delay={0.1}>
-                <div className="mt-8 rounded-2xl border border-white/[0.05] bg-[#0c1324]/20 p-8 space-y-6">
+                <div className="mt-8 rounded-2xl border border-white/[0.05] bg-forest/20 p-8 space-y-6">
                   <div className="flex items-start gap-4">
                     <BadgeCheck size={26} className="text-gold shrink-0 mt-0.5" />
                     <div>
@@ -264,7 +264,7 @@ export function ProductDetailClient({
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#0c1324] pt-14 pb-8 text-cream border-t border-white/[0.05]">
+      <footer className="bg-forest pt-14 pb-8 text-cream border-t border-white/[0.05]">
         <div className="shell">
           <div className="flex flex-col items-center gap-5 text-center md:flex-row md:items-center md:justify-between md:text-left">
             <div className="flex items-center gap-3">

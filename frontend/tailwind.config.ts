@@ -9,18 +9,18 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#080E1C",
-        forest: "#0C1529",
-        moss: "#1A3158",
-        gold: "#60A5FA",
-        champagne: "#93C5FD",
-        mint: "#38BDF8",
-        cream: "#F0F4FF",
-        paper: "#F5F7FC",
-        muted: "#94A3B8"
+        ink: "rgb(var(--color-ink) / <alpha-value>)",
+        forest: "rgb(var(--color-forest) / <alpha-value>)",
+        moss: "rgb(var(--color-moss) / <alpha-value>)",
+        gold: "rgb(var(--color-gold) / <alpha-value>)",
+        champagne: "rgb(var(--color-champagne) / <alpha-value>)",
+        mint: "rgb(var(--color-mint) / <alpha-value>)",
+        cream: "rgb(var(--color-cream) / <alpha-value>)",
+        paper: "rgb(var(--color-paper) / <alpha-value>)",
+        muted: "rgb(var(--color-muted) / <alpha-value>)"
       },
       boxShadow: {
-        premium: "0 26px 70px rgba(8,14,28,0.22)"
+        premium: "var(--shadow-premium)"
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { AuthProvider } from "@/lib/auth";
 import { CartProvider } from "@/lib/cart";
+import { ThemeProvider } from "@/lib/theme";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import "./globals.css";
 
@@ -21,14 +22,26 @@ export const metadata: Metadata = {
   }
 };
 
+const themeScript = `(function(){var t=localStorage.getItem("nhb-theme");if(!t)t="dark";document.documentElement.classList.toggle("dark",t==="dark");document.documentElement.style.colorScheme=t})()`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-scroll-behavior="smooth">
+    <html lang="en" className="dark" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <link rel="preconnect" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
       </head>
-      <body><AuthProvider><CartProvider>{children}<WhatsAppButton /></CartProvider></AuthProvider></body>
+      <body>
+        <ThemeProvider>
+          <AuthProvider>
+            <CartProvider>
+              {children}
+              <WhatsAppButton />
+            </CartProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

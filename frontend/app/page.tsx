@@ -131,7 +131,7 @@ export default async function HomePage() {
               <Reveal className="h-full" delay={index * 0.06} key={title}>
                 <Link
                   href={`/products?category=${encodeURIComponent(title)}`}
-                  className="group relative flex h-full min-h-[210px] overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0c1324] p-5 shadow-[0_18px_55px_rgba(0,0,0,0.2)] transition-all duration-300 hover:-translate-y-1 hover:border-gold/30 hover:bg-[#0c1324]/80 sm:min-h-[250px] sm:p-6 lg:min-h-[300px]"
+                  className="group relative flex h-full min-h-[210px] overflow-hidden rounded-2xl border border-white/[0.07] bg-forest p-5 shadow-[0_18px_55px_rgba(0,0,0,0.2)] transition-all duration-300 hover:-translate-y-1 hover:border-gold/30 hover:bg-forest/80 sm:min-h-[250px] sm:p-6 lg:min-h-[300px]"
                 >
                   {/* Photo background with dark gradients for maximum typography contrast */}
                   {image && (
@@ -143,7 +143,7 @@ export default async function HomePage() {
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                         className="object-cover opacity-[0.88] transition-all duration-700 ease-out group-hover:scale-105 group-hover:opacity-[0.98]"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#070b14] via-[#070b14]/75 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/75 to-transparent" />
                     </div>
                   )}
                   <div className={`absolute inset-x-0 top-0 h-28 bg-gradient-to-b ${accent} opacity-50 z-0`} />
@@ -177,7 +177,7 @@ export default async function HomePage() {
       <div className="h-[1px] bg-white/[0.05]" />
 
       {/* Best Sellers (Catalog) */}
-      <section id="catalog" className="relative bg-[#080d18] py-14 text-cream sm:py-20 lg:py-28">
+      <section id="catalog" className="relative bg-ink py-14 text-cream sm:py-20 lg:py-28">
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),transparent_22%),radial-gradient(circle_at_85%_0%,rgba(245,158,11,0.12),transparent_30%)]" />
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/[0.06]" />
         <div className="shell">
@@ -239,7 +239,7 @@ export default async function HomePage() {
             <div className="grid gap-4">
               {verificationSteps.map(({ step, text }, index) => (
                 <Reveal delay={index * 0.06} key={step}>
-                  <article className="group flex gap-5 rounded-2xl border border-white/[0.06] bg-[#0c1324]/40 p-6 transition-all duration-300 hover:border-gold/30 hover:bg-[#0c1324]/75">
+                  <article className="group flex gap-5 rounded-2xl border border-white/[0.06] bg-forest/40 p-6 transition-all duration-300 hover:border-gold/30 hover:bg-forest/75">
                     <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-gold/10 text-gold border border-white/5">
                       <BadgeCheck size={22} />
                     </span>
@@ -284,7 +284,7 @@ export default async function HomePage() {
       <div className="h-[1px] bg-white/[0.05]" />
 
       {/* Delivery & Payment */}
-      <section id="delivery" className="bg-[#0b101c]/40 py-14 border-y border-white/[0.05] sm:py-20 lg:py-28">
+      <section id="delivery" className="bg-forest/40 py-14 border-y border-white/[0.05] sm:py-20 lg:py-28">
         <div className="shell">
           <Reveal>
             <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12 lg:mb-14">
@@ -300,7 +300,7 @@ export default async function HomePage() {
           <div className="grid gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
             {deliveryOptions.map(({ icon: Icon, title, text }, index) => (
               <Reveal delay={index * 0.05} key={title}>
-                <article className="flex items-start gap-4 rounded-2xl border border-white/[0.06] bg-[#0c1324]/40 p-4 transition-all duration-300 hover:border-gold/30 hover:bg-[#0c1324]/75 sm:block sm:p-7 sm:text-center sm:hover:-translate-y-1">
+                <article className="flex items-start gap-4 rounded-2xl border border-white/[0.06] bg-forest/40 p-4 transition-all duration-300 hover:border-gold/30 hover:bg-forest/75 sm:block sm:p-7 sm:text-center sm:hover:-translate-y-1">
                   <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-white/5 bg-gold/10 text-gold sm:mx-auto sm:mb-5 sm:h-14 sm:w-14">
                     <Icon size={22} className="sm:hidden" />
                     <Icon size={26} className="hidden sm:block" />
@@ -329,7 +329,7 @@ export default async function HomePage() {
           <div className="grid gap-5 lg:grid-cols-3">
             {testimonials.map((item, index) => (
               <Reveal delay={index * 0.06} key={item.name}>
-                <article className="flex flex-col rounded-2xl border border-white/[0.06] bg-[#0c1324]/40 p-7 transition-all duration-300 hover:border-gold/30 hover:bg-[#0c1324]/75">
+                <article className="flex flex-col rounded-2xl border border-white/[0.06] bg-forest/40 p-7 transition-all duration-300 hover:border-gold/30 hover:bg-forest/75">
                   <div className="mb-5 flex gap-1">
                     {Array.from({ length: item.rating }).map((_, i) => (
                       <Star key={i} size={16} className="fill-gold text-gold" />
@@ -355,7 +355,7 @@ export default async function HomePage() {
       </section>
 
       {/* CTA */}
-      <section className="bg-[#0b101c]/60 py-28 text-cream border-t border-white/[0.05]">
+      <section className="bg-forest/60 py-28 text-cream border-t border-white/[0.05]">
         <div className="shell text-center">
           <Reveal>
             <p className="eyebrow text-gold mx-auto">Need supplement guidance?</p>
@@ -382,7 +382,7 @@ export default async function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/[0.05] bg-[#0c1324] pb-8 pt-12 text-cream sm:pt-14 md:pt-16">
+      <footer className="border-t border-white/[0.05] bg-forest pb-8 pt-12 text-cream sm:pt-14 md:pt-16">
         <div className="shell">
           {/* Brand block + Social icons row */}
           <div className="flex flex-col items-center gap-5 text-center md:flex-row md:items-center md:justify-between md:text-left">

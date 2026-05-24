@@ -71,7 +71,7 @@ export default function ProductsPage() {
     : filterCategories.find((category) => category.id === activeCategory)?.label;
 
   return (
-    <div className="min-h-screen bg-[#04060d] text-cream selection:bg-gold selection:text-ink">
+    <div className="min-h-screen bg-ink text-cream selection:bg-gold selection:text-ink">
       <Header />
 
       {/* CATALOG */}
@@ -139,8 +139,8 @@ export default function ProductsPage() {
               </ul>
             </div>
             {/* Edge fades to telegraph scrollability */}
-            <span className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-[#04060d] to-transparent lg:hidden" />
-            <span className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-[#04060d] to-transparent lg:hidden" />
+            <span className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-ink to-transparent lg:hidden" />
+            <span className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-ink to-transparent lg:hidden" />
           </nav>
 
           {/* Product grid */}
@@ -185,7 +185,7 @@ export default function ProductsPage() {
       </main>
 
       {/* TRUST */}
-      <section className="border-t border-white/[0.05] bg-[#0b101c]/40 py-10 sm:py-16">
+      <section className="border-t border-white/[0.05] bg-forest/40 py-10 sm:py-16">
         <div className="shell">
           <ul className="grid grid-cols-1 gap-6 text-center sm:grid-cols-3 sm:gap-8">
             {[
@@ -206,7 +206,7 @@ export default function ProductsPage() {
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-white/[0.05] bg-[#0c1324] pb-8 pt-12 text-cream md:pt-14">
+      <footer className="border-t border-white/[0.05] bg-forest pb-8 pt-12 text-cream md:pt-14">
         <div className="shell">
           <div className="flex flex-col items-center gap-5 text-center md:flex-row md:items-center md:justify-between md:text-left">
             <div className="flex items-center gap-3">

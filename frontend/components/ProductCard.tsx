@@ -18,7 +18,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
   return (
     <Link
       href={`/products/${product.slug}`}
-      className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-xl border border-white/[0.08] bg-[#090d16] transition-all duration-500 hover:border-white/20 sm:rounded-2xl"
+      className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-xl border border-white/[0.08] bg-ink transition-all duration-500 hover:border-white/20 sm:rounded-2xl"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -28,7 +28,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
       }}
     >
       {/* Authentic badge */}
-      <div className="absolute left-2 top-2 z-20 inline-flex items-center gap-1 rounded-full border border-white/10 bg-[#050811]/90 px-2 py-1 text-[8px] font-black uppercase tracking-wider text-mint sm:backdrop-blur-md sm:left-3 sm:top-3 sm:px-2.5 sm:text-[9px]">
+      <div className="absolute left-2 top-2 z-20 inline-flex items-center gap-1 rounded-full border border-white/10 bg-ink/90 px-2 py-1 text-[8px] font-black uppercase tracking-wider text-mint sm:backdrop-blur-md sm:left-3 sm:top-3 sm:px-2.5 sm:text-[9px]">
         <ShieldCheck size={10} className="shrink-0 text-mint" />
         <span className="hidden xs:inline sm:inline">Authentic</span>
       </div>
@@ -41,7 +41,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
       )}
 
       {/* Image */}
-      <div className="relative aspect-square w-full overflow-hidden border-b border-white/[0.05] bg-[#050811]">
+      <div className="relative aspect-square w-full overflow-hidden border-b border-white/[0.05] bg-ink">
         <div
           className={`absolute inset-0 transition-transform duration-700 ease-out ${
             hovered ? "scale-105" : "scale-100"
@@ -60,7 +60,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
       </div>
 
       {/* Info */}
-      <div className="flex min-w-0 flex-1 flex-col bg-[#0c1324]/50 p-3 sm:backdrop-blur-md sm:p-5">
+      <div className="flex min-w-0 flex-1 flex-col bg-forest/50 p-3 sm:backdrop-blur-md sm:p-5">
         {/* Category + rating */}
         <div className="mb-1.5 flex min-w-0 items-center justify-between gap-2 sm:mb-2">
           <span className="min-w-0 truncate text-[9px] font-black uppercase tracking-[0.12em] text-cream/40 sm:text-[10px]">

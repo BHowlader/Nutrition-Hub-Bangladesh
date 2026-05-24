@@ -126,7 +126,7 @@ export default function CartPage() {
 
   if (orderSuccess) {
     return (
-      <div className="min-h-screen bg-[#04060d] text-cream selection:bg-gold selection:text-ink pt-24 md:pt-28 pb-10 flex items-center justify-center">
+      <div className="min-h-screen bg-ink text-cream selection:bg-gold selection:text-ink pt-24 md:pt-28 pb-10 flex items-center justify-center">
         <Header />
         <div className="mx-auto max-w-xl px-4 w-full">
           <div className="premium-card p-6 md:p-8 text-center flex flex-col items-center">

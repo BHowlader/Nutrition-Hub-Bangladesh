@@ -19,10 +19,13 @@ import {
   UtensilsCrossed,
   AlignLeft,
   Search,
-  MapPin
+  MapPin,
+  Sun,
+  Moon
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
+import { useTheme } from "@/lib/theme";
 import { fetchCategories, type Category, warmProductCache } from "@/lib/products";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -61,6 +64,7 @@ function UserAvatar({ name, photoUrl }: { name: string; photoUrl: string | null 
 export function Header() {
   const { user, loading, logout } = useAuth();
   const { totalCount } = useCart();
+  const { theme, toggleTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -188,6 +192,13 @@ export function Header() {
         </div>
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          <button
+            onClick={toggleTheme}
+            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            className="inline-flex min-h-10 w-10 items-center justify-center rounded-lg text-cream transition hover:text-champagne sm:min-h-11 sm:w-11"
+          >
+            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
           <Link
             href="/products"
             aria-label="Search products"

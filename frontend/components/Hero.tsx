@@ -105,19 +105,19 @@ export function Hero({
     <>
       <section
         ref={rootRef}
-        className="relative flex min-h-screen items-center justify-center bg-[#04060d] pb-7 pt-[7.5rem] sm:pb-10 sm:pt-[7.25rem] md:pt-[7.75rem] lg:pb-12 lg:pt-[7.75rem]"
+        className="relative flex min-h-screen items-center justify-center bg-ink pb-7 pt-[7.5rem] sm:pb-10 sm:pt-[7.25rem] md:pt-[7.75rem] lg:pb-12 lg:pt-[7.75rem]"
       >
         {/* Cinematic Loader Shutter Panels */}
         {loading && (
           <div className="fixed inset-0 z-[999] hidden sm:flex flex-col items-center justify-center pointer-events-none">
             {/* Layered vertical panels sliding away using clean, hardware-accelerated CSS transitions */}
             <div
-              className={`absolute inset-0 bg-[#070b14] z-0 transition-transform duration-500 ease-in-out origin-top ${animatingOut ? "scale-y-0" : "scale-y-100"
+              className={`absolute inset-0 bg-ink z-0 transition-transform duration-500 ease-in-out origin-top ${animatingOut ? "scale-y-0" : "scale-y-100"
                 }`}
               style={{ transitionDelay: "150ms" }}
             />
             <div
-              className={`absolute inset-0 bg-[#04060d] z-0 transition-transform duration-500 ease-in-out origin-top ${animatingOut ? "scale-y-0" : "scale-y-100"
+              className={`absolute inset-0 bg-ink z-0 transition-transform duration-500 ease-in-out origin-top ${animatingOut ? "scale-y-0" : "scale-y-100"
                 }`}
             />
 
@@ -166,9 +166,9 @@ export function Hero({
             />
           </div>
           {/* Soft vertical vignette to keep header and grid travel smooth */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#04060d] via-transparent to-[#04060d]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-ink via-transparent to-ink" />
           {/* Left-side soft reading scrim to guarantee absolute text readability */}
-          <div className="absolute inset-y-0 left-0 w-full lg:w-[55%] bg-gradient-to-r from-[#04060d] via-[#04060d]/75 to-transparent" />
+          <div className="absolute inset-y-0 left-0 w-full lg:w-[55%] bg-gradient-to-r from-ink via-ink/75 to-transparent" />
         </div>
 
         {/* Living Aurora Borealis / Cinematic Nebula Backdrop — desktop only to prevent mobile scroll jank */}
@@ -197,7 +197,7 @@ export function Hero({
               transformOrigin: 'top center',
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#04060d] via-[#04060d]/80 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-transparent" />
         </div>
 
         {/* Laser scans — desktop only */}
@@ -285,7 +285,7 @@ export function Hero({
                 className="relative mx-auto mt-4 block h-[clamp(200px,68vw,320px)] w-[clamp(150px,56vw,280px)] sm:mt-6 sm:h-[clamp(310px,50vw,400px)] sm:w-[clamp(230px,36vw,290px)] lg:hidden group"
               >
                 {/* Bottom fade */}
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-gradient-to-t from-[#04060d] via-[#04060d]/60 to-transparent" />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-gradient-to-t from-ink via-ink/60 to-transparent" />
                 <div
                   className="overflow-hidden rounded-[1.5rem] sm:rounded-3xl transition-transform duration-300 group-hover:scale-[1.02]"
                   style={{ boxShadow: `0 22px 48px -16px ${visualProducts[0].accent || "#60A5FA"}55` }}
@@ -324,12 +324,12 @@ export function Hero({
                   className="block group"
                 >
                   <div
-                    className={`hero-visual-card animate-float-${i + 1} w-[260px] overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0c1324] shadow-[0_30px_60px_rgba(0,0,0,0.4)] sm:backdrop-blur-2xl transition-all duration-300 group-hover:border-white/20 group-hover:scale-[1.02] cursor-pointer`}
+                    className={`hero-visual-card animate-float-${i + 1} w-[260px] overflow-hidden rounded-3xl border border-white/[0.08] bg-forest shadow-[0_30px_60px_rgba(0,0,0,0.4)] sm:backdrop-blur-2xl transition-all duration-300 group-hover:border-white/20 group-hover:scale-[1.02] cursor-pointer`}
                     style={{
                       boxShadow: `0 30px 60px -10px ${product.accent || "#F59E0B"}15`
                     }}
                   >
-                    <div className="relative aspect-square w-full overflow-hidden bg-[#050811] border-b border-white/[0.04]">
+                    <div className="relative aspect-square w-full overflow-hidden bg-ink border-b border-white/[0.04]">
                       <div className="absolute inset-0">
                         <Image
                           src={productImage(product)}
@@ -364,7 +364,7 @@ export function Hero({
       </section>
 
       {/* Feature Row - Sits naturally below the 100svh viewport fold */}
-      <div className="relative z-20 bg-gradient-to-b from-[#04060d] to-ink py-6">
+      <div className="relative z-20 bg-gradient-to-b from-ink to-ink py-6">
         <div className="shell">
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[11px] font-semibold text-cream/40 uppercase tracking-widest sm:gap-8 sm:text-xs">
             <div className="flex items-center gap-2">
