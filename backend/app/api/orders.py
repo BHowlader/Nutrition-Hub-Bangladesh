@@ -88,6 +88,24 @@ def create_order(
         raise
 
 
+@router.get("/track", response_model=OrderRead)
+@limiter.limit("3/minute")
+def track_order(
+    request: Request,
+    order_id: str = Query(..., min_length=1, max_length=36),
+    phone: str = Query(..., min_length=8, max_length=40),
+    db: Session = Depends(get_db),
+) -> Order:
+    order = db.scalars(
+        select(Order)
+        .options(selectinload(Order.items).selectinload(OrderItem.product))
+        .where(Order.id == order_id, Order.phone == phone)
+    ).first()
+    if order is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+    return order
+
+
 @router.post("/coupon/validate", response_model=CouponValidateResponse)
 @limiter.limit("30/minute")
 def validate_coupon(

@@ -177,9 +177,16 @@ export default function CartPage() {
               <Link href="/" className="btn-primary w-full text-center py-3.5 text-sm uppercase tracking-wider justify-center">
                 Continue Shopping
               </Link>
-              {user && (
+              {user ? (
                 <Link href="/dashboard?tab=orders" className="btn-secondary w-full text-center py-3.5 text-sm uppercase tracking-wider justify-center">
                   Track in Dashboard
+                </Link>
+              ) : (
+                <Link
+                  href={`/track-order?order_id=${orderSuccess.id}`}
+                  className="btn-secondary w-full text-center py-3.5 text-sm uppercase tracking-wider justify-center"
+                >
+                  Track Your Order
                 </Link>
               )}
             </div>
