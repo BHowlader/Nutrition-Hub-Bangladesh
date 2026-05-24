@@ -131,9 +131,9 @@ export default async function HomePage() {
               <Reveal className="h-full" delay={index * 0.06} key={title}>
                 <Link
                   href={`/products?category=${encodeURIComponent(title)}`}
-                  className="group relative flex h-full min-h-[210px] overflow-hidden rounded-2xl border border-cream/[0.07] bg-card p-5 shadow-[0_18px_55px_rgba(0,0,0,0.2)] transition-all duration-300 hover:-translate-y-1 hover:border-gold/30 hover:bg-card/85 sm:min-h-[250px] sm:p-6 lg:min-h-[300px]"
+                  className="group relative flex h-full min-h-[210px] overflow-hidden rounded-2xl border border-white/10 bg-black p-5 shadow-[0_18px_55px_rgba(0,0,0,0.25)] transition-all duration-300 hover:-translate-y-1 hover:border-white/20 sm:min-h-[250px] sm:p-6 lg:min-h-[300px]"
                 >
-                  {/* Photo background with dark gradients for maximum typography contrast */}
+                  {/* Photo background with always-dark overlay for legibility in both themes */}
                   {image && (
                     <div className="absolute inset-0 z-0 overflow-hidden">
                       <Image
@@ -143,25 +143,25 @@ export default async function HomePage() {
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                         className="object-cover opacity-[0.88] transition-all duration-700 ease-out group-hover:scale-105 group-hover:opacity-[0.98]"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/75 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/20" />
                     </div>
                   )}
-                  <div className={`absolute inset-x-0 top-0 h-28 bg-gradient-to-b ${accent} opacity-50 z-0`} />
+                  <div className={`absolute inset-x-0 top-0 h-28 bg-gradient-to-b ${accent} opacity-30 z-0`} />
                   <div className="relative z-10 flex min-h-full w-full flex-col">
                     <div className="flex items-center justify-between">
-                      <span className="grid h-11 w-11 place-items-center rounded-xl border border-cream/10 bg-cream/[0.06] text-gold shadow-inner">
+                      <span className="grid h-11 w-11 place-items-center rounded-xl border border-white/15 bg-white/10 text-gold shadow-inner backdrop-blur-sm">
                         <Icon size={21} />
                       </span>
-                      <span className="font-mono text-xs font-bold text-cream/28">
+                      <span className="font-mono text-xs font-bold text-white/30">
                         0{index + 1}
                       </span>
                     </div>
                     <div className="mt-auto pt-8">
-                      <h3 className="text-lg font-black leading-tight text-cream transition-colors duration-300 group-hover:text-gold sm:text-xl">
+                      <h3 className="text-lg font-black leading-tight text-white transition-colors duration-300 group-hover:text-gold sm:text-xl">
                         {title}
                       </h3>
-                      <p className="mt-3 line-clamp-3 text-sm leading-6 text-cream/58">{text}</p>
-                      <div className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-cream/36 transition group-hover:text-gold">
+                      <p className="mt-3 line-clamp-3 text-sm leading-6 text-white/60">{text}</p>
+                      <div className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-white/40 transition group-hover:text-gold">
                         Browse <ArrowRight size={14} className="transition group-hover:translate-x-1" />
                       </div>
                     </div>
@@ -382,7 +382,7 @@ export default async function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-cream/10 bg-card pb-8 pt-12 text-cream sm:pt-14 md:pt-16">
+      <footer className="border-t border-slate-200 dark:border-cream/10 bg-gradient-to-b from-amber-50 to-orange-50/50 pb-8 pt-12 text-slate-800 dark:from-[#060d1a] dark:to-[#0a1528] dark:text-cream sm:pt-14 md:pt-16">
         <div className="shell">
           {/* Brand block + Social icons row */}
           <div className="flex flex-col items-center gap-5 text-center md:flex-row md:items-center md:justify-between md:text-left">
@@ -393,60 +393,60 @@ export default async function HomePage() {
                   alt="Nutrition Hub Bangladesh Logo"
                   width={44}
                   height={44}
-                  className="h-10 w-10 shrink-0 rounded-lg border border-cream/5 object-contain shadow-md sm:h-11 sm:w-11"
+                  className="h-10 w-10 shrink-0 rounded-lg border border-slate-200 dark:border-cream/5 object-contain shadow-md sm:h-11 sm:w-11"
                 />
-                <strong className="text-base font-black leading-tight text-cream sm:text-xl">
+                <strong className="text-base font-black leading-tight text-slate-900 dark:text-cream sm:text-xl">
                   Nutrition Hub
-                  <span className="mt-0.5 block text-[10px] font-bold uppercase tracking-wider text-cream/40 sm:text-xs">
+                  <span className="mt-0.5 block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-cream/40 sm:text-xs">
                     Bangladesh
                   </span>
                 </strong>
               </span>
-              <p className="mx-auto mt-5 max-w-md text-[13px] leading-relaxed text-cream/55 sm:text-sm md:mx-0">
+              <p className="mx-auto mt-5 max-w-md text-[13px] leading-relaxed text-slate-500 dark:text-cream/55 sm:text-sm md:mx-0">
                 Premium supplement storefront for authentic sports nutrition, wellness,
                 and goal-based product guidance in Bangladesh.
               </p>
             </div>
             <div className="flex items-center gap-3 shrink-0">
-              <a href="https://www.facebook.com/share/18WRSVF1Ch/" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="flex h-9 w-9 items-center justify-center rounded-full border border-cream/10 bg-cream/[0.04] text-cream/50 transition-all hover:border-[#1877F2]/40 hover:bg-[#1877F2]/10 hover:text-[#1877F2]">
+              <a href="https://www.facebook.com/share/18WRSVF1Ch/" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 dark:border-cream/10 bg-slate-100 dark:bg-cream/[0.04] text-slate-500 dark:text-cream/50 transition-all hover:border-[#1877F2]/40 hover:bg-[#1877F2]/10 hover:text-[#1877F2]">
                 <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4"><path d="M9.198 21.5h4v-8.01h3.604l.396-3.98h-4V7.5a1 1 0 0 1 1-1h3v-4h-3a5 5 0 0 0-5 5v2.01h-2l-.396 3.98h2.396v8.01Z" /></svg>
               </a>
-              <a href="https://www.instagram.com/nutrition.hub.bd?igsh=amVvaHlpcnI1dDY4" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="flex h-9 w-9 items-center justify-center rounded-full border border-cream/10 bg-cream/[0.04] text-cream/50 transition-all hover:border-[#E4405F]/40 hover:bg-[#E4405F]/10 hover:text-[#E4405F]">
+              <a href="https://www.instagram.com/nutrition.hub.bd?igsh=amVvaHlpcnI1dDY4" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 dark:border-cream/10 bg-slate-100 dark:bg-cream/[0.04] text-slate-500 dark:text-cream/50 transition-all hover:border-[#E4405F]/40 hover:bg-[#E4405F]/10 hover:text-[#E4405F]">
                 <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4"><path d="M12 2.982c2.937 0 3.285.011 4.445.064a6.087 6.087 0 0 1 2.042.379 3.408 3.408 0 0 1 1.265.823 3.408 3.408 0 0 1 .823 1.265 6.087 6.087 0 0 1 .379 2.042c.053 1.16.064 1.508.064 4.445s-.011 3.285-.064 4.445a6.087 6.087 0 0 1-.379 2.042 3.643 3.643 0 0 1-2.088 2.088 6.087 6.087 0 0 1-2.042.379c-1.16.053-1.508.064-4.445.064s-3.285-.011-4.445-.064a6.087 6.087 0 0 1-2.042-.379 3.408 3.408 0 0 1-1.265-.823 3.408 3.408 0 0 1-.823-1.265 6.087 6.087 0 0 1-.379-2.042c-.053-1.16-.064-1.508-.064-4.445s.011-3.285.064-4.445a6.087 6.087 0 0 1 .379-2.042 3.408 3.408 0 0 1 .823-1.265 3.408 3.408 0 0 1 1.265-.823 6.087 6.087 0 0 1 2.042-.379c1.16-.053 1.508-.064 4.445-.064M12 1c-2.987 0-3.362.013-4.535.066a8.074 8.074 0 0 0-2.67.511 5.392 5.392 0 0 0-1.949 1.27 5.392 5.392 0 0 0-1.269 1.948 8.074 8.074 0 0 0-.51 2.67C1.012 8.639 1 9.014 1 12s.013 3.362.066 4.535a8.074 8.074 0 0 0 .511 2.67 5.392 5.392 0 0 0 1.27 1.949 5.392 5.392 0 0 0 1.948 1.269 8.074 8.074 0 0 0 2.67.51C8.639 22.988 9.014 23 12 23s3.362-.013 4.535-.066a8.074 8.074 0 0 0 2.67-.511 5.625 5.625 0 0 0 3.218-3.218 8.074 8.074 0 0 0 .51-2.67C22.988 15.361 23 14.986 23 12s-.013-3.362-.066-4.535a8.074 8.074 0 0 0-.511-2.67 5.392 5.392 0 0 0-1.27-1.949 5.392 5.392 0 0 0-1.948-1.269 8.074 8.074 0 0 0-2.67-.51C15.361 1.012 14.986 1 12 1Zm0 5.351A5.649 5.649 0 1 0 17.649 12 5.649 5.649 0 0 0 12 6.351Zm0 9.316A3.667 3.667 0 1 1 15.667 12 3.667 3.667 0 0 1 12 15.667Zm5.872-10.859a1.32 1.32 0 1 0 1.32 1.32 1.32 1.32 0 0 0-1.32-1.32Z" /></svg>
               </a>
-              <a href="https://www.tiktok.com/@nutrition.hub.bd?_r=1&_t=ZS-96a0cD5XcDX" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="flex h-9 w-9 items-center justify-center rounded-full border border-cream/10 bg-cream/[0.04] text-cream/50 transition-all hover:border-cream/40 hover:bg-cream/10 hover:text-cream">
+              <a href="https://www.tiktok.com/@nutrition.hub.bd?_r=1&_t=ZS-96a0cD5XcDX" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 dark:border-cream/10 bg-slate-100 dark:bg-cream/[0.04] text-slate-500 dark:text-cream/50 transition-all hover:border-slate-400 dark:hover:border-cream/40 hover:bg-slate-200 dark:hover:bg-cream/10 hover:text-slate-800 dark:hover:text-cream">
                 <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1 0-5.78 2.86 2.86 0 0 1 .87.13V9.01a6.32 6.32 0 0 0-1-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V9.48a8.27 8.27 0 0 0 3.89.96V7h-.02c0-.1.02-.2.02-.31Z" /></svg>
               </a>
             </div>
           </div>
 
           {/* Divider — visible only on mobile/sm to separate brand from links */}
-          <div className="mx-auto my-9 h-px w-24 bg-cream/[0.08] sm:my-10 md:hidden" />
+          <div className="mx-auto my-9 h-px w-24 bg-slate-200 dark:bg-cream/[0.08] sm:my-10 md:hidden" />
 
           {/* Link columns — 2-col on mobile (Categories | Quick Links) with Trust Metrics centered below; 3-col from sm+ */}
           <div className="grid grid-cols-2 gap-x-6 gap-y-9 text-center sm:grid-cols-3 sm:gap-x-6 sm:gap-y-10 md:mt-12 md:gap-x-12 md:text-left">
             <nav className="min-w-0">
-              <strong className="text-[11px] font-black uppercase tracking-[0.18em] text-cream/45 sm:text-xs">
+              <strong className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400 dark:text-cream/45 sm:text-xs">
                 Store Categories
               </strong>
-              <ul className="mt-4 space-y-2.5 text-[13px] text-cream/60 sm:space-y-3 sm:text-sm">
+              <ul className="mt-4 space-y-2.5 text-[13px] text-slate-600 dark:text-cream/60 sm:space-y-3 sm:text-sm">
                 <li>
-                  <Link href="/products?category=Gym Supplements" className="inline-block transition hover:text-cream">
+                  <Link href="/products?category=Gym Supplements" className="inline-block transition hover:text-slate-900 dark:hover:text-cream">
                     Gym Supplements
                   </Link>
                 </li>
                 <li>
-                  <Link href="/products?category=Vitamins & Supplements" className="inline-block transition hover:text-cream">
+                  <Link href="/products?category=Vitamins & Supplements" className="inline-block transition hover:text-slate-900 dark:hover:text-cream">
                     Vitamins &amp; Supplements
                   </Link>
                 </li>
                 <li>
-                  <Link href="/products?category=Protein Oats" className="inline-block transition hover:text-cream">
+                  <Link href="/products?category=Protein Oats" className="inline-block transition hover:text-slate-900 dark:hover:text-cream">
                     Protein Oats
                   </Link>
                 </li>
                 <li>
-                  <Link href="/products?category=Peanut Butter" className="inline-block transition hover:text-cream">
+                  <Link href="/products?category=Peanut Butter" className="inline-block transition hover:text-slate-900 dark:hover:text-cream">
                     Peanut Butter
                   </Link>
                 </li>
@@ -454,27 +454,27 @@ export default async function HomePage() {
             </nav>
 
             <nav className="min-w-0">
-              <strong className="text-[11px] font-black uppercase tracking-[0.18em] text-cream/45 sm:text-xs">
+              <strong className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400 dark:text-cream/45 sm:text-xs">
                 Quick Links
               </strong>
-              <ul className="mt-4 space-y-2.5 text-[13px] text-cream/60 sm:space-y-3 sm:text-sm">
+              <ul className="mt-4 space-y-2.5 text-[13px] text-slate-600 dark:text-cream/60 sm:space-y-3 sm:text-sm">
                 <li>
-                  <Link href="/products" className="inline-block transition hover:text-cream">
+                  <Link href="/products" className="inline-block transition hover:text-slate-900 dark:hover:text-cream">
                     All products
                   </Link>
                 </li>
                 <li>
-                  <Link href="/#authenticity" className="inline-block transition hover:text-cream">
+                  <Link href="/#authenticity" className="inline-block transition hover:text-slate-900 dark:hover:text-cream">
                     Authenticity
                   </Link>
                 </li>
                 <li>
-                  <Link href="/#delivery" className="inline-block transition hover:text-cream">
+                  <Link href="/#delivery" className="inline-block transition hover:text-slate-900 dark:hover:text-cream">
                     Delivery &amp; payment
                   </Link>
                 </li>
                 <li>
-                  <Link href="/login" className="inline-block transition hover:text-cream">
+                  <Link href="/login" className="inline-block transition hover:text-slate-900 dark:hover:text-cream">
                     Sign in
                   </Link>
                 </li>
@@ -482,10 +482,10 @@ export default async function HomePage() {
             </nav>
 
             <div className="col-span-2 min-w-0 sm:col-span-1">
-              <strong className="text-[11px] font-black uppercase tracking-[0.18em] text-cream/45 sm:text-xs">
+              <strong className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400 dark:text-cream/45 sm:text-xs">
                 Trust Metrics
               </strong>
-              <ul className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2.5 text-[13px] text-cream/60 sm:mt-4 sm:flex-col sm:items-center sm:gap-x-0 sm:space-y-3 sm:text-sm md:items-start">
+              <ul className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2.5 text-[13px] text-slate-600 dark:text-cream/60 sm:mt-4 sm:flex-col sm:items-center sm:gap-x-0 sm:space-y-3 sm:text-sm md:items-start">
                 <li className="flex items-center justify-center gap-2 md:justify-start">
                   <ShieldCheck size={13} className="shrink-0 text-gold" />
                   <span>Authenticity checks</span>
@@ -503,9 +503,9 @@ export default async function HomePage() {
           </div>
 
           {/* Bottom strip */}
-          <div className="mt-10 flex flex-col items-center gap-4 border-t border-cream/[0.05] pt-6 sm:mt-14 sm:pt-7">
+          <div className="mt-10 flex flex-col items-center gap-4 border-t border-slate-200 dark:border-cream/[0.05] pt-6 sm:mt-14 sm:pt-7">
             <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between sm:w-full">
-              <span className="text-[11px] text-cream/35 sm:text-xs">
+              <span className="text-[11px] text-slate-400 dark:text-cream/35 sm:text-xs">
                 © {new Date().getFullYear()} Nutrition Hub Bangladesh. All rights reserved.
               </span>
               <a
