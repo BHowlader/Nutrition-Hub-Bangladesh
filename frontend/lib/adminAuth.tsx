@@ -50,6 +50,12 @@ async function adminApiFetch(path: string, opts: RequestInit = {}) {
       ...opts.headers,
     },
   });
+  if (res.status === 401) {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(ADMIN_AUTH_SIGNAL_KEY);
+    }
+    throw new Error("Admin session expired");
+  }
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.detail || `Request failed (${res.status})`);

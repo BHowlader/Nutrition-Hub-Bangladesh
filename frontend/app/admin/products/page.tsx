@@ -37,11 +37,11 @@ import { csrfHeader } from "@/lib/auth";
 import { useAdminAuth } from "@/lib/adminAuth";
 import { productImage } from "@/lib/products";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 function resolveMediaUrl(url: string | null) {
   if (!url) return null;
-  return url.startsWith("http") ? url : `${API}${url}`;
+  return url.startsWith("http") ? url : `${BACKEND_URL}${url}`;
 }
 
 type ProductStatus = "draft" | "published" | "archived";
@@ -214,7 +214,7 @@ const statusStyles: Record<ProductStatus, string> = {
 
 async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const method = (init.method || "GET").toUpperCase();
-  const res = await fetch(`${API}${path}`, {
+  const res = await fetch(path, {
     credentials: "include",
     ...init,
     headers: {
@@ -239,7 +239,7 @@ async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
 }
 
 async function uploadApi<T>(path: string, formData: FormData): Promise<T> {
-  const res = await fetch(`${API}${path}`, {
+  const res = await fetch(path, {
     method: "POST",
     credentials: "include",
     headers: csrfHeader("POST"),
