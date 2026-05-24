@@ -191,18 +191,18 @@ export function Header() {
           </Link>
         </div>
 
-        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
           <button
             onClick={toggleTheme}
             aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-            className="inline-flex min-h-10 w-10 items-center justify-center rounded-lg text-cream transition hover:text-champagne sm:min-h-11 sm:w-11"
+            className="hidden min-h-10 w-10 items-center justify-center rounded-lg text-cream transition hover:text-champagne sm:inline-flex sm:min-h-11 sm:w-11"
           >
             {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
           </button>
           <Link
             href="/products"
             aria-label="Search products"
-            className="inline-flex min-h-10 w-10 items-center justify-center rounded-lg text-cream transition hover:text-champagne sm:min-h-11 sm:w-11"
+            className="hidden min-h-10 w-10 items-center justify-center rounded-lg text-cream transition hover:text-champagne sm:inline-flex sm:min-h-11 sm:w-11"
           >
             <Search size={18} />
           </Link>
@@ -362,6 +362,15 @@ export function Header() {
               <Search size={16} className="text-gold" />
               Search Products
             </Link>
+
+            {/* Theme toggle — mobile only */}
+            <button
+              onClick={() => { toggleTheme(); setMenuOpen(false); }}
+              className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-base font-bold text-cream/80 transition hover:bg-cream/5 hover:text-cream"
+            >
+              {theme === "dark" ? <Sun size={16} className="text-gold" /> : <Moon size={16} className="text-gold" />}
+              {theme === "dark" ? "Light Mode" : "Dark Mode"}
+            </button>
           </nav>
         </div>
       )}
