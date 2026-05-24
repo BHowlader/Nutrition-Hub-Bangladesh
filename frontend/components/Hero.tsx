@@ -346,28 +346,56 @@ export function Hero({
             </div>
 
             {visualProducts.length > 0 && (
-              <Link
-                href={`/products/${visualProducts[0].slug}`}
-                className="relative mx-auto mt-4 block h-[clamp(200px,68vw,320px)] w-[clamp(150px,56vw,280px)] sm:mt-6 sm:h-[clamp(310px,50vw,400px)] sm:w-[clamp(230px,36vw,290px)] lg:hidden group"
-              >
-                {/* Bottom fade */}
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-gradient-to-t from-ink via-ink/60 to-transparent" />
-                <div
-                  className="overflow-hidden rounded-[1.5rem] sm:rounded-3xl transition-transform duration-300 group-hover:scale-[1.02]"
-                  style={{ boxShadow: `0 22px 48px -16px ${visualProducts[0].accent || "#B45309"}55` }}
-                >
-                  <div className="relative aspect-square">
-                    <Image
-                      src={productImage(visualProducts[0])}
-                      alt={visualProducts[0].name}
-                      fill
-                      sizes="(max-width: 640px) 56vw, 290px"
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      priority
-                    />
-                  </div>
-                </div>
-              </Link>
+              <div className="relative mx-auto mt-6 h-[280px] w-full max-w-[320px] sm:mt-8 sm:h-[340px] sm:max-w-[380px] lg:hidden">
+                {visualProducts.slice(0, 3).map((product, i) => {
+                  const transforms = [
+                    "translate(-50%, 0) rotate(-6deg)",
+                    "translate(-50%, -12px) rotate(0deg) scale(1.05)",
+                    "translate(-50%, 0) rotate(6deg)",
+                  ];
+                  const lefts = ["22%", "50%", "78%"];
+                  const zIndexes = [10, 30, 10];
+                  const floatClass = `animate-float-${i + 1}`;
+                  return (
+                    <Link
+                      key={product.id}
+                      href={`/products/${product.slug}`}
+                      className={`${floatClass} absolute group`}
+                      style={{
+                        left: lefts[i],
+                        top: "10%",
+                        transform: transforms[i],
+                        zIndex: zIndexes[i],
+                      }}
+                    >
+                      <div
+                        className="w-[140px] overflow-hidden rounded-2xl border border-cream/[0.08] bg-card/90 backdrop-blur-lg transition-transform duration-300 group-hover:scale-[1.03] sm:w-[170px]"
+                        style={{
+                          boxShadow: mounted && theme === "light"
+                            ? `0 16px 40px rgba(180,83,9,0.10), 0 20px 50px -10px ${product.accent || "#B45309"}14`
+                            : `0 20px 50px rgba(0,0,0,0.35), 0 20px 50px -10px ${product.accent || "#F59E0B"}18`,
+                        }}
+                      >
+                        <div className="relative aspect-square w-full overflow-hidden border-b border-cream/[0.08]">
+                          <Image
+                            src={productImage(product)}
+                            alt={product.name}
+                            fill
+                            sizes="170px"
+                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                            priority={i === 1}
+                          />
+                        </div>
+                        <div className="p-2.5 sm:p-3">
+                          <p className="truncate text-[10px] font-bold text-cream/50 uppercase tracking-wider sm:text-[11px]">{product.category?.name || ""}</p>
+                          <h3 className="mt-0.5 truncate text-xs font-bold text-cream group-hover:text-gold transition-colors sm:text-sm">{product.name}</h3>
+                          <p className="mt-1.5 text-xs font-black text-gold sm:text-sm">{formatTaka(product.price)}</p>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
             )}
           </div>
 
