@@ -346,14 +346,18 @@ export function Hero({
             </div>
 
             {visualProducts.length > 0 && (
-              <div className="relative mx-auto mt-6 h-[280px] w-full max-w-[320px] sm:mt-8 sm:h-[340px] sm:max-w-[380px] lg:hidden">
+              <div className="relative mx-auto mt-6 h-[240px] w-[280px] min-[400px]:h-[270px] min-[400px]:w-[310px] sm:mt-8 sm:h-[320px] sm:w-[370px] lg:hidden">
                 {visualProducts.slice(0, 3).map((product, i) => {
                   const transforms = [
-                    "translate(-50%, 0) rotate(-6deg)",
-                    "translate(-50%, -12px) rotate(0deg) scale(1.05)",
-                    "translate(-50%, 0) rotate(6deg)",
+                    "rotate(-8deg)",
+                    "translateY(-14px) scale(1.06)",
+                    "rotate(8deg)",
                   ];
-                  const lefts = ["22%", "50%", "78%"];
+                  const positions = [
+                    { left: "0px", top: "18px" },
+                    { left: "50%", top: "0px", marginLeft: "-55px" },
+                    { right: "0px", top: "18px" },
+                  ];
                   const zIndexes = [10, 30, 10];
                   const floatClass = `animate-float-${i + 1}`;
                   return (
@@ -362,14 +366,13 @@ export function Hero({
                       href={`/products/${product.slug}`}
                       className={`${floatClass} absolute group`}
                       style={{
-                        left: lefts[i],
-                        top: "10%",
+                        ...positions[i],
                         transform: transforms[i],
                         zIndex: zIndexes[i],
                       }}
                     >
                       <div
-                        className="w-[140px] overflow-hidden rounded-2xl border border-cream/[0.08] bg-card/90 backdrop-blur-lg transition-transform duration-300 group-hover:scale-[1.03] sm:w-[170px]"
+                        className="w-[110px] overflow-hidden rounded-xl border border-cream/[0.08] bg-card/90 backdrop-blur-lg transition-transform duration-300 group-active:scale-[1.03] min-[400px]:w-[120px] sm:w-[150px] sm:rounded-2xl"
                         style={{
                           boxShadow: mounted && theme === "light"
                             ? `0 16px 40px rgba(180,83,9,0.10), 0 20px 50px -10px ${product.accent || "#B45309"}14`
@@ -381,15 +384,15 @@ export function Hero({
                             src={productImage(product)}
                             alt={product.name}
                             fill
-                            sizes="170px"
+                            sizes="150px"
                             className="object-cover transition-transform duration-500 group-hover:scale-105"
                             priority={i === 1}
                           />
                         </div>
-                        <div className="p-2.5 sm:p-3">
-                          <p className="truncate text-[10px] font-bold text-cream/50 uppercase tracking-wider sm:text-[11px]">{product.category?.name || ""}</p>
-                          <h3 className="mt-0.5 truncate text-xs font-bold text-cream group-hover:text-gold transition-colors sm:text-sm">{product.name}</h3>
-                          <p className="mt-1.5 text-xs font-black text-gold sm:text-sm">{formatTaka(product.price)}</p>
+                        <div className="p-2 sm:p-3">
+                          <p className="truncate text-[8px] font-bold text-cream/50 uppercase tracking-wider min-[400px]:text-[9px] sm:text-[11px]">{product.category?.name || ""}</p>
+                          <h3 className="mt-0.5 truncate text-[11px] font-bold text-cream group-hover:text-gold transition-colors min-[400px]:text-xs sm:text-sm">{product.name}</h3>
+                          <p className="mt-1 text-[11px] font-black text-gold min-[400px]:text-xs sm:text-sm">{formatTaka(product.price)}</p>
                         </div>
                       </div>
                     </Link>
