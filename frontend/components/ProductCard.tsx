@@ -57,7 +57,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
             fill
             className="h-full w-full object-cover"
             sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 25vw"
-            quality={80}
+            quality={85}
             priority={priority}
           />
         </div>
