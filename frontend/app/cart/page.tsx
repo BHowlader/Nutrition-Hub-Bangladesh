@@ -126,7 +126,7 @@ export default function CartPage() {
 
   if (orderSuccess) {
     return (
-      <div className="min-h-screen bg-ink text-cream selection:bg-gold selection:text-ink pt-24 md:pt-28 pb-10 flex items-center justify-center">
+      <div className="min-h-screen bg-transparent text-cream selection:bg-gold selection:text-ink pt-24 md:pt-28 pb-10 flex items-center justify-center">
         <Header />
         <div className="mx-auto max-w-xl px-4 w-full">
           <div className="premium-card p-6 md:p-8 text-center flex flex-col items-center">
@@ -139,8 +139,8 @@ export default function CartPage() {
             <h1 className="text-3xl font-black text-cream">Order Confirmed!</h1>
             <p className="mt-2 text-sm text-cream/55">Thank you for shopping with Nutrition Hub Bangladesh.</p>
             
-            <div className="w-full mt-8 border-t border-white/[0.08] pt-6 text-left space-y-4">
-              <div className="flex justify-between items-center bg-white/[0.02] border border-white/[0.05] rounded-xl p-3.5">
+            <div className="w-full mt-8 border-t border-cream/[0.08] pt-6 text-left space-y-4">
+              <div className="flex justify-between items-center bg-cream/[0.02] border border-cream/[0.05] rounded-xl p-3.5">
                 <span className="text-xs uppercase tracking-wider text-cream/40 font-bold">Order ID</span>
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="font-mono text-sm font-black text-gold truncate">{orderSuccess.id}</span>
@@ -148,7 +148,7 @@ export default function CartPage() {
                 </div>
               </div>
 
-              <div className="space-y-2.5 rounded-xl border border-white/[0.05] bg-white/[0.01] p-4 text-sm text-cream/70">
+              <div className="space-y-2.5 rounded-xl border border-cream/[0.05] bg-cream/[0.01] p-4 text-sm text-cream/70">
                 <div className="flex justify-between">
                   <span className="text-cream/40">Customer Name</span>
                   <span className="font-bold text-cream">{orderSuccess.customer_name}</span>
@@ -165,7 +165,7 @@ export default function CartPage() {
                   <span className="text-cream/40">Payment Method</span>
                   <span className="font-bold text-cream uppercase">Cash on Delivery (COD)</span>
                 </div>
-                <div className="flex justify-between border-t border-white/[0.08] pt-3 text-base">
+                <div className="flex justify-between border-t border-cream/[0.08] pt-3 text-base">
                   <span className="font-bold text-cream">Amount Payable</span>
                   <strong className="font-black text-gold">৳{Number(orderSuccess.total).toLocaleString()}</strong>
                 </div>
@@ -200,7 +200,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-ink pt-24 md:pt-28 pb-10">
+    <div className="min-h-screen bg-transparent pt-24 md:pt-28 pb-10">
       <Header />
       <div className="mx-auto max-w-5xl px-4">
         <div className="mb-6 flex items-end justify-between">
@@ -358,7 +358,7 @@ export default function CartPage() {
 
       {checkoutOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/80 p-4">
-          <div className="w-full max-w-md rounded-xl border border-cream/10 bg-ink p-6 shadow-2xl">
+          <div className="w-full max-w-md rounded-xl border border-cream/10 bg-card p-6 shadow-2xl">
             <h2 className="text-xl font-black text-cream">Delivery details</h2>
             <p className="mt-1 text-xs text-cream/50">Cash on delivery via Pathao · Total ৳{payableTotal.toLocaleString()}</p>
 
@@ -469,7 +469,7 @@ function CopyButton({ text }: { text: string }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }}
-      className="shrink-0 rounded-lg border border-white/10 p-1.5 text-cream/40 transition hover:border-gold/30 hover:text-gold"
+      className="shrink-0 rounded-lg border border-cream/10 p-1.5 text-cream/40 transition hover:border-gold/30 hover:text-gold"
       aria-label="Copy order ID"
     >
       {copied ? <Check size={14} className="text-mint" /> : <Copy size={14} />}

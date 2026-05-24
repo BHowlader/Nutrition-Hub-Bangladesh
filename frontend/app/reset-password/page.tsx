@@ -66,8 +66,8 @@ function ResetPasswordContent() {
 
   if (!token) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-ink px-6 py-12">
-        <div className="w-full max-w-md text-center">
+      <div className="flex min-h-screen items-center justify-center bg-transparent px-6 py-12">
+        <div className="w-full max-w-md rounded-2xl border border-cream/10 bg-card p-6 sm:p-8 shadow-2xl relative z-10 text-center">
           <div className="flex flex-col items-center mb-6">
             <Link href="/" className="mb-3">
               <Image src="/images/logo.png" alt="Nutrition Hub" width={56} height={56} className="rounded-xl shadow-lg border border-cream/5" />
@@ -87,8 +87,8 @@ function ResetPasswordContent() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-ink px-6 py-12">
-      <div className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center bg-transparent px-6 py-12">
+      <div className="w-full max-w-md rounded-2xl border border-cream/10 bg-card p-6 sm:p-8 shadow-2xl relative z-10">
         <div className="flex flex-col items-center text-center mb-6">
           <Link href="/" className="mb-3">
             <Image src="/images/logo.png" alt="Nutrition Hub" width={56} height={56} className="rounded-xl shadow-lg border border-cream/5" />

@@ -135,7 +135,7 @@ export function Header() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 pt-2 sm:pt-4">
-      <nav className="shell flex min-h-[58px] items-center justify-between gap-2 rounded-lg border border-cream/10 bg-ink/95 px-3 text-cream sm:min-h-[72px] sm:gap-6 sm:px-5 sm:bg-ink/75 sm:backdrop-blur-xl">
+      <nav className="shell flex min-h-[58px] items-center justify-between gap-2 rounded-lg border border-cream/10 bg-card/95 px-3 text-cream sm:min-h-[72px] sm:gap-6 sm:px-5 sm:bg-card/75 sm:backdrop-blur-xl">
         <Link href="/" onClick={handleLogoClick} className="flex min-w-0 items-center gap-2 sm:gap-3">
           <Image
             src="/images/logo.png"
@@ -158,10 +158,10 @@ export function Header() {
               <ChevronDown size={14} className="transition-transform duration-200 group-hover:rotate-180" />
             </button>
             <div className="absolute left-1/2 top-full hidden group-hover:block w-64 -translate-x-1/2 pt-2">
-              <div className="rounded-xl border border-cream/10 bg-ink/95 p-1.5 shadow-2xl backdrop-blur-xl">
+              <div className="rounded-xl border border-cream/10 bg-card/95 p-1.5 shadow-2xl backdrop-blur-xl">
                 <Link
                   href="/products"
-                  className="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm text-cream/70 transition hover:bg-cream/5 hover:text-cream border-b border-white/[0.05] mb-1 pb-3"
+                  className="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm text-cream/70 transition hover:bg-cream/5 hover:text-cream border-b border-cream/[0.05] mb-1 pb-3"
                 >
                   <AlignLeft size={16} className="text-gold" />
                   All Products
@@ -236,7 +236,7 @@ export function Header() {
                   </button>
 
                   {dropdownOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-56 overflow-hidden rounded-xl border border-cream/10 bg-ink/95 shadow-2xl sm:backdrop-blur-xl">
+                    <div className="absolute right-0 top-full mt-2 w-56 overflow-hidden rounded-xl border border-cream/10 bg-card/95 shadow-2xl sm:backdrop-blur-xl">
                       <div className="border-b border-cream/10 px-4 py-3">
                         <p className="text-sm font-bold text-cream">{user.name}</p>
                         <p className="text-xs text-cream/50">{user.email}</p>
@@ -297,7 +297,7 @@ export function Header() {
 
       {/* Mobile Drawer Overlay */}
       {menuOpen && (
-        <div className="fixed inset-x-3 top-[74px] z-40 overflow-hidden rounded-xl border border-cream/10 bg-ink/95 shadow-2xl sm:inset-x-4 sm:top-[92px] md:hidden">
+        <div className="fixed inset-x-3 top-[74px] z-40 overflow-hidden rounded-xl border border-cream/10 bg-card/95 shadow-2xl sm:inset-x-4 sm:top-[92px] md:hidden">
           <nav className="flex flex-col gap-1 p-3">
             {/* Mobile Categories Accordion */}
             <div>
@@ -312,7 +312,7 @@ export function Header() {
                 />
               </button>
               {mobileCategoriesOpen && (
-                <div className="mt-1 pl-4 flex flex-col gap-1 border-l border-white/10 ml-6 pb-2">
+                <div className="mt-1 pl-4 flex flex-col gap-1 border-l border-cream/10 ml-6 pb-2">
                   <Link
                     href="/products"
                     onClick={() => setMenuOpen(false)}

@@ -44,7 +44,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-ink text-cream flex flex-col justify-between">
+      <div className="min-h-screen bg-transparent text-cream flex flex-col justify-between">
         <Header />
         <main className="flex-1 flex flex-col items-center justify-center py-20 text-center">
           <h1 className="text-4xl font-black mb-4">Product Not Found</h1>

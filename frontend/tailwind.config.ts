@@ -10,6 +10,7 @@ const config: Config = {
     extend: {
       colors: {
         ink: "rgb(var(--color-ink) / <alpha-value>)",
+        card: "rgb(var(--color-card) / <alpha-value>)",
         forest: "rgb(var(--color-forest) / <alpha-value>)",
         moss: "rgb(var(--color-moss) / <alpha-value>)",
         gold: "rgb(var(--color-gold) / <alpha-value>)",

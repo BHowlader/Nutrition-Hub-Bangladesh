@@ -84,7 +84,7 @@ function TrackOrderContent() {
   }
 
   return (
-    <div className="min-h-screen bg-ink pt-24 md:pt-28 pb-10">
+    <div className="min-h-screen bg-transparent pt-24 md:pt-28 pb-10">
       <Header />
       <div className="mx-auto max-w-xl px-4">
         {order ? (

@@ -159,7 +159,7 @@ function DashboardContent() {
 
   if (section === "orders") {
     return (
-      <div className="min-h-screen bg-ink pt-24 md:pt-28 pb-10">
+      <div className="min-h-screen bg-transparent pt-24 md:pt-28 pb-10">
         <Header />
         <div className="mx-auto max-w-4xl px-4">
           <div className="mb-8">
@@ -173,7 +173,7 @@ function DashboardContent() {
   }
 
   return (
-    <div className="min-h-screen bg-ink pt-24 md:pt-28 pb-10">
+    <div className="min-h-screen bg-transparent pt-24 md:pt-28 pb-10">
       <Header />
       <div className="mx-auto max-w-6xl px-4">
         <div className="mb-6 md:mb-8">
@@ -207,7 +207,7 @@ function DashboardContent() {
               </div>
               <button
                 onClick={() => logout().then(() => router.push("/"))}
-                className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-cream/60 transition hover:text-red-400"
+                className="rounded-lg border border-cream/10 bg-cream/5 px-3 py-1.5 text-xs font-bold text-cream/60 transition hover:text-red-400"
               >
                 Sign out
               </button>
@@ -224,7 +224,7 @@ function DashboardContent() {
                     className={`flex shrink-0 items-center gap-2 rounded-full border px-4 py-2.5 text-xs font-bold transition ${
                       active
                         ? "border-gold/55 bg-gold/10 text-cream"
-                        : "border-white/[0.06] bg-white/[0.02] text-cream/60 hover:border-white/12 hover:bg-white/[0.04]"
+                        : "border-cream/[0.06] bg-cream/[0.02] text-cream/60 hover:border-cream/12 hover:bg-cream/[0.04]"
                     }`}
                   >
                     <Icon size={14} className={active ? "text-gold" : "text-cream/40"} />
@@ -344,7 +344,7 @@ function DashboardContent() {
       </div>
 
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl border border-cream/10 bg-ink/95 p-4 shadow-2xl backdrop-blur-xl min-w-[280px]">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl border border-cream/10 bg-card/95 p-4 shadow-2xl backdrop-blur-xl min-w-[280px]">
           <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${toast.type === "success"
             ? "bg-green-500/20 text-green-400 border border-green-500/30"
             : "bg-red-500/20 text-red-400 border border-red-500/30"

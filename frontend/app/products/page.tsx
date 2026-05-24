@@ -71,7 +71,7 @@ export default function ProductsPage() {
     : filterCategories.find((category) => category.id === activeCategory)?.label;
 
   return (
-    <div className="min-h-screen bg-ink text-cream selection:bg-gold selection:text-ink">
+    <div className="min-h-screen bg-transparent text-cream selection:bg-gold selection:text-ink">
       <Header />
 
       {/* CATALOG */}
@@ -103,7 +103,7 @@ export default function ProductsPage() {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search the catalog"
-                className="h-11 w-full border-0 border-b border-white/15 bg-transparent pl-6 pr-2 text-sm font-semibold text-cream outline-none transition placeholder:text-cream/30 focus:border-gold sm:h-12"
+                className="h-11 w-full border-0 border-b border-cream/15 bg-transparent pl-6 pr-2 text-sm font-semibold text-cream outline-none transition placeholder:text-cream/30 focus:border-gold sm:h-12"
               />
             </label>
           </div>
@@ -111,7 +111,7 @@ export default function ProductsPage() {
           {/* Category tab nav — full-width hairline, scrolls horizontally at every breakpoint */}
           <nav className="relative mt-6 sm:mt-8">
             <div className="-mx-3 overflow-x-auto sm:-mx-5 lg:mx-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <ul className="flex min-w-max items-end gap-7 border-b border-white/[0.08] px-3 sm:gap-9 sm:px-5 lg:px-0">
+              <ul className="flex min-w-max items-end gap-7 border-b border-cream/[0.08] px-3 sm:gap-9 sm:px-5 lg:px-0">
                 {filterCategories.map((category) => {
                   const active = activeCategory === category.id;
                   return (
@@ -148,12 +148,12 @@ export default function ProductsPage() {
             {loading ? (
               <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 xl:grid-cols-4">
                 {Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className="animate-pulse rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
-                    <div className="aspect-square bg-white/[0.04]" />
+                  <div key={i} className="animate-pulse rounded-2xl border border-cream/[0.06] bg-cream/[0.02] overflow-hidden">
+                    <div className="aspect-square bg-cream/[0.04]" />
                     <div className="p-3 sm:p-4 space-y-2.5">
-                      <div className="h-3 w-3/4 rounded bg-white/[0.06]" />
-                      <div className="h-2.5 w-1/2 rounded bg-white/[0.04]" />
-                      <div className="h-4 w-1/3 rounded bg-white/[0.06]" />
+                      <div className="h-3 w-3/4 rounded bg-cream/[0.06]" />
+                      <div className="h-2.5 w-1/2 rounded bg-cream/[0.04]" />
+                      <div className="h-4 w-1/3 rounded bg-cream/[0.06]" />
                     </div>
                   </div>
                 ))}
@@ -165,7 +165,7 @@ export default function ProductsPage() {
                 ))}
               </div>
             ) : (
-              <div className="border border-dashed border-white/[0.1] px-5 py-14 text-center sm:py-24">
+              <div className="border border-dashed border-cream/[0.1] px-5 py-14 text-center sm:py-24">
                 <p className="font-display text-lg font-black tracking-tight text-cream/70 sm:text-2xl">
                   No products match.
                 </p>
@@ -185,7 +185,7 @@ export default function ProductsPage() {
       </main>
 
       {/* TRUST */}
-      <section className="border-t border-white/[0.05] bg-forest/40 py-10 sm:py-16">
+      <section className="border-t border-cream/[0.05] bg-transparent py-10 sm:py-16">
         <div className="shell">
           <ul className="grid grid-cols-1 gap-6 text-center sm:grid-cols-3 sm:gap-8">
             {[
@@ -206,7 +206,7 @@ export default function ProductsPage() {
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-white/[0.05] bg-forest pb-8 pt-12 text-cream md:pt-14">
+      <footer className="border-t border-cream/10 bg-card pb-8 pt-12 text-cream md:pt-14">
         <div className="shell">
           <div className="flex flex-col items-center gap-5 text-center md:flex-row md:items-center md:justify-between md:text-left">
             <div className="flex items-center gap-3">
@@ -215,7 +215,7 @@ export default function ProductsPage() {
                 alt="Nutrition Hub Bangladesh Logo"
                 width={40}
                 height={40}
-                className="rounded-lg border border-white/5 object-contain shadow-md"
+                className="rounded-lg border border-cream/5 object-contain shadow-md"
               />
               <strong className="text-lg font-black leading-tight text-cream sm:text-xl">
                 Nutrition Hub
@@ -225,13 +225,13 @@ export default function ProductsPage() {
               </strong>
             </div>
             <div className="flex items-center gap-3 shrink-0">
-              <a href="https://www.facebook.com/share/18WRSVF1Ch/" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-cream/50 transition-all hover:border-[#1877F2]/40 hover:bg-[#1877F2]/10 hover:text-[#1877F2]">
+              <a href="https://www.facebook.com/share/18WRSVF1Ch/" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="flex h-9 w-9 items-center justify-center rounded-full border border-cream/10 bg-cream/[0.04] text-cream/50 transition-all hover:border-[#1877F2]/40 hover:bg-[#1877F2]/10 hover:text-[#1877F2]">
                 <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4"><path d="M9.198 21.5h4v-8.01h3.604l.396-3.98h-4V7.5a1 1 0 0 1 1-1h3v-4h-3a5 5 0 0 0-5 5v2.01h-2l-.396 3.98h2.396v8.01Z" /></svg>
               </a>
-              <a href="https://www.instagram.com/nutrition.hub.bd?igsh=amVvaHlpcnI1dDY4" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-cream/50 transition-all hover:border-[#E4405F]/40 hover:bg-[#E4405F]/10 hover:text-[#E4405F]">
+              <a href="https://www.instagram.com/nutrition.hub.bd?igsh=amVvaHlpcnI1dDY4" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="flex h-9 w-9 items-center justify-center rounded-full border border-cream/10 bg-cream/[0.04] text-cream/50 transition-all hover:border-[#E4405F]/40 hover:bg-[#E4405F]/10 hover:text-[#E4405F]">
                 <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4"><path d="M12 2.982c2.937 0 3.285.011 4.445.064a6.087 6.087 0 0 1 2.042.379 3.408 3.408 0 0 1 1.265.823 3.408 3.408 0 0 1 .823 1.265 6.087 6.087 0 0 1 .379 2.042c.053 1.16.064 1.508.064 4.445s-.011 3.285-.064 4.445a6.087 6.087 0 0 1-.379 2.042 3.643 3.643 0 0 1-2.088 2.088 6.087 6.087 0 0 1-2.042.379c-1.16.053-1.508.064-4.445.064s-3.285-.011-4.445-.064a6.087 6.087 0 0 1-2.042-.379 3.408 3.408 0 0 1-1.265-.823 3.408 3.408 0 0 1-.823-1.265 6.087 6.087 0 0 1-.379-2.042c-.053-1.16-.064-1.508-.064-4.445s.011-3.285.064-4.445a6.087 6.087 0 0 1 .379-2.042 3.408 3.408 0 0 1 .823-1.265 3.408 3.408 0 0 1 1.265-.823 6.087 6.087 0 0 1 2.042-.379c1.16-.053 1.508-.064 4.445-.064M12 1c-2.987 0-3.362.013-4.535.066a8.074 8.074 0 0 0-2.67.511 5.392 5.392 0 0 0-1.949 1.27 5.392 5.392 0 0 0-1.269 1.948 8.074 8.074 0 0 0-.51 2.67C1.012 8.639 1 9.014 1 12s.013 3.362.066 4.535a8.074 8.074 0 0 0 .511 2.67 5.392 5.392 0 0 0 1.27 1.949 5.392 5.392 0 0 0 1.948 1.269 8.074 8.074 0 0 0 2.67.51C8.639 22.988 9.014 23 12 23s3.362-.013 4.535-.066a8.074 8.074 0 0 0 2.67-.511 5.625 5.625 0 0 0 3.218-3.218 8.074 8.074 0 0 0 .51-2.67C22.988 15.361 23 14.986 23 12s-.013-3.362-.066-4.535a8.074 8.074 0 0 0-.511-2.67 5.392 5.392 0 0 0-1.27-1.949 5.392 5.392 0 0 0-1.948-1.269 8.074 8.074 0 0 0-2.67-.51C15.361 1.012 14.986 1 12 1Zm0 5.351A5.649 5.649 0 1 0 17.649 12 5.649 5.649 0 0 0 12 6.351Zm0 9.316A3.667 3.667 0 1 1 15.667 12 3.667 3.667 0 0 1 12 15.667Zm5.872-10.859a1.32 1.32 0 1 0 1.32 1.32 1.32 1.32 0 0 0-1.32-1.32Z" /></svg>
               </a>
-              <a href="https://www.tiktok.com/@nutrition.hub.bd?_r=1&_t=ZS-96a0cD5XcDX" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-cream/50 transition-all hover:border-cream/40 hover:bg-cream/10 hover:text-cream">
+              <a href="https://www.tiktok.com/@nutrition.hub.bd?_r=1&_t=ZS-96a0cD5XcDX" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="flex h-9 w-9 items-center justify-center rounded-full border border-cream/10 bg-cream/[0.04] text-cream/50 transition-all hover:border-cream/40 hover:bg-cream/10 hover:text-cream">
                 <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1 0-5.78 2.86 2.86 0 0 1 .87.13V9.01a6.32 6.32 0 0 0-1-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V9.48a8.27 8.27 0 0 0 3.89.96V7h-.02c0-.1.02-.2.02-.31Z" /></svg>
               </a>
             </div>
@@ -285,7 +285,7 @@ export default function ProductsPage() {
               </ul>
             </div>
           </div>
-          <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-white/[0.05] pt-6 text-center text-xs text-cream/30 sm:mt-12 sm:flex-row sm:gap-4 sm:pt-8">
+          <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-cream/[0.05] pt-6 text-center text-xs text-cream/30 sm:mt-12 sm:flex-row sm:gap-4 sm:pt-8">
             <span>Nutrition Hub Bangladesh. All rights reserved.</span>
             <span>
               Built by{" "}

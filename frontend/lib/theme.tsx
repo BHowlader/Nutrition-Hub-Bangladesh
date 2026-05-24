@@ -10,19 +10,18 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  theme: "dark",
+  theme: "light",
   toggleTheme: () => {},
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
     const stored = localStorage.getItem("nhb-theme") as Theme | null;
     if (stored === "light" || stored === "dark") {
       setTheme(stored);
     }
-    // Default stays "dark" if nothing stored (matching brand identity)
   }, []);
 
   useEffect(() => {

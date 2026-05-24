@@ -22,11 +22,11 @@ export const metadata: Metadata = {
   }
 };
 
-const themeScript = `(function(){var t=localStorage.getItem("nhb-theme");if(!t)t="dark";document.documentElement.classList.toggle("dark",t==="dark");document.documentElement.style.colorScheme=t})()`;
+const themeScript = `(function(){var t=localStorage.getItem("nhb-theme");if(!t)t="light";document.documentElement.classList.toggle("dark",t==="dark");document.documentElement.style.colorScheme=t})()`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark" data-scroll-behavior="smooth" suppressHydrationWarning>
+    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <link rel="preconnect" href="https://res.cloudinary.com" />

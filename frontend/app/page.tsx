@@ -99,17 +99,17 @@ export default async function HomePage() {
   const [allProducts, heroSettings] = await Promise.all([fetchProducts(), fetchHeroSettings()]);
   const featured = allProducts.filter((p) => FEATURED_SLUGS.has(p.slug));
   return (
-    <main className="min-h-screen bg-ink text-cream antialiased">
+    <main className="min-h-screen bg-transparent text-cream antialiased">
       <Header />
       <Hero initialProducts={allProducts} settings={heroSettings} />
 
       {/* Spacer line */}
-      <div className="h-[1px] bg-white/[0.05]" />
+      <div className="h-[1px] bg-cream/[0.05]" />
 
       {/* Shop by Goal */}
-      <section className="relative bg-ink py-16 sm:py-20 lg:py-28">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(96,165,250,0.13),transparent_32%),radial-gradient(circle_at_85%_15%,rgba(16,185,129,0.08),transparent_30%)]" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/[0.06]" />
+      <section className="relative bg-transparent py-16 sm:py-20 lg:py-28">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgb(var(--color-gold)/0.10),transparent_32%),radial-gradient(circle_at_85%_15%,rgb(var(--color-mint)/0.07),transparent_30%)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-cream/[0.06]" />
         <div className="shell">
           <Reveal>
             <div className="relative mb-9 grid gap-5 sm:mb-12 lg:grid-cols-[0.92fr_1.08fr] lg:items-end">
@@ -131,7 +131,7 @@ export default async function HomePage() {
               <Reveal className="h-full" delay={index * 0.06} key={title}>
                 <Link
                   href={`/products?category=${encodeURIComponent(title)}`}
-                  className="group relative flex h-full min-h-[210px] overflow-hidden rounded-2xl border border-white/[0.07] bg-forest p-5 shadow-[0_18px_55px_rgba(0,0,0,0.2)] transition-all duration-300 hover:-translate-y-1 hover:border-gold/30 hover:bg-forest/80 sm:min-h-[250px] sm:p-6 lg:min-h-[300px]"
+                  className="group relative flex h-full min-h-[210px] overflow-hidden rounded-2xl border border-cream/[0.07] bg-card p-5 shadow-[0_18px_55px_rgba(0,0,0,0.2)] transition-all duration-300 hover:-translate-y-1 hover:border-gold/30 hover:bg-card/85 sm:min-h-[250px] sm:p-6 lg:min-h-[300px]"
                 >
                   {/* Photo background with dark gradients for maximum typography contrast */}
                   {image && (
@@ -149,7 +149,7 @@ export default async function HomePage() {
                   <div className={`absolute inset-x-0 top-0 h-28 bg-gradient-to-b ${accent} opacity-50 z-0`} />
                   <div className="relative z-10 flex min-h-full w-full flex-col">
                     <div className="flex items-center justify-between">
-                      <span className="grid h-11 w-11 place-items-center rounded-xl border border-white/10 bg-white/[0.06] text-gold shadow-inner">
+                      <span className="grid h-11 w-11 place-items-center rounded-xl border border-cream/10 bg-cream/[0.06] text-gold shadow-inner">
                         <Icon size={21} />
                       </span>
                       <span className="font-mono text-xs font-bold text-cream/28">
@@ -174,12 +174,12 @@ export default async function HomePage() {
       </section>
 
       {/* Spacer line */}
-      <div className="h-[1px] bg-white/[0.05]" />
+      <div className="h-[1px] bg-cream/[0.05]" />
 
       {/* Best Sellers (Catalog) */}
-      <section id="catalog" className="relative bg-ink py-14 text-cream sm:py-20 lg:py-28">
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),transparent_22%),radial-gradient(circle_at_85%_0%,rgba(245,158,11,0.12),transparent_30%)]" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/[0.06]" />
+      <section id="catalog" className="relative bg-transparent py-14 text-cream sm:py-20 lg:py-28">
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgb(var(--color-cream)/0.035),transparent_22%),radial-gradient(circle_at_85%_0%,rgb(var(--color-gold)/0.10),transparent_30%)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-cream/[0.06]" />
         <div className="shell">
           <Reveal>
             <div className="mb-7 sm:mb-12">
@@ -208,7 +208,7 @@ export default async function HomePage() {
           <div className="mt-8 sm:mt-14 sm:text-center">
             <Link
               href="/products"
-              className="group flex w-full items-center justify-center gap-2.5 rounded-full border border-white/10 bg-white/[0.03] px-5 py-3.5 text-xs font-black uppercase tracking-[0.18em] text-cream/75 transition hover:border-gold hover:bg-gold hover:text-ink sm:inline-flex sm:w-auto sm:px-8 sm:py-4 sm:text-sm"
+              className="group flex w-full items-center justify-center gap-2.5 rounded-full border border-cream/10 bg-cream/[0.03] px-5 py-3.5 text-xs font-black uppercase tracking-[0.18em] text-cream/75 transition hover:border-gold hover:bg-gold hover:text-ink sm:inline-flex sm:w-auto sm:px-8 sm:py-4 sm:text-sm"
             >
               View All Products
               <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
@@ -218,7 +218,7 @@ export default async function HomePage() {
       </section>
 
       {/* Authenticity Process */}
-      <section id="authenticity" className="bg-ink py-28">
+      <section id="authenticity" className="bg-transparent py-28">
         <div className="shell">
           <div className="grid gap-16 lg:grid-cols-2 lg:items-center">
             <Reveal>
@@ -239,8 +239,8 @@ export default async function HomePage() {
             <div className="grid gap-4">
               {verificationSteps.map(({ step, text }, index) => (
                 <Reveal delay={index * 0.06} key={step}>
-                  <article className="group flex gap-5 rounded-2xl border border-white/[0.06] bg-forest/40 p-6 transition-all duration-300 hover:border-gold/30 hover:bg-forest/75">
-                    <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-gold/10 text-gold border border-white/5">
+                  <article className="group flex gap-5 rounded-2xl border border-cream/[0.06] bg-card p-6 transition-all duration-300 hover:border-gold/30 hover:bg-card/85">
+                    <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-gold/10 text-gold border border-cream/5">
                       <BadgeCheck size={22} />
                     </span>
                     <div>
@@ -255,7 +255,7 @@ export default async function HomePage() {
 
               <Reveal delay={0.3}>
                 <div className="mt-4 grid grid-cols-2 gap-4">
-                  <div className="overflow-hidden rounded-2xl border border-white/[0.08]">
+                  <div className="overflow-hidden rounded-2xl border border-cream/[0.08]">
                     <Image
                       src="/images/products/creatine/brand-banner.jpg"
                       alt="Wellcore certified by Euromonitor International"
@@ -264,7 +264,7 @@ export default async function HomePage() {
                       className="h-full w-full object-cover opacity-85 transition-opacity hover:opacity-100 duration-300"
                     />
                   </div>
-                  <div className="overflow-hidden rounded-2xl border border-white/[0.08]">
+                  <div className="overflow-hidden rounded-2xl border border-cream/[0.08]">
                     <Image
                       src="/images/products/creatine/back-label.jpg"
                       alt="Product back label showing batch number, FSSAI certification, and authentication steps"
@@ -281,10 +281,10 @@ export default async function HomePage() {
       </section>
 
       {/* Spacer line */}
-      <div className="h-[1px] bg-white/[0.05]" />
+      <div className="h-[1px] bg-cream/[0.05]" />
 
       {/* Delivery & Payment */}
-      <section id="delivery" className="bg-forest/40 py-14 border-y border-white/[0.05] sm:py-20 lg:py-28">
+      <section id="delivery" className="bg-transparent py-14 border-y border-cream/[0.05] sm:py-20 lg:py-28">
         <div className="shell">
           <Reveal>
             <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12 lg:mb-14">
@@ -300,8 +300,8 @@ export default async function HomePage() {
           <div className="grid gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
             {deliveryOptions.map(({ icon: Icon, title, text }, index) => (
               <Reveal delay={index * 0.05} key={title}>
-                <article className="flex items-start gap-4 rounded-2xl border border-white/[0.06] bg-forest/40 p-4 transition-all duration-300 hover:border-gold/30 hover:bg-forest/75 sm:block sm:p-7 sm:text-center sm:hover:-translate-y-1">
-                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-white/5 bg-gold/10 text-gold sm:mx-auto sm:mb-5 sm:h-14 sm:w-14">
+                <article className="flex items-start gap-4 rounded-2xl border border-cream/[0.06] bg-card p-4 transition-all duration-300 hover:border-gold/30 hover:bg-card/85 sm:block sm:p-7 sm:text-center sm:hover:-translate-y-1">
+                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-cream/5 bg-gold/10 text-gold sm:mx-auto sm:mb-5 sm:h-14 sm:w-14">
                     <Icon size={22} className="sm:hidden" />
                     <Icon size={26} className="hidden sm:block" />
                   </div>
@@ -317,7 +317,7 @@ export default async function HomePage() {
       </section>
 
       {/* Testimonials */}
-      <section className="bg-ink py-28">
+      <section className="bg-transparent py-28">
         <div className="shell">
           <Reveal>
             <div className="text-center max-w-2xl mx-auto mb-14">
@@ -329,7 +329,7 @@ export default async function HomePage() {
           <div className="grid gap-5 lg:grid-cols-3">
             {testimonials.map((item, index) => (
               <Reveal delay={index * 0.06} key={item.name}>
-                <article className="flex flex-col rounded-2xl border border-white/[0.06] bg-forest/40 p-7 transition-all duration-300 hover:border-gold/30 hover:bg-forest/75">
+                <article className="flex flex-col rounded-2xl border border-cream/[0.06] bg-card p-7 transition-all duration-300 hover:border-gold/30 hover:bg-card/85">
                   <div className="mb-5 flex gap-1">
                     {Array.from({ length: item.rating }).map((_, i) => (
                       <Star key={i} size={16} className="fill-gold text-gold" />
@@ -338,7 +338,7 @@ export default async function HomePage() {
                   <p className="flex-1 text-lg leading-relaxed font-medium text-cream/90">
                     &ldquo;{item.quote}&rdquo;
                   </p>
-                  <div className="mt-8 flex items-center gap-4 border-t border-white/[0.06] pt-6">
+                  <div className="mt-8 flex items-center gap-4 border-t border-cream/[0.06] pt-6">
                     <div className="grid h-11 w-11 place-items-center rounded-full bg-gold/15 text-sm font-black text-gold">
                       {item.name.split(" ").map(n => n[0]).join("")}
                     </div>
@@ -355,7 +355,7 @@ export default async function HomePage() {
       </section>
 
       {/* CTA */}
-      <section className="bg-forest/60 py-28 text-cream border-t border-white/[0.05]">
+      <section className="bg-transparent py-28 text-cream border-t border-cream/[0.05]">
         <div className="shell text-center">
           <Reveal>
             <p className="eyebrow text-gold mx-auto">Need supplement guidance?</p>
@@ -373,7 +373,7 @@ export default async function HomePage() {
               <a className="btn-primary text-base min-h-[48px]" href="#catalog">
                 Start Shopping <ArrowRight size={18} />
               </a>
-              <a className="btn-secondary text-base min-h-[48px] border-white/10 bg-white/5" href="#authenticity">
+              <a className="btn-secondary text-base min-h-[48px]" href="#authenticity">
                 Learn About Verification
               </a>
             </div>
@@ -382,7 +382,7 @@ export default async function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/[0.05] bg-forest pb-8 pt-12 text-cream sm:pt-14 md:pt-16">
+      <footer className="border-t border-cream/10 bg-card pb-8 pt-12 text-cream sm:pt-14 md:pt-16">
         <div className="shell">
           {/* Brand block + Social icons row */}
           <div className="flex flex-col items-center gap-5 text-center md:flex-row md:items-center md:justify-between md:text-left">
@@ -393,7 +393,7 @@ export default async function HomePage() {
                   alt="Nutrition Hub Bangladesh Logo"
                   width={44}
                   height={44}
-                  className="h-10 w-10 shrink-0 rounded-lg border border-white/5 object-contain shadow-md sm:h-11 sm:w-11"
+                  className="h-10 w-10 shrink-0 rounded-lg border border-cream/5 object-contain shadow-md sm:h-11 sm:w-11"
                 />
                 <strong className="text-base font-black leading-tight text-cream sm:text-xl">
                   Nutrition Hub
@@ -408,20 +408,20 @@ export default async function HomePage() {
               </p>
             </div>
             <div className="flex items-center gap-3 shrink-0">
-              <a href="https://www.facebook.com/share/18WRSVF1Ch/" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-cream/50 transition-all hover:border-[#1877F2]/40 hover:bg-[#1877F2]/10 hover:text-[#1877F2]">
+              <a href="https://www.facebook.com/share/18WRSVF1Ch/" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="flex h-9 w-9 items-center justify-center rounded-full border border-cream/10 bg-cream/[0.04] text-cream/50 transition-all hover:border-[#1877F2]/40 hover:bg-[#1877F2]/10 hover:text-[#1877F2]">
                 <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4"><path d="M9.198 21.5h4v-8.01h3.604l.396-3.98h-4V7.5a1 1 0 0 1 1-1h3v-4h-3a5 5 0 0 0-5 5v2.01h-2l-.396 3.98h2.396v8.01Z" /></svg>
               </a>
-              <a href="https://www.instagram.com/nutrition.hub.bd?igsh=amVvaHlpcnI1dDY4" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-cream/50 transition-all hover:border-[#E4405F]/40 hover:bg-[#E4405F]/10 hover:text-[#E4405F]">
+              <a href="https://www.instagram.com/nutrition.hub.bd?igsh=amVvaHlpcnI1dDY4" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="flex h-9 w-9 items-center justify-center rounded-full border border-cream/10 bg-cream/[0.04] text-cream/50 transition-all hover:border-[#E4405F]/40 hover:bg-[#E4405F]/10 hover:text-[#E4405F]">
                 <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4"><path d="M12 2.982c2.937 0 3.285.011 4.445.064a6.087 6.087 0 0 1 2.042.379 3.408 3.408 0 0 1 1.265.823 3.408 3.408 0 0 1 .823 1.265 6.087 6.087 0 0 1 .379 2.042c.053 1.16.064 1.508.064 4.445s-.011 3.285-.064 4.445a6.087 6.087 0 0 1-.379 2.042 3.643 3.643 0 0 1-2.088 2.088 6.087 6.087 0 0 1-2.042.379c-1.16.053-1.508.064-4.445.064s-3.285-.011-4.445-.064a6.087 6.087 0 0 1-2.042-.379 3.408 3.408 0 0 1-1.265-.823 3.408 3.408 0 0 1-.823-1.265 6.087 6.087 0 0 1-.379-2.042c-.053-1.16-.064-1.508-.064-4.445s.011-3.285.064-4.445a6.087 6.087 0 0 1 .379-2.042 3.408 3.408 0 0 1 .823-1.265 3.408 3.408 0 0 1 1.265-.823 6.087 6.087 0 0 1 2.042-.379c1.16-.053 1.508-.064 4.445-.064M12 1c-2.987 0-3.362.013-4.535.066a8.074 8.074 0 0 0-2.67.511 5.392 5.392 0 0 0-1.949 1.27 5.392 5.392 0 0 0-1.269 1.948 8.074 8.074 0 0 0-.51 2.67C1.012 8.639 1 9.014 1 12s.013 3.362.066 4.535a8.074 8.074 0 0 0 .511 2.67 5.392 5.392 0 0 0 1.27 1.949 5.392 5.392 0 0 0 1.948 1.269 8.074 8.074 0 0 0 2.67.51C8.639 22.988 9.014 23 12 23s3.362-.013 4.535-.066a8.074 8.074 0 0 0 2.67-.511 5.625 5.625 0 0 0 3.218-3.218 8.074 8.074 0 0 0 .51-2.67C22.988 15.361 23 14.986 23 12s-.013-3.362-.066-4.535a8.074 8.074 0 0 0-.511-2.67 5.392 5.392 0 0 0-1.27-1.949 5.392 5.392 0 0 0-1.948-1.269 8.074 8.074 0 0 0-2.67-.51C15.361 1.012 14.986 1 12 1Zm0 5.351A5.649 5.649 0 1 0 17.649 12 5.649 5.649 0 0 0 12 6.351Zm0 9.316A3.667 3.667 0 1 1 15.667 12 3.667 3.667 0 0 1 12 15.667Zm5.872-10.859a1.32 1.32 0 1 0 1.32 1.32 1.32 1.32 0 0 0-1.32-1.32Z" /></svg>
               </a>
-              <a href="https://www.tiktok.com/@nutrition.hub.bd?_r=1&_t=ZS-96a0cD5XcDX" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-cream/50 transition-all hover:border-cream/40 hover:bg-cream/10 hover:text-cream">
+              <a href="https://www.tiktok.com/@nutrition.hub.bd?_r=1&_t=ZS-96a0cD5XcDX" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="flex h-9 w-9 items-center justify-center rounded-full border border-cream/10 bg-cream/[0.04] text-cream/50 transition-all hover:border-cream/40 hover:bg-cream/10 hover:text-cream">
                 <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1 0-5.78 2.86 2.86 0 0 1 .87.13V9.01a6.32 6.32 0 0 0-1-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V9.48a8.27 8.27 0 0 0 3.89.96V7h-.02c0-.1.02-.2.02-.31Z" /></svg>
               </a>
             </div>
           </div>
 
           {/* Divider — visible only on mobile/sm to separate brand from links */}
-          <div className="mx-auto my-9 h-px w-24 bg-white/[0.08] sm:my-10 md:hidden" />
+          <div className="mx-auto my-9 h-px w-24 bg-cream/[0.08] sm:my-10 md:hidden" />
 
           {/* Link columns — 2-col on mobile (Categories | Quick Links) with Trust Metrics centered below; 3-col from sm+ */}
           <div className="grid grid-cols-2 gap-x-6 gap-y-9 text-center sm:grid-cols-3 sm:gap-x-6 sm:gap-y-10 md:mt-12 md:gap-x-12 md:text-left">
@@ -503,7 +503,7 @@ export default async function HomePage() {
           </div>
 
           {/* Bottom strip */}
-          <div className="mt-10 flex flex-col items-center gap-2 border-t border-white/[0.05] pt-6 text-center text-[11px] text-cream/35 sm:mt-14 sm:flex-row sm:justify-between sm:gap-4 sm:pt-7 sm:text-xs">
+          <div className="mt-10 flex flex-col items-center gap-2 border-t border-cream/[0.05] pt-6 text-center text-[11px] text-cream/35 sm:mt-14 sm:flex-row sm:justify-between sm:gap-4 sm:pt-7 sm:text-xs">
             <span>© {new Date().getFullYear()} Nutrition Hub Bangladesh. All rights reserved.</span>
             <span>
               Built by{" "}

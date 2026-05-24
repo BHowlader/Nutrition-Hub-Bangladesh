@@ -4,7 +4,7 @@ import { ArrowLeft, Home, ShoppingBag } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-ink px-4 text-center">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-transparent px-4 text-center">
       {/* Background glow */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute left-1/2 top-1/3 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gold/5 blur-[150px]" />
@@ -17,7 +17,7 @@ export default function NotFound() {
             alt="Nutrition Hub Bangladesh"
             width={56}
             height={56}
-            className="rounded-xl border border-white/10 shadow-lg"
+            className="rounded-xl border border-cream/10 shadow-lg"
           />
         </Link>
 
@@ -43,7 +43,7 @@ export default function NotFound() {
           </Link>
           <Link
             href="/products"
-            className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-6 text-sm font-bold text-cream/70 transition hover:border-gold/30 hover:text-cream sm:w-auto"
+            className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full border border-cream/10 bg-cream/[0.04] px-6 text-sm font-bold text-cream/70 transition hover:border-gold/30 hover:text-cream sm:w-auto"
           >
             <ShoppingBag size={16} />
             Browse products
