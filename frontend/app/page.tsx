@@ -99,7 +99,7 @@ export default async function HomePage() {
   const [allProducts, heroSettings] = await Promise.all([fetchProducts(), fetchHeroSettings()]);
   const featured = allProducts.filter((p) => FEATURED_SLUGS.has(p.slug));
   return (
-    <main className="min-h-screen bg-transparent text-cream antialiased">
+    <main className="min-h-screen overflow-x-hidden bg-transparent text-cream antialiased">
       <Header />
       <Hero initialProducts={allProducts} settings={heroSettings} />
 
