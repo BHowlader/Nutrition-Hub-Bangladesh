@@ -21,14 +21,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { Reveal } from "@/components/Reveal";
 import { fetchHeroSettings, fetchProducts } from "@/lib/products";
 
-const FEATURED_SLUGS = new Set([
-  "creatine-tropical-tango",
-  "creatine-kiwi-kick",
-  "mb-omega3-gold",
-  "mb-vite-multivitamin",
-  "pintola-protein-oats",
-  "kapiva-shilajit-gold",
-]);
+const BEST_SELLERS_LIMIT = 6;
 
 const categories = [
   {
@@ -97,7 +90,7 @@ const deliveryOptions: { icon: LucideIcon; title: string; text: string }[] = [
 
 export default async function HomePage() {
   const [allProducts, heroSettings] = await Promise.all([fetchProducts(), fetchHeroSettings()]);
-  const featured = allProducts.filter((p) => FEATURED_SLUGS.has(p.slug));
+  const featured = allProducts.slice(0, BEST_SELLERS_LIMIT);
   return (
     <main className="min-h-screen overflow-x-hidden bg-transparent text-cream antialiased">
       <Header />
