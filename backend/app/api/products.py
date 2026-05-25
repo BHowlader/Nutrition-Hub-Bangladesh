@@ -1,9 +1,12 @@
 import hashlib
+import logging
 import os
 import time
 from uuid import uuid4
 
 import requests
+
+logger = logging.getLogger(__name__)
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, UploadFile, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
@@ -231,19 +234,35 @@ def upload_product_image(
         public_id = f"nutrition-hub/products/{uuid4().hex}"
         to_sign = f"public_id={public_id}&timestamp={timestamp}{settings.cloudinary_api_secret}"
         signature = hashlib.sha1(to_sign.encode("utf-8")).hexdigest()
-        res = requests.post(
-            f"https://api.cloudinary.com/v1_1/{settings.cloudinary_cloud_name}/image/upload",
-            data={
-                "api_key": settings.cloudinary_api_key,
-                "timestamp": timestamp,
-                "public_id": public_id,
-                "signature": signature,
-            },
-            files={"file": (file.filename or "product-image", content, file.content_type)},
-            timeout=20,
-        )
+        try:
+            res = requests.post(
+                f"https://api.cloudinary.com/v1_1/{settings.cloudinary_cloud_name}/image/upload",
+                data={
+                    "api_key": settings.cloudinary_api_key,
+                    "timestamp": timestamp,
+                    "public_id": public_id,
+                    "signature": signature,
+                },
+                files={"file": (file.filename or "product-image", content, file.content_type)},
+                timeout=30,
+            )
+        except requests.RequestException as exc:
+            logger.error("Cloudinary request failed: %s", exc)
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=f"Cloudinary unreachable: {exc}",
+            )
         if not res.ok:
-            raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="Cloudinary upload failed")
+            error_body = res.text[:300] if res.text else "empty response"
+            logger.error("Cloudinary upload rejected (%s): %s", res.status_code, error_body)
+            try:
+                detail = res.json().get("error", {}).get("message", error_body)
+            except Exception:
+                detail = error_body
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=f"Cloudinary upload failed: {detail}",
+            )
         url = res.json()["secure_url"]
     else:
         ext = ALLOWED_IMAGE_TYPES[file.content_type]
