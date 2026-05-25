@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     title: "Nutrition Hub Bangladesh | Premium Supplements & Sports Nutrition",
     description:
       "Shop 100% authentic gym supplements, creatine, protein oats, vitamins, and peanut butter in Bangladesh. Verified products with Pathao delivery.",
-    images: [{ url: "/images/og-cover.png", width: 1200, height: 630, alt: "Nutrition Hub Bangladesh" }],
+    images: [{ url: "/images/og-cover.png", width: 1080, height: 1080, alt: "Nutrition Hub Bangladesh" }],
   },
   twitter: {
     card: "summary_large_image",
