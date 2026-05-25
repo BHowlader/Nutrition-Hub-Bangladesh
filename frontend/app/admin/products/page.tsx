@@ -492,6 +492,23 @@ export default function AdminProductsPage() {
     }
   }
 
+  async function handleOrderDelete(orderId: string) {
+    if (!confirm("Are you sure you want to delete this order? This cannot be undone.")) return;
+    setSaving(true);
+    setError("");
+    try {
+      await api(`/api/orders/admin/${orderId}`, {
+        method: "DELETE",
+      });
+      setNotice("Order deleted");
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to delete order");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function handleUserRole(userId: string, role: string) {
     setSaving(true);
     setError("");
@@ -837,7 +854,7 @@ export default function AdminProductsPage() {
             />
           )}
 
-          {activeTab === "orders" && <OrdersSection orders={orders} saving={saving} onStatusChange={handleOrderStatus} />}
+          {activeTab === "orders" && <OrdersSection orders={orders} saving={saving} onStatusChange={handleOrderStatus} onDelete={handleOrderDelete} canDelete={adminUser?.role === "admin" || adminUser?.role === "owner"} />}
           {activeTab === "customers" && <CustomersSection customers={customers} loading={loading} />}
           {activeTab === "analytics" && <AnalyticsSection stats={adminStats} products={products} orders={orders} />}
           {activeTab === "coupons" && (
@@ -1234,7 +1251,7 @@ const statusColors: Record<string, string> = {
   cancelled: "bg-red-500/20 text-red-400 border-red-500/30",
 };
 
-function OrdersSection({ orders, saving, onStatusChange }: { orders: Order[]; saving: boolean; onStatusChange: (id: string, status: OrderStatus) => void }) {
+function OrdersSection({ orders, saving, onStatusChange, onDelete, canDelete }: { orders: Order[]; saving: boolean; onStatusChange: (id: string, status: OrderStatus) => void; onDelete: (id: string) => void; canDelete: boolean }) {
   const [expandedOrders, setExpandedOrders] = useState<Record<string, boolean>>({});
 
   const toggleOrder = (orderId: string) => {
@@ -1388,6 +1405,16 @@ function OrdersSection({ orders, saving, onStatusChange }: { orders: Order[]; sa
                       <span className="text-gold">Tk {Number(order.total).toLocaleString()}</span>
                     </div>
                   </div>
+                  
+                  {canDelete && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onDelete(order.id); }}
+                      disabled={saving}
+                      className="w-full rounded-xl border border-red-500/20 bg-red-500/10 py-2.5 text-[10px] font-black uppercase tracking-wider text-red-400 hover:bg-red-500/20 transition-colors disabled:opacity-50"
+                    >
+                      Delete Order
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -1603,6 +1630,15 @@ function OrdersSection({ orders, saving, onStatusChange }: { orders: Order[]; sa
                                   </span>
                                 </div>
                               </div>
+                              {canDelete && (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); onDelete(order.id); }}
+                                  disabled={saving}
+                                  className="w-full mt-3 rounded-xl border border-red-500/20 bg-red-500/10 py-2.5 text-[10px] font-black uppercase tracking-wider text-red-400 hover:bg-red-500/20 transition-colors disabled:opacity-50"
+                                >
+                                  Delete Order
+                                </button>
+                              )}
                             </div>
                           </div>
                         </div>

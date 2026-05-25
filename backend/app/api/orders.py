@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session, selectinload
 
@@ -11,7 +11,7 @@ from app.core.database import get_db
 from app.core.limiter import limiter
 from app.models.catalog import Product
 from app.models.order import Order, OrderItem, OrderStatus
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.schemas.coupon import CouponValidateRequest, CouponValidateResponse
 from app.schemas.order import OrderCreate, OrderRead, OrderStatusUpdate
 
@@ -180,3 +180,34 @@ def update_order_status(
     db.commit()
     db.refresh(order)
     return order
+
+
+@router.delete("/admin/{order_id}", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit("30/minute")
+def delete_order(
+    request: Request,
+    order_id: str,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin_google),
+):
+    require_trusted_admin_origin(request)
+    if admin.role not in {UserRole.admin, UserRole.owner}:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only administrators can delete orders")
+
+    order = db.get(Order, order_id)
+    if order is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+    
+    write_audit_log(
+        db,
+        actor=admin,
+        action="order.delete",
+        entity_type="order",
+        entity_id=order.id,
+        summary=f"Deleted order {order.id[:8]}",
+        request=request,
+    )
+    db.delete(order)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
