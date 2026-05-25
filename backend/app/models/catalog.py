@@ -3,7 +3,7 @@ from decimal import Decimal
 from enum import Enum
 from uuid import uuid4
 
-from sqlalchemy import DateTime, Enum as SqlEnum, ForeignKey, Index, Integer, Numeric, String, Text
+from sqlalchemy import DateTime, Enum as SqlEnum, ForeignKey, Index, Integer, JSON, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -42,6 +42,7 @@ class Product(Base):
     batch_no: Mapped[str | None] = mapped_column(String(80), nullable=True)
     expiry_date: Mapped[str | None] = mapped_column(String(40), nullable=True)
     image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    gallery: Mapped[list | None] = mapped_column(JSON, nullable=True, default=None)
     badge: Mapped[str | None] = mapped_column(String(120), nullable=True)
     detail: Mapped[str | None] = mapped_column(String(200), nullable=True)
     accent: Mapped[str | None] = mapped_column(String(20), nullable=True)

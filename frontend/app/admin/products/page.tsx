@@ -172,7 +172,7 @@ interface Coupon {
 
 type CouponForm = Omit<Coupon, "id" | "usage_count" | "created_at"> & { id?: string };
 
-type FormState = Omit<Product, "id" | "category"> & { id?: string };
+type FormState = Omit<Product, "id" | "category"> & { id?: string; gallery: string[] | null };
 
 const EMPTY_FORM: FormState = {
   name: "",
@@ -185,6 +185,7 @@ const EMPTY_FORM: FormState = {
   batch_no: null,
   expiry_date: null,
   image_url: null,
+  gallery: null,
   badge: null,
   detail: null,
   accent: "#F59E0B",
@@ -580,17 +581,36 @@ export default function AdminProductsPage() {
     }
   }
 
+  async function handleGalleryUpload(file: File) {
+    setUploading(true);
+    setError("");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const data = await uploadApi<{ image_url: string }>("/api/products/admin/upload-image", formData);
+      if (editing) {
+        const current = editing.gallery || [];
+        setEditing({ ...editing, gallery: [...current, data.image_url] });
+      }
+      setNotice("Gallery image uploaded");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Gallery upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
+
   return (
-    <div className="relative min-h-screen lg:h-screen lg:overflow-hidden bg-ink text-cream font-sans overflow-x-hidden">
+    <div className="relative h-[100dvh] bg-ink text-cream font-sans overflow-hidden">
       {/* Background glow effects */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <div className="absolute -left-[10%] -top-[10%] h-[50vw] w-[50vw] rounded-full bg-gold/5 blur-[120px] animate-aurora-1" />
         <div className="absolute -right-[10%] -bottom-[10%] h-[50vw] w-[50vw] rounded-full bg-mint/5 blur-[120px] animate-aurora-2" />
       </div>
 
-      <div className="relative z-10 flex flex-col lg:flex-row min-h-screen lg:h-screen lg:overflow-hidden">
+      <div className="relative z-10 flex flex-col lg:flex-row h-full overflow-hidden">
         {/* Sidebar for Desktop */}
-        <aside className="hidden lg:flex lg:flex-col lg:w-48 xl:w-56 shrink-0 border-r border-cream/[0.08] bg-forest/40 backdrop-blur-md p-5 sticky top-0 h-screen justify-between">
+        <aside className="hidden lg:flex lg:flex-col lg:w-48 xl:w-56 shrink-0 border-r border-cream/[0.08] bg-forest/40 backdrop-blur-md p-5 h-full justify-between">
           <div>
             {/* Header/Branding */}
             <div className="mb-8 flex items-center gap-3">
@@ -707,7 +727,7 @@ export default function AdminProductsPage() {
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 lg:h-screen overflow-y-auto overscroll-none max-w-full z-10 scrollbar-thin">
+        <main className="flex-1 min-h-0 p-4 sm:p-6 lg:p-8 overflow-y-auto overscroll-none max-w-full z-10 scrollbar-thin">
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-cream">
@@ -824,6 +844,7 @@ export default function AdminProductsPage() {
           uploading={uploading}
           setEditing={setEditing}
           onImageUpload={handleImageUpload}
+          onGalleryUpload={handleGalleryUpload}
           onSubmit={handleSave}
           onClose={() => setEditing(null)}
         />
@@ -1108,7 +1129,7 @@ function ProductsSection({
 function productToForm(product: Product): FormState {
   const { category, ...form } = product;
   void category;
-  return form;
+  return { ...form, gallery: (product as any).gallery ?? null };
 }
 
 function couponToForm(coupon: Coupon): CouponForm {
@@ -2210,6 +2231,7 @@ function ProductModal({
   uploading,
   setEditing,
   onImageUpload,
+  onGalleryUpload,
   onSubmit,
   onClose,
 }: {
@@ -2219,6 +2241,7 @@ function ProductModal({
   uploading: boolean;
   setEditing: (value: FormState) => void;
   onImageUpload: (file: File) => void;
+  onGalleryUpload: (file: File) => void;
   onSubmit: (e: React.FormEvent) => void;
   onClose: () => void;
 }) {
@@ -2310,6 +2333,47 @@ function ProductModal({
             <option value="published">Published</option>
             <option value="archived">Archived</option>
           </SelectField>
+        </div>
+
+        {/* Gallery images */}
+        <div>
+          <label className="mb-1 block text-xs font-black uppercase tracking-[0.08em] text-cream/40">Gallery images</label>
+          {editing.gallery && editing.gallery.length > 0 && (
+            <div className="mb-2.5 flex flex-wrap gap-2">
+              {editing.gallery.map((url, i) => (
+                <div key={i} className="group relative h-16 w-16 overflow-hidden rounded-lg border border-cream/10">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} alt={`Gallery ${i + 1}`} className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updated = [...(editing.gallery || [])];
+                      updated.splice(i, 1);
+                      setEditing({ ...editing, gallery: updated.length > 0 ? updated : null });
+                    }}
+                    className="absolute inset-0 flex items-center justify-center bg-black/60 text-white opacity-0 transition group-hover:opacity-100"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          <label className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-xl border border-cream/[0.12] bg-cream/[0.02] px-4 text-xs font-black text-cream/70 hover:text-cream hover:border-cream/20 hover:bg-cream/[0.04] transition-all duration-300 select-none">
+            <Upload size={14} className="text-gold" />
+            <span>{uploading ? "Uploading..." : "Add gallery image"}</span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              disabled={uploading}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) onGalleryUpload(file);
+                e.target.value = "";
+              }}
+            />
+          </label>
         </div>
 
         <div>

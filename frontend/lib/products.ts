@@ -31,6 +31,7 @@ export interface Product {
   accent: string | null;
   subcategory: string | null;
   image_url: string | null;
+  gallery: string[] | null;
   status: string;
   category_id: string;
   category: Category | null;
@@ -60,6 +61,19 @@ export function productImage(p?: { image_url: string | null } | null): string {
   if (p.image_url.startsWith("http")) return p.image_url;
   if (p.image_url.startsWith("/static")) return `${BACKEND_URL}${p.image_url}`;
   return p.image_url;
+}
+
+function resolveImageUrl(url: string): string {
+  if (url.startsWith("http")) return url;
+  if (url.startsWith("/static")) return `${BACKEND_URL}${url}`;
+  return url;
+}
+
+export function productGallery(p?: Product | null): string[] {
+  const hero = productImage(p);
+  if (!p?.gallery || p.gallery.length === 0) return [hero];
+  const extras = p.gallery.map(resolveImageUrl);
+  return [hero, ...extras.filter((u) => u !== hero)];
 }
 
 function productCacheKey(opts: FetchProductsOptions) {

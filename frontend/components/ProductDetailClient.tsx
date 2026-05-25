@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/Header";
 import { ProductCard } from "@/components/ProductCard";
-import { formatTaka, productImage, type Product } from "@/lib/products";
+import { formatTaka, productGallery, type Product } from "@/lib/products";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
 import { Reveal } from "@/components/Reveal";
@@ -33,8 +33,10 @@ export function ProductDetailClient({
   const { setQuantity, items } = useCart();
   const router = useRouter();
   const [hoveredImage, setHoveredImage] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [adding, setAdding] = useState(false);
   const [addMsg, setAddMsg] = useState("");
+  const gallery = productGallery(product);
 
   const inCart = items.find((it) => it.product_id === product.id)?.quantity || 0;
 
@@ -77,35 +79,56 @@ export function ProductDetailClient({
 
           <div className="grid gap-6 md:gap-10 lg:grid-cols-[1fr_1fr] lg:items-start xl:grid-cols-[1.1fr_0.9fr]">
 
-            {/* Left — Image */}
+            {/* Left — Image + Gallery */}
             <Reveal>
-              <div
-                className="relative aspect-square w-full overflow-hidden rounded-2xl border border-cream/[0.08] bg-card md:rounded-3xl"
-                onMouseEnter={() => setHoveredImage(true)}
-                onMouseLeave={() => setHoveredImage(false)}
-              >
-                {/* Accent glow */}
+              <div className="flex flex-col gap-3">
                 <div
-                  className="pointer-events-none absolute inset-0 opacity-15 blur-3xl"
-                  style={{ background: `radial-gradient(circle at center, ${accent} 0%, transparent 70%)` }}
-                />
-                <div className={`relative h-full w-full transition-transform duration-700 ease-out ${hoveredImage ? "scale-105" : "scale-100"}`}>
-                  <Image
-                    src={productImage(product)}
-                    alt={product.name}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 1024px) 100vw, 550px"
-                    priority
-                    quality={85}
+                  className="relative aspect-square w-full overflow-hidden rounded-2xl border border-cream/[0.08] bg-card md:rounded-3xl"
+                  onMouseEnter={() => setHoveredImage(true)}
+                  onMouseLeave={() => setHoveredImage(false)}
+                >
+                  {/* Accent glow */}
+                  <div
+                    className="pointer-events-none absolute inset-0 opacity-15 blur-3xl"
+                    style={{ background: `radial-gradient(circle at center, ${accent} 0%, transparent 70%)` }}
                   />
+                  <div className={`relative h-full w-full transition-transform duration-700 ease-out ${hoveredImage ? "scale-105" : "scale-100"}`}>
+                    <Image
+                      src={gallery[activeImageIndex]}
+                      alt={product.name}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 100vw, 550px"
+                      priority
+                      quality={85}
+                    />
+                  </div>
+
+                  {/* Authentic badge */}
+                  <div className="absolute left-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full border border-cream/10 bg-ink/80 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-mint backdrop-blur-md sm:left-4 sm:top-4 sm:px-3 sm:text-[10px]">
+                    <ShieldCheck size={12} className="text-mint" />
+                    Authentic
+                  </div>
                 </div>
 
-                {/* Authentic badge */}
-                <div className="absolute left-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full border border-cream/10 bg-ink/80 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-mint backdrop-blur-md sm:left-4 sm:top-4 sm:px-3 sm:text-[10px]">
-                  <ShieldCheck size={12} className="text-mint" />
-                  Authentic
-                </div>
+                {/* Thumbnails */}
+                {gallery.length > 1 && (
+                  <div className="flex gap-2 overflow-x-auto pb-1">
+                    {gallery.map((url, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setActiveImageIndex(i)}
+                        className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-all duration-200 sm:h-20 sm:w-20 ${
+                          i === activeImageIndex
+                            ? "border-gold ring-1 ring-gold/30"
+                            : "border-cream/10 opacity-60 hover:opacity-100"
+                        }`}
+                      >
+                        <Image src={url} alt={`${product.name} ${i + 1}`} fill className="object-cover" sizes="80px" quality={60} />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </Reveal>
 

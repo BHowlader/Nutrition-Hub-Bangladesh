@@ -6,9 +6,9 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
   ShoppingBag,
-  LogIn,
   LogOut,
   User as UserIcon,
+  CircleUserRound,
   Menu,
   X,
   Package,
@@ -277,7 +277,7 @@ export function Header() {
                   href="/login"
                   className="inline-flex min-h-10 w-10 items-center justify-center gap-2 rounded-lg font-bold text-cream transition hover:text-champagne sm:min-h-11 sm:w-auto sm:border sm:border-cream/15 sm:bg-cream/[0.04] sm:px-4 sm:hover:border-gold/50"
                 >
-                  <LogIn size={18} />
+                  <CircleUserRound size={18} />
                   <span className="hidden sm:inline">Login</span>
                 </Link>
               )}

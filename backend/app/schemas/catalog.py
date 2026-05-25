@@ -29,6 +29,7 @@ class ProductBase(BaseModel):
     batch_no: str | None = None
     expiry_date: str | None = None
     image_url: str | None = None
+    gallery: list[str] | None = None
     badge: str | None = None
     detail: str | None = None
     accent: str | None = None
@@ -56,6 +57,7 @@ class ProductUpdate(BaseModel):
     accent: str | None = None
     subcategory: str | None = None
     image_url: str | None = None
+    gallery: list[str] | None = None
     status: ProductStatus | None = None
     category_id: str | None = None
 
