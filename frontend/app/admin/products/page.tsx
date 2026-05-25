@@ -421,6 +421,12 @@ export default function AdminProductsPage() {
       setEditing(null);
       setNotice(editing.id ? "Product updated" : "Product created");
       await load();
+      // Bust Next.js data cache so public pages reflect changes immediately
+      fetch("/api/revalidate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tag: "products" }),
+      }).catch(() => {});
     } catch (e) {
       setError(e instanceof Error ? e.message : "Save failed");
     } finally {
@@ -437,6 +443,11 @@ export default function AdminProductsPage() {
       setNotice("Product deleted");
       setDeleteTarget(null);
       await load();
+      fetch("/api/revalidate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tag: "products" }),
+      }).catch(() => {});
     } catch (e) {
       setError(e instanceof Error ? e.message : "Delete failed");
     } finally {

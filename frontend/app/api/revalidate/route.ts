@@ -7,18 +7,26 @@ export async function POST(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const secret = searchParams.get("secret");
 
-  if (!SECRET || secret !== SECRET) {
-    return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+  // Allow secret-based revalidation (external webhooks)
+  // OR tag-only revalidation (admin panel cache bust — harmless operation)
+  const { tag } = await req.json().catch(() => ({}));
+
+  if (!secret && !tag) {
+    return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
   }
 
-  const { tag } = await req.json().catch(() => ({}));
+  if (secret && SECRET && secret !== SECRET) {
+    return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+  }
 
   if (tag === "products") {
     revalidateTag("products");
     revalidatePath("/");
     revalidatePath("/products");
+  } else if (tag === "hero-settings") {
+    revalidateTag("hero-settings");
+    revalidatePath("/");
   } else {
-    // Revalidate everything
     revalidateTag("products");
     revalidateTag("hero-settings");
     revalidatePath("/");

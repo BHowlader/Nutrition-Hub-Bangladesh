@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -19,7 +19,8 @@ import {
   PackageCheck,
   Truck,
   Clock,
-  Check
+  Check,
+  Zap
 } from "lucide-react";
 
 export function ProductDetailClient({
@@ -38,6 +39,39 @@ export function ProductDetailClient({
   const [addMsg, setAddMsg] = useState("");
   const gallery = productGallery(product);
 
+  // Swipe handling
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const swiping = useRef(false);
+
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    swiping.current = false;
+  }
+
+  function handleTouchMove(e: React.TouchEvent) {
+    if (!touchStart.current) return;
+    const dx = e.touches[0].clientX - touchStart.current.x;
+    const dy = e.touches[0].clientY - touchStart.current.y;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
+      swiping.current = true;
+    }
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    if (!touchStart.current || !swiping.current) {
+      touchStart.current = null;
+      return;
+    }
+    const dx = e.changedTouches[0].clientX - touchStart.current.x;
+    if (dx < -40 && activeImageIndex < gallery.length - 1) {
+      setActiveImageIndex(activeImageIndex + 1);
+    } else if (dx > 40 && activeImageIndex > 0) {
+      setActiveImageIndex(activeImageIndex - 1);
+    }
+    touchStart.current = null;
+    swiping.current = false;
+  }
+
   const inCart = items.find((it) => it.product_id === product.id)?.quantity || 0;
 
   useEffect(() => {
@@ -55,6 +89,19 @@ export function ProductDetailClient({
       setAddMsg(`Added to cart (${inCart + 1})`);
     } catch (e) {
       setAddMsg(e instanceof Error ? e.message : "Failed to add");
+    } finally {
+      setAdding(false);
+    }
+  }
+
+  async function handleBuyNow() {
+    setAdding(true);
+    setAddMsg("");
+    try {
+      await setQuantity(product.id, inCart > 0 ? inCart : 1, product);
+      router.push("/cart?checkout=1");
+    } catch (e) {
+      setAddMsg(e instanceof Error ? e.message : "Failed");
     } finally {
       setAdding(false);
     }
@@ -83,9 +130,12 @@ export function ProductDetailClient({
             <Reveal>
               <div className="flex flex-col gap-3">
                 <div
-                  className="relative aspect-square w-full overflow-hidden rounded-2xl border border-cream/[0.08] bg-card md:rounded-3xl"
+                  className="relative aspect-square w-full overflow-hidden rounded-2xl border border-cream/[0.08] bg-card md:rounded-3xl touch-pan-y"
                   onMouseEnter={() => setHoveredImage(true)}
                   onMouseLeave={() => setHoveredImage(false)}
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
                 >
                   {/* Accent glow */}
                   <div
@@ -109,6 +159,23 @@ export function ProductDetailClient({
                     <ShieldCheck size={12} className="text-mint" />
                     Authentic
                   </div>
+
+                  {/* Swipe dot indicators */}
+                  {gallery.length > 1 && (
+                    <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 gap-1.5 md:hidden">
+                      {gallery.map((_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setActiveImageIndex(i)}
+                          className={`h-1.5 rounded-full transition-all duration-300 ${
+                            i === activeImageIndex
+                              ? "w-5 bg-gold"
+                              : "w-1.5 bg-cream/30"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Thumbnails */}
@@ -190,18 +257,28 @@ export function ProductDetailClient({
                 </p>
               </Reveal>
 
-              {/* Desktop Add-to-Cart (hidden on mobile — sticky bar used instead) */}
+              {/* Desktop Add-to-Cart + Buy Now (hidden on mobile — sticky bar used instead) */}
               <Reveal delay={0.05}>
                 <div className="mt-6 hidden md:block">
                   {product.stock > 0 ? (
-                    <button
-                      onClick={handleAddToCart}
-                      disabled={adding}
-                      className="flex w-full min-h-[52px] items-center justify-center gap-2 rounded-xl bg-gold text-ink text-sm font-black uppercase tracking-wider transition-all duration-300 hover:bg-champagne shadow-[0_10px_30px_rgb(var(--color-gold)/0.2)] disabled:opacity-50"
-                    >
-                      <ShoppingBag size={18} />
-                      {adding ? "Adding…" : inCart > 0 ? `Add another (${inCart} in cart)` : "Add to cart"}
-                    </button>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={handleAddToCart}
+                        disabled={adding}
+                        className="flex flex-1 min-h-[52px] items-center justify-center gap-2 rounded-xl border-2 border-gold bg-transparent text-gold text-sm font-black uppercase tracking-wider transition-all duration-300 hover:bg-gold/10 disabled:opacity-50"
+                      >
+                        <ShoppingBag size={18} />
+                        {adding ? "Adding…" : inCart > 0 ? `Add another (${inCart})` : "Add to cart"}
+                      </button>
+                      <button
+                        onClick={handleBuyNow}
+                        disabled={adding}
+                        className="flex flex-1 min-h-[52px] items-center justify-center gap-2 rounded-xl bg-gold text-ink text-sm font-black uppercase tracking-wider transition-all duration-300 hover:bg-champagne shadow-[0_10px_30px_rgb(var(--color-gold)/0.2)] disabled:opacity-50"
+                      >
+                        <Zap size={18} />
+                        Buy now
+                      </button>
+                    </div>
                   ) : (
                     <button
                       disabled
@@ -267,9 +344,9 @@ export function ProductDetailClient({
         </div>
       </main>
 
-      {/* Mobile Sticky Add-to-Cart Bar */}
+      {/* Mobile Sticky Add-to-Cart + Buy Now Bar */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-cream/10 bg-card/95 backdrop-blur-xl px-4 py-3 md:hidden">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <div className="min-w-0 flex-1">
             <p className="truncate text-xs font-bold text-cream/70">{product.name}</p>
             <div className="flex items-baseline gap-1.5">
@@ -280,23 +357,30 @@ export function ProductDetailClient({
             </div>
           </div>
           {product.stock > 0 ? (
-            <button
-              onClick={handleAddToCart}
-              disabled={adding}
-              className="flex h-11 shrink-0 items-center gap-2 rounded-xl bg-gold px-5 text-sm font-black text-ink transition-all duration-300 hover:bg-champagne active:scale-[0.97] disabled:opacity-50"
-            >
-              {adding ? (
-                "Adding…"
-              ) : inCart > 0 ? (
-                <>
-                  <Check size={16} /> In Cart ({inCart})
-                </>
-              ) : (
-                <>
-                  <ShoppingBag size={16} /> Add to Cart
-                </>
-              )}
-            </button>
+            <div className="flex shrink-0 gap-2">
+              <button
+                onClick={handleAddToCart}
+                disabled={adding}
+                className="flex h-11 items-center gap-1.5 rounded-xl border-2 border-gold px-3 text-xs font-black text-gold transition-all duration-300 active:scale-[0.97] disabled:opacity-50"
+              >
+                {inCart > 0 ? (
+                  <>
+                    <Check size={14} /> {inCart}
+                  </>
+                ) : (
+                  <>
+                    <ShoppingBag size={14} /> Cart
+                  </>
+                )}
+              </button>
+              <button
+                onClick={handleBuyNow}
+                disabled={adding}
+                className="flex h-11 items-center gap-1.5 rounded-xl bg-gold px-4 text-xs font-black text-ink transition-all duration-300 hover:bg-champagne active:scale-[0.97] disabled:opacity-50"
+              >
+                <Zap size={14} /> Buy Now
+              </button>
+            </div>
           ) : (
             <span className="flex h-11 shrink-0 items-center rounded-xl border border-cream/5 bg-cream/[0.02] px-5 text-sm font-black text-cream/35">
               Sold Out
