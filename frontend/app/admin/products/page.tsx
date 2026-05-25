@@ -611,6 +611,8 @@ export default function AdminProductsPage() {
     }
   }
 
+  const pendingOrdersCount = orders.filter((o) => o.status === "pending").length;
+
   return (
     <div className="relative h-[100dvh] bg-ink text-cream font-sans overflow-hidden">
       {/* Background glow effects */}
@@ -651,14 +653,31 @@ export default function AdminProductsPage() {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-black transition-all duration-300 ${
+                    className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-black transition-all duration-300 ${
                       active
                         ? "bg-gradient-to-r from-gold/15 to-champagne/5 text-gold border border-gold/20 shadow-[0_0_20px_rgba(96,165,250,0.08)]"
                         : "text-cream/60 border border-transparent hover:text-cream hover:bg-cream/[0.03]"
                     }`}
                   >
-                    <Icon size={18} className={active ? "text-gold" : "text-cream/50"} />
-                    <span className="truncate">{label}</span>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Icon size={18} className={active ? "text-gold" : "text-cream/50"} />
+                      <span className="truncate">{label}</span>
+                    </div>
+                    {tab === "orders" && pendingOrdersCount > 0 && (
+                      <span className={`flex h-5 items-center justify-center rounded-full px-2 text-[10px] font-black ${active ? "bg-gold text-ink" : "bg-gold/20 text-gold"}`}>
+                        {pendingOrdersCount}
+                      </span>
+                    )}
+                    {tab === "products" && products.length > 0 && (
+                      <span className={`flex h-5 items-center justify-center rounded-full px-2 text-[10px] font-black ${active ? "bg-gold text-ink" : "bg-gold/20 text-gold"}`}>
+                        {products.length}
+                      </span>
+                    )}
+                    {tab === "customers" && customers.length > 0 && (
+                      <span className={`flex h-5 items-center justify-center rounded-full px-2 text-[10px] font-black ${active ? "bg-gold text-ink" : "bg-gold/20 text-gold"}`}>
+                        {customers.length}
+                      </span>
+                    )}
                   </button>
                 );
               })}
@@ -731,6 +750,21 @@ export default function AdminProductsPage() {
                 >
                   <Icon size={14} />
                   {label}
+                  {tab === "orders" && pendingOrdersCount > 0 && (
+                    <span className={`ml-1 flex h-4 items-center justify-center rounded-full px-1.5 text-[9px] font-black ${active ? "bg-ink text-gold" : "bg-gold/20 text-gold"}`}>
+                      {pendingOrdersCount}
+                    </span>
+                  )}
+                  {tab === "products" && products.length > 0 && (
+                    <span className={`ml-1 flex h-4 items-center justify-center rounded-full px-1.5 text-[9px] font-black ${active ? "bg-ink text-gold" : "bg-gold/20 text-gold"}`}>
+                      {products.length}
+                    </span>
+                  )}
+                  {tab === "customers" && customers.length > 0 && (
+                    <span className={`ml-1 flex h-4 items-center justify-center rounded-full px-1.5 text-[9px] font-black ${active ? "bg-ink text-gold" : "bg-gold/20 text-gold"}`}>
+                      {customers.length}
+                    </span>
+                  )}
                 </button>
               );
             })}
