@@ -74,15 +74,6 @@ def _detect_photo_mime(content: bytes) -> str | None:
 
 
 def _token_response(user: User, response: Response, db: Session | None = None) -> TokenResponse:
-    if db and user.phone:
-        from sqlalchemy import update
-        from app.models.order import Order
-        db.execute(
-            update(Order)
-            .where(Order.user_id == None, Order.phone == user.phone)
-            .values(user_id=user.id)
-        )
-        db.commit()
     hours = _token_expiry_hours_for(user)
     token = create_access_token(user.id, token_version=int(user.token_version or 0), hours=hours)
     set_auth_cookie(response, token, max_age_seconds=hours * 3600)
@@ -329,16 +320,6 @@ def update_me(body: UserUpdate, db: Session = Depends(get_db), user: User = Depe
         setattr(user, field, value)
     db.commit()
     db.refresh(user)
-    if user.phone:
-        from sqlalchemy import update
-        from app.models.order import Order
-        db.execute(
-            update(Order)
-            .where(Order.user_id == None, Order.phone == user.phone)
-            .values(user_id=user.id)
-        )
-        db.commit()
-        db.refresh(user)
     return UserOut.model_validate(user)
 
 
