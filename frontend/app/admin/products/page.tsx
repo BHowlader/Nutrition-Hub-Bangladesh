@@ -612,9 +612,6 @@ export default function AdminProductsPage() {
   }
 
   const pendingOrdersCount = orders.filter((o) => o.status === "pending").length;
-  const newCustomersCount = customers.filter((c) => {
-    return new Date().getTime() - new Date(c.created_at).getTime() < 24 * 60 * 60 * 1000;
-  }).length;
 
   return (
     <div className="relative h-[100dvh] bg-ink text-cream font-sans overflow-hidden">
@@ -669,11 +666,6 @@ export default function AdminProductsPage() {
                     {tab === "orders" && pendingOrdersCount > 0 && (
                       <span className={`flex h-5 items-center justify-center rounded-full px-2 text-[10px] font-black ${active ? "bg-gold text-ink" : "bg-gold/20 text-gold"}`}>
                         {pendingOrdersCount}
-                      </span>
-                    )}
-                    {tab === "customers" && newCustomersCount > 0 && (
-                      <span className={`flex h-5 items-center justify-center rounded-full px-2 text-[10px] font-black ${active ? "bg-gold text-ink" : "bg-gold/20 text-gold"}`}>
-                        {newCustomersCount}
                       </span>
                     )}
                   </button>
@@ -751,11 +743,6 @@ export default function AdminProductsPage() {
                   {tab === "orders" && pendingOrdersCount > 0 && (
                     <span className={`ml-1 flex h-4 items-center justify-center rounded-full px-1.5 text-[9px] font-black ${active ? "bg-ink text-gold" : "bg-gold/20 text-gold"}`}>
                       {pendingOrdersCount}
-                    </span>
-                  )}
-                  {tab === "customers" && newCustomersCount > 0 && (
-                    <span className={`ml-1 flex h-4 items-center justify-center rounded-full px-1.5 text-[9px] font-black ${active ? "bg-ink text-gold" : "bg-gold/20 text-gold"}`}>
-                      {newCustomersCount}
                     </span>
                   )}
                 </button>
