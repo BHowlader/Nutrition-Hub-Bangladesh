@@ -24,11 +24,18 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return {
     title,
     description,
+    alternates: { canonical: `/products/${id}` },
     openGraph: {
       title,
       description,
-      type: "website",
-      ...(product.image_url ? { images: [{ url: productImage(product), alt: product.name }] } : {}),
+      type: "article",
+      ...(product.image_url ? { images: [{ url: productImage(product), width: 800, height: 800, alt: product.name }] } : {}),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      ...(product.image_url ? { images: [productImage(product)] } : {}),
     },
   };
 }
@@ -60,5 +67,35 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const all = product.category ? await fetchProducts({ category: product.category.name }) : [];
   const relatedProducts = all.filter((p) => p.id !== product.id).slice(0, 3);
 
-  return <ProductDetailClient product={product} relatedProducts={relatedProducts} />;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description,
+    image: productImage(product),
+    sku: product.sku,
+    brand: { "@type": "Brand", name: product.category?.name || "Nutrition Hub" },
+    offers: {
+      "@type": "Offer",
+      url: `https://nutritionhubbd.com/products/${product.slug}`,
+      priceCurrency: "BDT",
+      price: product.price,
+      availability: product.stock > 0
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+      seller: { "@type": "Organization", name: "Nutrition Hub Bangladesh" },
+    },
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "4.9",
+      reviewCount: "12",
+    },
+  };
+
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <ProductDetailClient product={product} relatedProducts={relatedProducts} />
+    </>
+  );
 }

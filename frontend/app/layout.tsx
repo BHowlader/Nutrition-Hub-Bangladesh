@@ -11,15 +11,55 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Nutrition Hub Bangladesh | Premium Supplements",
+  title: {
+    default: "Nutrition Hub Bangladesh | Premium Supplements & Sports Nutrition",
+    template: "%s | Nutrition Hub Bangladesh",
+  },
   description:
-    "CMS-ready premium e-commerce platform for authentic supplements and sports nutrition in Bangladesh.",
-  metadataBase: new URL("https://nutritionhubbangladesh.com"),
+    "Shop 100% authentic gym supplements, creatine, protein oats, vitamins, and peanut butter in Bangladesh. Verified products, Pathao delivery, and cash on delivery.",
+  metadataBase: new URL("https://nutritionhubbd.com"),
+  alternates: { canonical: "/" },
+  keywords: [
+    "supplements Bangladesh",
+    "gym supplements BD",
+    "creatine Bangladesh",
+    "protein oats",
+    "Wellcore creatine",
+    "MuscleBlaze Bangladesh",
+    "PINTOLA peanut butter",
+    "authentic supplements",
+    "Nutrition Hub Bangladesh",
+    "sports nutrition Dhaka",
+  ],
+  openGraph: {
+    type: "website",
+    locale: "en_BD",
+    siteName: "Nutrition Hub Bangladesh",
+    title: "Nutrition Hub Bangladesh | Premium Supplements & Sports Nutrition",
+    description:
+      "Shop 100% authentic gym supplements, creatine, protein oats, vitamins, and peanut butter in Bangladesh. Verified products with Pathao delivery.",
+    images: [{ url: "/images/og-cover.png", width: 1200, height: 630, alt: "Nutrition Hub Bangladesh" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Nutrition Hub Bangladesh | Premium Supplements",
+    description:
+      "100% authentic gym supplements, creatine, protein, and vitamins delivered across Bangladesh.",
+    images: ["/images/og-cover.png"],
+  },
+  verification: {
+    google: "O_AcCeKmO5QmxrRlXJzuvdaGHrfEnmSWWhvAY1P0jr4",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+  },
   icons: {
     icon: "/images/logo.png",
     shortcut: "/images/logo.png",
-    apple: "/images/logo.png"
-  }
+    apple: "/images/logo.png",
+  },
 };
 
 const themeScript = `(function(){var t=localStorage.getItem("nhb-theme");if(!t)t="light";document.documentElement.classList.toggle("dark",t==="dark");document.documentElement.style.colorScheme=t})()`;
