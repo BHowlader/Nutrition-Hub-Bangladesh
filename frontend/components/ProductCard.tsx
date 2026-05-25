@@ -106,9 +106,16 @@ export function ProductCard({ product, priority = false }: { product: Product; p
             <span className="text-[8px] font-bold uppercase tracking-widest text-cream/30 sm:text-[9px]">
               BD Price
             </span>
-            <strong className="truncate text-[15px] font-black leading-tight text-cream sm:text-xl">
-              {formatTaka(product.price)}
-            </strong>
+            <div className="flex items-baseline gap-1.5">
+              <strong className="truncate text-[15px] font-black leading-tight text-cream sm:text-xl">
+                {formatTaka(product.price)}
+              </strong>
+              {product.compare_at_price && Number(product.compare_at_price) > Number(product.price) && (
+                <span className="truncate text-[11px] font-bold text-cream/35 line-through sm:text-sm">
+                  {formatTaka(Number(product.compare_at_price))}
+                </span>
+              )}
+            </div>
           </div>
 
           {product.stock > 0 ? (

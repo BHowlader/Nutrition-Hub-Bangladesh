@@ -131,6 +131,11 @@ export function ProductDetailClient({
                 {/* Price — prominent on mobile */}
                 <div className="mt-3 flex items-baseline gap-3 sm:mt-4">
                   <strong className="text-2xl font-black text-cream sm:text-3xl">{formatTaka(product.price)}</strong>
+                  {product.compare_at_price && Number(product.compare_at_price) > Number(product.price) && (
+                    <span className="text-base font-bold text-cream/35 line-through sm:text-lg">
+                      {formatTaka(Number(product.compare_at_price))}
+                    </span>
+                  )}
                   {product.stock > 0 ? (
                     <span className="inline-flex items-center gap-1 text-xs font-bold text-mint">
                       <span className="h-1.5 w-1.5 rounded-full bg-mint" /> In Stock
@@ -244,7 +249,12 @@ export function ProductDetailClient({
         <div className="flex items-center gap-3">
           <div className="min-w-0 flex-1">
             <p className="truncate text-xs font-bold text-cream/70">{product.name}</p>
-            <strong className="text-base font-black text-cream">{formatTaka(product.price)}</strong>
+            <div className="flex items-baseline gap-1.5">
+              <strong className="text-base font-black text-cream">{formatTaka(product.price)}</strong>
+              {product.compare_at_price && Number(product.compare_at_price) > Number(product.price) && (
+                <span className="text-xs font-bold text-cream/35 line-through">{formatTaka(Number(product.compare_at_price))}</span>
+              )}
+            </div>
           </div>
           {product.stock > 0 ? (
             <button
