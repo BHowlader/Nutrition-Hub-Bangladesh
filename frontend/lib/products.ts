@@ -1,4 +1,5 @@
-const API = typeof window === "undefined" ? (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000") : "";
+const BACKEND_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").trim();
+const API = typeof window === "undefined" ? BACKEND_URL : "";
 const PRODUCT_CACHE_TTL = 60_000;
 const PRODUCT_REVALIDATE_SECONDS = 3600;
 const SERVER_FETCH_TIMEOUT_MS = 4_000;
@@ -57,7 +58,7 @@ export function formatTaka(value: number | string) {
 export function productImage(p?: { image_url: string | null } | null): string {
   if (!p || !p.image_url) return "/images/logo.png";
   if (p.image_url.startsWith("http")) return p.image_url;
-  if (p.image_url.startsWith("/static")) return `${API}${p.image_url}`;
+  if (p.image_url.startsWith("/static")) return `${BACKEND_URL}${p.image_url}`;
   return p.image_url;
 }
 
