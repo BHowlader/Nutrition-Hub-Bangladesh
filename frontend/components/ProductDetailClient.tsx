@@ -124,11 +124,11 @@ export function ProductDetailClient({
             </button>
           </Reveal>
 
-          <div className="grid gap-6 md:gap-10 lg:grid-cols-[1fr_1fr] lg:items-start xl:grid-cols-[1.1fr_0.9fr]">
+          <div className="grid gap-6 md:gap-10 lg:grid-cols-[minmax(0,480px)_1fr] lg:items-start lg:gap-10">
 
             {/* Left — Image + Gallery */}
             <Reveal>
-              <div className="mx-auto lg:mx-0 flex w-full max-w-[380px] flex-col gap-3 sm:max-w-[450px] lg:max-w-[480px]">
+              <div className="mx-auto lg:mx-0 flex w-full max-w-[380px] flex-col gap-3 sm:max-w-[450px] lg:max-w-none">
                 <div
                   className="relative aspect-square w-full overflow-hidden rounded-2xl border border-cream/[0.08] bg-card md:rounded-3xl touch-pan-y"
                   onMouseEnter={() => setHoveredImage(true)}
