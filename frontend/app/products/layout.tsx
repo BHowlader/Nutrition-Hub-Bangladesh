@@ -10,13 +10,13 @@ export const metadata: Metadata = {
     description:
       "Browse 100% authentic supplements, protein oats, peanut butter, vitamins and more. Delivered nationwide via Pathao Courier.",
     type: "website",
-    images: [{ url: "/images/og-cover.png", width: 1080, height: 1080, alt: "Nutrition Hub Bangladesh Products" }],
+    images: [{ url: "/images/og-cover.jpg", width: 1200, height: 630, alt: "Nutrition Hub Bangladesh Products" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "All Products | Nutrition Hub Bangladesh",
     description: "Browse 100% authentic supplements delivered across Bangladesh.",
-    images: ["/images/og-cover.png"],
+    images: ["/images/og-cover.jpg"],
   },
 };
 
