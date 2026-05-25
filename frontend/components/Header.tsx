@@ -202,7 +202,7 @@ export function Header() {
           <Link
             href="/products"
             aria-label="Search products"
-            className="hidden min-h-10 w-10 items-center justify-center rounded-lg text-cream transition hover:text-champagne sm:inline-flex sm:min-h-11 sm:w-11"
+            className="inline-flex min-h-10 w-10 items-center justify-center rounded-lg text-cream transition hover:text-champagne sm:min-h-11 sm:w-11"
           >
             <Search size={18} />
           </Link>
@@ -354,15 +354,6 @@ export function Header() {
               <MapPin size={16} className="text-gold" />
               Track Order
             </Link>
-            <Link
-              href="/products"
-              onClick={() => setMenuOpen(false)}
-              className="flex items-center gap-3 rounded-lg px-4 py-3 text-base font-bold text-cream/80 transition hover:bg-cream/5 hover:text-cream"
-            >
-              <Search size={16} className="text-gold" />
-              Search Products
-            </Link>
-
             {/* Theme toggle — mobile only */}
             <button
               onClick={() => { toggleTheme(); setMenuOpen(false); }}
