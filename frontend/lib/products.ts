@@ -26,6 +26,7 @@ export interface Product {
   price: string;
   compare_at_price: string | null;
   stock: number;
+  rating: string;
   badge: string | null;
   detail: string | null;
   accent: string | null;

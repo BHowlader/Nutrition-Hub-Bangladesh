@@ -39,6 +39,7 @@ class Product(Base):
     price: Mapped[Decimal] = mapped_column(Numeric(10, 2), index=True)
     compare_at_price: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
     stock: Mapped[int] = mapped_column(Integer, default=0)
+    rating: Mapped[Decimal] = mapped_column(Numeric(2, 1), default=Decimal("5.0"))
     batch_no: Mapped[str | None] = mapped_column(String(80), nullable=True)
     expiry_date: Mapped[str | None] = mapped_column(String(40), nullable=True)
     image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)

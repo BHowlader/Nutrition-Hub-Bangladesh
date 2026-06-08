@@ -26,6 +26,7 @@ class ProductBase(BaseModel):
     price: Decimal
     compare_at_price: Decimal | None = None
     stock: int = Field(ge=0)
+    rating: Decimal = Field(default=Decimal("5.0"), ge=0, le=5)
     batch_no: str | None = None
     expiry_date: str | None = None
     image_url: str | None = None
@@ -50,6 +51,7 @@ class ProductUpdate(BaseModel):
     price: Decimal | None = None
     compare_at_price: Decimal | None = None
     stock: int | None = Field(default=None, ge=0)
+    rating: Decimal | None = Field(default=None, ge=0, le=5)
     batch_no: str | None = None
     expiry_date: str | None = None
     badge: str | None = None

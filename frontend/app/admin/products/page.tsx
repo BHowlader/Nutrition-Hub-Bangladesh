@@ -96,6 +96,7 @@ interface Product {
   price: string;
   compare_at_price: string | null;
   stock: number;
+  rating: string;
   batch_no: string | null;
   expiry_date: string | null;
   image_url: string | null;
@@ -189,6 +190,7 @@ const EMPTY_FORM: FormState = {
   price: "0",
   compare_at_price: null,
   stock: 0,
+  rating: "5.0",
   batch_no: null,
   expiry_date: null,
   image_url: null,
@@ -288,6 +290,7 @@ function cleanProductPayload(form: FormState) {
     subcategory: form.subcategory || null,
     price: String(form.price || "0"),
     stock: Number(form.stock || 0),
+    rating: String(form.rating || "5"),
   };
 }
 
@@ -2533,6 +2536,15 @@ function ProductModal({
             onChange={(value) => setEditing({ ...editing, stock: Math.max(0, Number.parseInt(value || "0", 10)) })}
             type="number"
           />
+          <Field
+            label="Rating (0–5)"
+            value={editing.rating ?? "5.0"}
+            onChange={(value) => setEditing({ ...editing, rating: value })}
+            type="number"
+            step="0.1"
+            min="0"
+            max="5"
+          />
           <Field label="Batch no." value={editing.batch_no || ""} onChange={(value) => setEditing({ ...editing, batch_no: value })} required={false} />
           <Field label="Expiry date" value={editing.expiry_date || ""} onChange={(value) => setEditing({ ...editing, expiry_date: value })} required={false} />
           <Field label="Accent color" value={editing.accent || ""} onChange={(value) => setEditing({ ...editing, accent: value })} required={false} />
@@ -2740,6 +2752,8 @@ function Field({
   onChange,
   type = "text",
   step,
+  min,
+  max,
   required = true,
 }: {
   label: string;
@@ -2747,6 +2761,8 @@ function Field({
   onChange: (value: string) => void;
   type?: string;
   step?: string;
+  min?: string;
+  max?: string;
   required?: boolean;
 }) {
   return (
@@ -2755,6 +2771,8 @@ function Field({
       <input
         type={type}
         step={step}
+        min={min}
+        max={max}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="h-10 w-full rounded-xl border border-cream/[0.12] bg-forest/60 px-3.5 text-xs font-bold text-cream outline-none focus:border-gold/50 focus:ring-4 focus:ring-gold/10 transition-all duration-300"
