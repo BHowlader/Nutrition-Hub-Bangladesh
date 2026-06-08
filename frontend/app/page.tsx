@@ -19,7 +19,7 @@ import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { ProductCard } from "@/components/ProductCard";
 import { Reveal } from "@/components/Reveal";
-import { fetchHeroSettings, fetchProducts } from "@/lib/products";
+import { fetchCategoryImages, fetchHeroSettings, fetchProducts, productImage } from "@/lib/products";
 
 const BEST_SELLERS_LIMIT = 6;
 
@@ -89,8 +89,20 @@ const deliveryOptions: { icon: LucideIcon; title: string; text: string }[] = [
 ];
 
 export default async function HomePage() {
-  const [allProducts, heroSettings] = await Promise.all([fetchProducts(), fetchHeroSettings()]);
+  const [allProducts, heroSettings, categoryImages] = await Promise.all([
+    fetchProducts(),
+    fetchHeroSettings(),
+    fetchCategoryImages(),
+  ]);
   const featured = allProducts.slice(0, BEST_SELLERS_LIMIT);
+  // Admin-managed category photos (1-4, in display order). Fall back to the bundled
+  // static image whenever a slot has not been customised.
+  const categoryImageOverrides = [
+    categoryImages?.category_image_1,
+    categoryImages?.category_image_2,
+    categoryImages?.category_image_3,
+    categoryImages?.category_image_4,
+  ];
   return (
     <main className="min-h-screen overflow-x-hidden bg-transparent text-cream antialiased">
       <Header />
@@ -120,17 +132,20 @@ export default async function HomePage() {
           </Reveal>
 
           <div className="relative grid auto-rows-fr gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {categories.map(({ title, text, icon: Icon, image, accent }, index) => (
+            {categories.map(({ title, text, icon: Icon, image, accent }, index) => {
+              const override = categoryImageOverrides[index];
+              const displayImage = override ? productImage({ image_url: override }) : image;
+              return (
               <Reveal className="h-full" delay={index * 0.06} key={title}>
                 <Link
                   href={`/products?category=${encodeURIComponent(title)}`}
                   className="group relative flex h-full min-h-[210px] overflow-hidden rounded-2xl border border-white/10 bg-black p-5 shadow-[0_18px_55px_rgba(0,0,0,0.25)] transition-all duration-300 hover:-translate-y-1 hover:border-white/20 sm:min-h-[250px] sm:p-6 lg:min-h-[300px]"
                 >
                   {/* Photo background with always-dark overlay for legibility in both themes */}
-                  {image && (
+                  {displayImage && (
                     <div className="absolute inset-0 z-0 overflow-hidden">
                       <Image
-                        src={image}
+                        src={displayImage}
                         alt={title}
                         fill
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
@@ -161,7 +176,8 @@ export default async function HomePage() {
                   </div>
                 </Link>
               </Reveal>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

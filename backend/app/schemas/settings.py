@@ -15,3 +15,19 @@ class HeroSettingsUpdate(BaseModel):
     hero_product_slug_1: str | None = Field(default=None, max_length=220)
     hero_product_slug_2: str | None = Field(default=None, max_length=220)
     hero_product_slug_3: str | None = Field(default=None, max_length=220)
+
+
+class CategoryImagesRead(BaseModel):
+    category_image_1: str | None = None
+    category_image_2: str | None = None
+    category_image_3: str | None = None
+    category_image_4: str | None = None
+
+    model_config = {"from_attributes": True}
+
+
+class CategoryImagesUpdate(BaseModel):
+    category_image_1: str | None = Field(default=None, max_length=500)
+    category_image_2: str | None = Field(default=None, max_length=500)
+    category_image_3: str | None = Field(default=None, max_length=500)
+    category_image_4: str | None = Field(default=None, max_length=500)

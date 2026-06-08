@@ -6,7 +6,12 @@ from app.core.auth import require_admin_google, require_trusted_admin_origin
 from app.core.database import get_db
 from app.models.settings import SiteSettings
 from app.models.user import User
-from app.schemas.settings import HeroSettingsRead, HeroSettingsUpdate
+from app.schemas.settings import (
+    CategoryImagesRead,
+    CategoryImagesUpdate,
+    HeroSettingsRead,
+    HeroSettingsUpdate,
+)
 
 router = APIRouter(tags=["settings"])
 
@@ -46,6 +51,38 @@ def update_hero_settings(
         entity_type="site_settings",
         entity_id="1",
         summary="Updated hero section settings",
+        request=request,
+    )
+    db.commit()
+    db.refresh(row)
+    return row
+
+
+@router.get("/settings/category-images", response_model=CategoryImagesRead)
+def get_category_images(db: Session = Depends(get_db)) -> SiteSettings:
+    return _get_or_create(db)
+
+
+@router.put("/admin/category-images", response_model=CategoryImagesRead)
+def update_category_images(
+    request: Request,
+    payload: CategoryImagesUpdate,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin_google),
+) -> SiteSettings:
+    require_trusted_admin_origin(request)
+    row = _get_or_create(db)
+    row.category_image_1 = payload.category_image_1
+    row.category_image_2 = payload.category_image_2
+    row.category_image_3 = payload.category_image_3
+    row.category_image_4 = payload.category_image_4
+    write_audit_log(
+        db,
+        actor=admin,
+        action="settings.category_images.update",
+        entity_type="site_settings",
+        entity_id="1",
+        summary="Updated homepage category photos",
         request=request,
     )
     db.commit()

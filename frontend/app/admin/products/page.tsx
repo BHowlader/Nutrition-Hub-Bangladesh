@@ -46,7 +46,7 @@ function resolveMediaUrl(url: string | null) {
 
 type ProductStatus = "draft" | "published" | "archived";
 type StatusFilter = ProductStatus | "all";
-type AdminTab = "products" | "orders" | "customers" | "analytics" | "audit" | "users" | "hero" | "coupons";
+type AdminTab = "products" | "orders" | "customers" | "analytics" | "audit" | "users" | "hero" | "categories" | "coupons";
 
 interface Customer {
   id: string;
@@ -71,6 +71,13 @@ interface HeroSettings {
   hero_product_slug_1: string | null;
   hero_product_slug_2: string | null;
   hero_product_slug_3: string | null;
+}
+
+interface CategoryImages {
+  category_image_1: string | null;
+  category_image_2: string | null;
+  category_image_3: string | null;
+  category_image_4: string | null;
 }
 type OrderStatus = "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
 
@@ -311,6 +318,7 @@ export default function AdminProductsPage() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [editingCoupon, setEditingCoupon] = useState<CouponForm | null>(null);
   const [heroSettings, setHeroSettings] = useState<HeroSettings | null>(null);
+  const [categoryImages, setCategoryImages] = useState<CategoryImages | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -329,7 +337,7 @@ export default function AdminProductsPage() {
   const load = useCallback(async () => {
     setError("");
     try {
-      const [p, c, s, o, a, u, h, cust, couponsData] = await Promise.all([
+      const [p, c, s, o, a, u, h, ci, cust, couponsData] = await Promise.all([
         api<Product[]>("/api/products/admin"),
         api<Category[]>("/api/categories"),
         api<AdminStats>("/api/admin/stats"),
@@ -337,6 +345,7 @@ export default function AdminProductsPage() {
         api<AuditLog[]>("/api/admin/audit-logs"),
         adminUser?.role === "owner" ? api<AdminUser[]>("/api/admin/users") : Promise.resolve([]),
         api<HeroSettings>("/api/settings/hero"),
+        api<CategoryImages>("/api/settings/category-images"),
         api<Customer[]>("/api/admin/customers"),
         api<Coupon[]>("/api/admin/coupons"),
       ]);
@@ -347,6 +356,7 @@ export default function AdminProductsPage() {
       setAuditLogs(a);
       setAdminUsers(u);
       setHeroSettings(h);
+      setCategoryImages(ci);
       setCustomers(cust);
       setCoupons(couponsData);
     } catch (e) {
@@ -543,6 +553,29 @@ export default function AdminProductsPage() {
     }
   }
 
+  async function handleCategoryImagesSave(payload: CategoryImages) {
+    setSaving(true);
+    setError("");
+    try {
+      const updated = await api<CategoryImages>("/api/admin/category-images", {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      });
+      setCategoryImages(updated);
+      setNotice("Category photos updated");
+      // Bust the homepage cache so the new photos show immediately.
+      fetch("/api/revalidate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tag: "category-images" }),
+      }).catch(() => {});
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to update category photos");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function handleCouponSave(e: React.FormEvent) {
     e.preventDefault();
     if (!editingCoupon) return;
@@ -663,6 +696,7 @@ export default function AdminProductsPage() {
                 ["coupons", Percent, "Coupons"],
                 ["audit", History, "Audit Log"],
                 ["hero", Sparkles, "Hero Section"],
+                ["categories", ImageIcon, "Categories"],
                 ...(adminUser?.role === "owner" ? ([["users", Users, "Users"]] as const) : []),
               ] as const).map(([tab, Icon, label]) => {
                 const active = activeTab === tab;
@@ -742,6 +776,7 @@ export default function AdminProductsPage() {
               ["coupons", Percent, "Coupons"],
               ["audit", History, "Audit"],
               ["hero", Sparkles, "Hero"],
+              ["categories", ImageIcon, "Categories"],
               ...(adminUser?.role === "owner" ? ([["users", Users, "Users"]] as const) : []),
             ] as const).map(([tab, Icon, label]) => {
               const active = activeTab === tab;
@@ -782,6 +817,7 @@ export default function AdminProductsPage() {
                 {activeTab === "analytics" && "Review sales, stock health, and performance snapshot metrics."}
                 {activeTab === "coupons" && "Create discount codes, control limits, and track coupon usage."}
                 {activeTab === "audit" && "Inspect security logs and administrative action history."}
+                {activeTab === "categories" && "Replace the four homepage “Shop by goal” category photos."}
                 {activeTab === "users" && "Manage administration access levels and roles."}
                 {activeTab === "hero" && "Edit the homepage hero description and the 3 floating product cards."}
               </p>
@@ -873,6 +909,13 @@ export default function AdminProductsPage() {
               products={products}
               saving={saving}
               onSave={handleHeroSave}
+            />
+          )}
+          {activeTab === "categories" && (
+            <CategoryImagesSection
+              settings={categoryImages}
+              saving={saving}
+              onSave={handleCategoryImagesSave}
             />
           )}
         </main>
@@ -2190,6 +2233,136 @@ function HeroSection({
         <button
           type="submit"
           disabled={saving}
+          className="btn-primary min-h-11 text-sm rounded-xl py-2 px-6 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {saving ? "Saving..." : "Save changes"}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+// Labels mirror the homepage "Shop by goal" cards, in display order (slots 1-4).
+const CATEGORY_LABELS = ["Gym Supplements", "Vitamins & Supplements", "Protein Oats", "Peanut Butter"];
+
+function CategoryImagesSection({
+  settings,
+  saving,
+  onSave,
+}: {
+  settings: CategoryImages | null;
+  saving: boolean;
+  onSave: (payload: CategoryImages) => void;
+}) {
+  const toArray = (s: CategoryImages | null): (string | null)[] => [
+    s?.category_image_1 ?? null,
+    s?.category_image_2 ?? null,
+    s?.category_image_3 ?? null,
+    s?.category_image_4 ?? null,
+  ];
+  const [images, setImages] = useState<(string | null)[]>(toArray(settings));
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
+  const [uploadError, setUploadError] = useState("");
+
+  useEffect(() => {
+    if (settings) setImages(toArray(settings));
+  }, [settings]);
+
+  async function handleFile(index: number, file: File) {
+    setUploadingIndex(index);
+    setUploadError("");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const data = await uploadApi<{ image_url: string }>("/api/products/admin/upload-image", formData);
+      setImages((prev) => prev.map((value, i) => (i === index ? data.image_url : value)));
+    } catch (e) {
+      setUploadError(e instanceof Error ? e.message : "Image upload failed");
+    } finally {
+      setUploadingIndex(null);
+    }
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    onSave({
+      category_image_1: images[0],
+      category_image_2: images[1],
+      category_image_3: images[2],
+      category_image_4: images[3],
+    });
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="premium-card p-6 space-y-6">
+      <div>
+        <h2 className="text-lg font-black text-cream">Category Photos</h2>
+        <p className="text-xs text-cream/40 mt-0.5">
+          These four photos power the homepage “Shop by goal” cards. Changes appear immediately after saving.
+        </p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        {CATEGORY_LABELS.map((label, index) => {
+          const url = images[index];
+          const preview = url ? productImage({ image_url: url }) : null;
+          const inputId = `category-image-${index}`;
+          return (
+            <div key={label} className="rounded-xl border border-cream/[0.08] bg-cream/[0.02] p-4">
+              <label className="mb-2 block text-xs font-black uppercase tracking-[0.08em] text-cream/40">
+                {index + 1}. {label}
+              </label>
+              <div className="flex items-center gap-3">
+                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-cream/[0.08] bg-cream/[0.04]">
+                  {preview ? (
+                    <Image src={preview} alt={label} fill className="object-cover" sizes="80px" />
+                  ) : (
+                    <div className="grid h-full w-full place-items-center text-cream/30">
+                      <ImageIcon size={20} />
+                    </div>
+                  )}
+                </div>
+                <div className="flex min-w-0 flex-1 flex-col gap-2">
+                  <input
+                    id={inputId}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFile(index, file);
+                      e.target.value = "";
+                    }}
+                  />
+                  <label
+                    htmlFor={inputId}
+                    className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-gold/30 bg-gold/5 px-3 py-2 text-xs font-black text-gold transition hover:bg-gold/10"
+                  >
+                    <Upload size={14} />
+                    {uploadingIndex === index ? "Uploading…" : url ? "Replace" : "Upload"}
+                  </label>
+                  {url && (
+                    <button
+                      type="button"
+                      onClick={() => setImages((prev) => prev.map((value, i) => (i === index ? null : value)))}
+                      className="text-left text-[11px] font-bold text-cream/40 transition hover:text-red-400"
+                    >
+                      Remove (use default)
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {uploadError && <p className="text-xs font-bold text-red-400">{uploadError}</p>}
+
+      <div className="flex justify-end gap-3 pt-4 border-t border-cream/[0.06]">
+        <button
+          type="submit"
+          disabled={saving || uploadingIndex !== null}
           className="btn-primary min-h-11 text-sm rounded-xl py-2 px-6 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {saving ? "Saving..." : "Save changes"}

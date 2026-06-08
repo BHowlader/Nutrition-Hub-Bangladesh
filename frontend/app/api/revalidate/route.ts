@@ -26,9 +26,13 @@ export async function POST(req: NextRequest) {
   } else if (tag === "hero-settings") {
     revalidateTag("hero-settings");
     revalidatePath("/");
+  } else if (tag === "category-images") {
+    revalidateTag("category-images");
+    revalidatePath("/");
   } else {
     revalidateTag("products");
     revalidateTag("hero-settings");
+    revalidateTag("category-images");
     revalidatePath("/");
     revalidatePath("/products");
   }

@@ -17,4 +17,10 @@ class SiteSettings(Base):
     hero_product_slug_1: Mapped[str | None] = mapped_column(String(220), nullable=True, default="creatine-tropical-tango")
     hero_product_slug_2: Mapped[str | None] = mapped_column(String(220), nullable=True, default="pintola-protein-oats")
     hero_product_slug_3: Mapped[str | None] = mapped_column(String(220), nullable=True, default="kapiva-shilajit-gold")
+    # Homepage "Shop by goal" category photos, in display order (1-4). When null, the
+    # storefront falls back to the bundled static image for that slot.
+    category_image_1: Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)
+    category_image_2: Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)
+    category_image_3: Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)
+    category_image_4: Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

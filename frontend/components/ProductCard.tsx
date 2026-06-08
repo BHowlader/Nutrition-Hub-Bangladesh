@@ -39,7 +39,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
  
       {/* Sold-out overlay */}
       {product.stock === 0 && (
-        <div className="absolute right-2 top-2 z-20 inline-flex items-center gap-1 rounded-full border border-red-500/20 bg-red-500/10 px-2 py-1 text-[8px] font-black uppercase tracking-wider text-red-400 sm:backdrop-blur-md sm:right-3 sm:top-3 sm:px-2.5 sm:text-[9px]">
+        <div className="absolute right-2 top-2 z-20 inline-flex items-center gap-1 rounded-full border border-red-400/40 bg-red-700 px-2 py-1 text-[8px] font-black uppercase tracking-wider text-white shadow-lg shadow-red-950/50 ring-1 ring-red-900/40 sm:backdrop-blur-md sm:right-3 sm:top-3 sm:px-2.5 sm:text-[9px]">
           Sold Out
         </div>
       )}
