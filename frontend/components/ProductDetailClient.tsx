@@ -209,7 +209,7 @@ export function ProductDetailClient({
                   </span>
                   <span className="h-1 w-1 rounded-full bg-cream/20" />
                   <div className="flex items-center gap-1 text-[10px] font-black text-gold sm:text-xs">
-                    <Star size={11} className="fill-gold" /> 4.9
+                    <Star size={11} className="fill-gold" /> {Number(product.rating ?? 4.9).toFixed(1)}
                   </div>
                 </div>
 

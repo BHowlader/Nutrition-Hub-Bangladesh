@@ -72,7 +72,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           </span>
           <div className="flex shrink-0 items-center gap-0.5 text-[10px] font-black text-gold sm:text-[11px]">
             <Star size={10} className="fill-gold" />
-            4.9
+            {Number(product.rating ?? 4.9).toFixed(1)}
           </div>
         </div>
 

@@ -175,6 +175,7 @@ def create_tables() -> None:
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS accent VARCHAR(20)"))
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS subcategory VARCHAR(120)"))
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS gallery JSONB"))
+        conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS rating NUMERIC(2,1) NOT NULL DEFAULT 5.0"))
         conn.execute(text("ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS category_image_1 VARCHAR(500)"))
         conn.execute(text("ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS category_image_2 VARCHAR(500)"))
         conn.execute(text("ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS category_image_3 VARCHAR(500)"))
