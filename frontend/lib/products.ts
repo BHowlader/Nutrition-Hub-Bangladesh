@@ -56,6 +56,12 @@ export function formatTaka(value: number | string) {
   return `Tk ${new Intl.NumberFormat("en-BD").format(n)}`;
 }
 
+// New orders use short, readable IDs (e.g. NHB-7F3K9Q) which are shown in full.
+// Legacy UUID orders are abbreviated so the UI stays compact.
+export function formatOrderId(id: string): string {
+  return id.startsWith("NHB-") ? id : `#${id.slice(0, 8).toUpperCase()}`;
+}
+
 export function productImage(p?: { image_url: string | null } | null): string {
   if (!p || !p.image_url) return "/images/logo.png";
   if (p.image_url.startsWith("http")) return p.image_url;
@@ -203,6 +209,27 @@ export async function fetchHeroSettings(): Promise<HeroSettings | null> {
         ? { signal: AbortSignal.timeout(SERVER_FETCH_TIMEOUT_MS), next: { revalidate: 60, tags: ["hero-settings"] } }
         : {};
     const res = await fetch(`${API}/api/settings/hero`, init);
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
+export interface CategoryImages {
+  category_image_1: string | null;
+  category_image_2: string | null;
+  category_image_3: string | null;
+  category_image_4: string | null;
+}
+
+export async function fetchCategoryImages(): Promise<CategoryImages | null> {
+  try {
+    const init: RequestInit & { next?: { revalidate: number; tags: string[] } } =
+      typeof window === "undefined"
+        ? { signal: AbortSignal.timeout(SERVER_FETCH_TIMEOUT_MS), next: { revalidate: 60, tags: ["category-images"] } }
+        : {};
+    const res = await fetch(`${API}/api/settings/category-images`, init);
     if (!res.ok) return null;
     return res.json();
   } catch {

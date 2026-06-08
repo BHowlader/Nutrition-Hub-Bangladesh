@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.audit import write_audit_log
@@ -10,7 +10,7 @@ from app.core.coupons import get_valid_coupon, money, normalize_coupon_code
 from app.core.database import get_db
 from app.core.limiter import limiter
 from app.models.catalog import Product
-from app.models.order import Order, OrderItem, OrderStatus
+from app.models.order import Order, OrderItem, OrderStatus, generate_order_id
 from app.models.user import User, UserRole
 from app.schemas.coupon import CouponValidateRequest, CouponValidateResponse
 from app.schemas.order import OrderCreate, OrderRead, OrderStatusUpdate
@@ -31,7 +31,14 @@ def create_order(
     for item in payload.items:
         aggregated[item.product_id] = aggregated.get(item.product_id, 0) + item.quantity
 
+    # Generate a short, human-friendly order ID and guard against the (astronomically
+    # unlikely) collision so the primary key stays unique.
+    order_id = generate_order_id()
+    while db.get(Order, order_id) is not None:
+        order_id = generate_order_id()
+
     order = Order(
+        id=order_id,
         customer_name=payload.customer_name,
         phone=payload.phone,
         address=payload.address,
@@ -96,10 +103,12 @@ def track_order(
     phone: str = Query(..., min_length=8, max_length=40),
     db: Session = Depends(get_db),
 ) -> Order:
+    # Match the order ID case-insensitively and trim surrounding whitespace so a
+    # customer re-typing "nhb-7f3k9q" still resolves to "NHB-7F3K9Q".
     order = db.scalars(
         select(Order)
         .options(selectinload(Order.items).selectinload(OrderItem.product))
-        .where(Order.id == order_id, Order.phone == phone)
+        .where(func.lower(Order.id) == order_id.strip().lower(), Order.phone == phone.strip())
     ).first()
     if order is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")

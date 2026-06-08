@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Package, Search } from "lucide-react";
 import { Header } from "@/components/Header";
-import { productImage } from "@/lib/products";
+import { formatOrderId, productImage } from "@/lib/products";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
@@ -173,7 +173,7 @@ function OrderResult({ order, onReset }: { order: Order; onReset: () => void }) 
           <div className="flex items-center gap-4">
             <div>
               <p className="text-[10px] font-black uppercase tracking-wider text-cream/40">Order ID</p>
-              <p className="font-mono text-sm font-bold text-cream">#{order.id.slice(0, 8).toUpperCase()}</p>
+              <p className="font-mono text-sm font-bold text-cream">{formatOrderId(order.id)}</p>
             </div>
             <div className="h-8 w-px bg-cream/10 hidden sm:block" />
             <div>

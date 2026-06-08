@@ -1,3 +1,4 @@
+import secrets
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
@@ -8,6 +9,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 from app.models.catalog import Product
+
+# Short, human-friendly order IDs (e.g. NHB-7F3K9Q). The alphabet omits the
+# ambiguous characters 0/O/1/I so customers can read and re-type the code.
+ORDER_ID_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+
+
+def generate_order_id() -> str:
+    return "NHB-" + "".join(secrets.choice(ORDER_ID_ALPHABET) for _ in range(6))
 
 
 class OrderStatus(str, Enum):
@@ -21,7 +30,7 @@ class OrderStatus(str, Enum):
 class Order(Base):
     __tablename__ = "orders"
 
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=generate_order_id)
     customer_name: Mapped[str] = mapped_column(String(160))
     phone: Mapped[str] = mapped_column(String(40), index=True)
     address: Mapped[str] = mapped_column(String(500))

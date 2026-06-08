@@ -22,7 +22,7 @@ import {
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/Header";
 import { PageLoading } from "@/components/PageLoading";
-import { productImage } from "@/lib/products";
+import { formatOrderId, productImage } from "@/lib/products";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -466,7 +466,7 @@ function ProfileSection({
         <StatCard label="Spent" value={`৳${totalSpent.toLocaleString()}`} icon={Package} accent="text-green-400" />
         <StatCard
           label="Last order"
-          value={orders[0] ? `#${orders[0].id.slice(0, 6)}` : "—"}
+          value={orders[0] ? formatOrderId(orders[0].id) : "—"}
           icon={Package}
           accent="text-champagne"
         />
@@ -561,7 +561,7 @@ function OrdersSection({ orders, loading }: { orders: Order[]; loading: boolean 
               <div className="flex items-center gap-4">
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-wider text-cream/40">Order ID</p>
-                  <p className="font-mono text-sm font-bold text-cream">#{order.id.slice(0, 8).toUpperCase()}</p>
+                  <p className="font-mono text-sm font-bold text-cream">{formatOrderId(order.id)}</p>
                 </div>
                 <div className="h-8 w-px bg-cream/10 hidden sm:block" />
                 <div>
