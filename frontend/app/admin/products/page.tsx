@@ -277,12 +277,13 @@ function slugify(value: string) {
     .replace(/(^-|-$)+/g, "");
 }
 
-// Slugify `value`, then append -2, -3… if that slug already belongs to another
-// product or category so the auto-generated slug is always unique.
+// Slugify `value`, then always append a numeric suffix (-1, -2…) so the
+// auto-generated slug is never identical to the name and stays unique across
+// existing products and categories.
 function uniqueSlug(value: string, taken: string[]) {
   const base = slugify(value);
-  if (!base || !taken.includes(base)) return base;
-  let n = 2;
+  if (!base) return "";
+  let n = 1;
   while (taken.includes(`${base}-${n}`)) n += 1;
   return `${base}-${n}`;
 }
