@@ -63,7 +63,7 @@ export const metadata: Metadata = {
   },
 };
 
-const themeScript = `(function(){var t=localStorage.getItem("nhb-theme");if(!t)t="light";document.documentElement.classList.toggle("dark",t==="dark");document.documentElement.style.colorScheme=t})()`;
+const themeScript = `(function(){var t;try{t=localStorage.getItem("nhb-theme")}catch(e){}if(t!=="dark"&&t!=="light")t="light";document.documentElement.classList.toggle("dark",t==="dark");document.documentElement.style.colorScheme=t})()`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

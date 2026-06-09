@@ -18,7 +18,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
-    const stored = localStorage.getItem("nhb-theme") as Theme | null;
+    // localStorage access throws in iOS Safari Private Browsing — guard it so a
+    // storage error can never crash hydration and white out the page.
+    let stored: Theme | null = null;
+    try {
+      stored = localStorage.getItem("nhb-theme") as Theme | null;
+    } catch {}
     if (stored === "light" || stored === "dark") {
       setTheme(stored);
     }
@@ -28,7 +33,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const root = document.documentElement;
     root.classList.toggle("dark", theme === "dark");
     root.style.colorScheme = theme;
-    localStorage.setItem("nhb-theme", theme);
+    try {
+      localStorage.setItem("nhb-theme", theme);
+    } catch {}
   }, [theme]);
 
   const toggleTheme = useCallback(() => {
