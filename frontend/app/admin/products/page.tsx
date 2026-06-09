@@ -277,6 +277,16 @@ function slugify(value: string) {
     .replace(/(^-|-$)+/g, "");
 }
 
+// Slugify `value`, then append -2, -3… if that slug already belongs to another
+// product or category so the auto-generated slug is always unique.
+function uniqueSlug(value: string, taken: string[]) {
+  const base = slugify(value);
+  if (!base || !taken.includes(base)) return base;
+  let n = 2;
+  while (taken.includes(`${base}-${n}`)) n += 1;
+  return `${base}-${n}`;
+}
+
 function cleanProductPayload(form: FormState) {
   return {
     ...form,
@@ -928,6 +938,10 @@ export default function AdminProductsPage() {
         <ProductModal
           categories={categories}
           editing={editing}
+          existingSlugs={[
+            ...products.filter((p) => p.id !== editing.id).map((p) => p.slug),
+            ...categories.map((c) => c.slug),
+          ]}
           saving={saving}
           uploading={uploading}
           setEditing={setEditing}
@@ -944,7 +958,12 @@ export default function AdminProductsPage() {
             <Field
               label="Name"
               value={newCategory.name}
-              onChange={(value) => setNewCategory({ name: value, slug: slugify(value) })}
+              onChange={(value) =>
+                setNewCategory({
+                  name: value,
+                  slug: uniqueSlug(value, [...categories.map((c) => c.slug), ...products.map((p) => p.slug)]),
+                })
+              }
             />
             <Field
               label="Slug"
@@ -2464,6 +2483,7 @@ function toDatetimeLocal(value: string | null) {
 function ProductModal({
   categories,
   editing,
+  existingSlugs,
   saving,
   uploading,
   setEditing,
@@ -2474,6 +2494,7 @@ function ProductModal({
 }: {
   categories: Category[];
   editing: FormState;
+  existingSlugs: string[];
   saving: boolean;
   uploading: boolean;
   setEditing: (value: FormState) => void;
@@ -2493,7 +2514,7 @@ function ProductModal({
               setEditing({
                 ...editing,
                 name: value,
-                slug: editing.id ? editing.slug : slugify(value),
+                slug: editing.id ? editing.slug : uniqueSlug(value, existingSlugs),
               })
             }
           />

@@ -3,6 +3,7 @@ import { AuthProvider } from "@/lib/auth";
 import { CartProvider } from "@/lib/cart";
 import { ThemeProvider } from "@/lib/theme";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { PullToRefresh } from "@/components/PullToRefresh";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -76,6 +77,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           <AuthProvider>
             <CartProvider>
+              <PullToRefresh />
               {children}
               <WhatsAppButton />
             </CartProvider>
