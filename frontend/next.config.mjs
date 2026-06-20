@@ -4,6 +4,12 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+function backendUrl() {
+  const raw = (process.env.NEXT_PUBLIC_API_URL || "https://api.nutritionhubbd.com").trim();
+  const withProtocol = raw.startsWith("http://") || raw.startsWith("https://") ? raw : `https://${raw}`;
+  return withProtocol.replace(/\/$/, "");
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
@@ -44,15 +50,15 @@ const nextConfig = {
     ]
   },
   async rewrites() {
-    const backendUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").trim();
+    const backend = backendUrl();
     return [
       {
         source: '/api/:path*',
-        destination: `${backendUrl}/api/:path*`,
+        destination: `${backend}/api/:path*`,
       },
       {
         source: '/static/:path*',
-        destination: `${backendUrl}/static/:path*`,
+        destination: `${backend}/static/:path*`,
       },
     ];
   }
