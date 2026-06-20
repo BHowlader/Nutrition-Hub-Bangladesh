@@ -1,5 +1,5 @@
-const BACKEND_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").trim();
-const API = typeof window === "undefined" ? BACKEND_URL : "";
+const BACKEND_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").trim().replace(/\/$/, "");
+const API = BACKEND_URL;
 const PRODUCT_CACHE_TTL = 60_000;
 const PRODUCT_REVALIDATE_SECONDS = 60;
 const SERVER_FETCH_TIMEOUT_MS = 4_000;

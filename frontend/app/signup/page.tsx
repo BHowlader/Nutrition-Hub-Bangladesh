@@ -8,6 +8,8 @@ import { Eye, EyeOff, Mail, UserPlus } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { PageLoading } from "@/components/PageLoading";
 
+const BACKEND_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").trim().replace(/\/$/, "");
+
 export default function SignupPage() {
   return (
     <Suspense>
@@ -131,7 +133,7 @@ function SignupContent() {
   async function handleResend() {
     setResending(true);
     try {
-      await fetch("/api/auth/resend-verification", {
+      await fetch(`${BACKEND_URL}/api/auth/resend-verification`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
