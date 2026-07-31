@@ -17,6 +17,16 @@ export interface Category {
   slug: string;
 }
 
+export interface VariantOption {
+  label: string;
+  price_delta: string;
+}
+
+export interface VariantGroup {
+  name: string;
+  options: VariantOption[];
+}
+
 export interface Product {
   id: string;
   slug: string;
@@ -33,9 +43,26 @@ export interface Product {
   subcategory: string | null;
   image_url: string | null;
   gallery: string[] | null;
+  variants: VariantGroup[] | null;
   status: string;
   category_id: string;
   category: Category | null;
+}
+
+// A customer's choice is one string: the chosen labels joined in group order,
+// e.g. "1kg / Strawberry". Keep this in sync with backend/app/core/variants.py.
+export const VARIANT_SEPARATOR = " / ";
+
+export function variantKey(labels: string[]): string {
+  return labels.join(VARIANT_SEPARATOR);
+}
+
+export function variantPrice(product: { price: string; variants?: VariantGroup[] | null }, labels: string[]): number {
+  const groups = product.variants || [];
+  return groups.reduce((sum, group, i) => {
+    const option = group.options.find((o) => o.label === labels[i]);
+    return sum + Number(option?.price_delta || 0);
+  }, Number(product.price));
 }
 
 export interface ProductPage {

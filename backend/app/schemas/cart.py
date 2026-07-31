@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 
 class CartItemUpsert(BaseModel):
     quantity: int = Field(ge=1, le=99)
+    variant: str | None = Field(default=None, max_length=200)
 
 
 class CartItemProduct(BaseModel):
@@ -21,6 +22,10 @@ class CartItemProduct(BaseModel):
 class CartItemRead(BaseModel):
     product_id: str
     quantity: int
+    variant: str | None = None
+    # Base price plus the selected variant's deltas — the storefront must never
+    # compute what the customer pays from the product price alone.
+    unit_price: Decimal
     product: CartItemProduct
 
     model_config = {"from_attributes": True}

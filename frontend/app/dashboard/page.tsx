@@ -30,6 +30,7 @@ interface OrderItem {
   product_id: string;
   quantity: number;
   unit_price: number;
+  variant?: string | null;
   product_name?: string;
   product_image_url?: string;
   product_slug?: string;
@@ -604,6 +605,9 @@ function OrdersSection({ orders, loading }: { orders: Order[]; loading: boolean 
                       <h4 className="text-sm font-extrabold text-cream group-hover:text-gold transition truncate">
                         {item.product_name || `Product (${item.product_id.slice(0, 8)})`}
                       </h4>
+                      {item.variant && (
+                        <p className="mt-1 text-xs font-black text-gold">{item.variant}</p>
+                      )}
                       <p className="mt-1 text-xs text-cream/50">
                         Unit Price: ৳{Number(item.unit_price).toLocaleString()}
                       </p>

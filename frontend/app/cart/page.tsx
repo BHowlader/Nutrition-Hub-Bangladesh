@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, Copy, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { csrfHeader, useAuth } from "@/lib/auth";
-import { useCart } from "@/lib/cart";
+import { cartLineKey, useCart } from "@/lib/cart";
 import { Header } from "@/components/Header";
 import { PageLoading } from "@/components/PageLoading";
 import { productImage } from "@/lib/products";
@@ -56,7 +56,11 @@ export default function CartPage() {
           address,
           payment_method: "cod",
           coupon_code: coupon?.code || undefined,
-          items: items.map((it) => ({ product_id: it.product_id, quantity: it.quantity })),
+          items: items.map((it) => ({
+            product_id: it.product_id,
+            quantity: it.quantity,
+            variant: it.variant || null,
+          })),
         }),
       });
       if (!res.ok) {
@@ -235,10 +239,11 @@ export default function CartPage() {
             <div className="space-y-3">
               {items.map((it) => {
                 const img = it.product.image_url ? productImage(it.product) : null;
-                const lineTotal = Number(it.product.price) * it.quantity;
+                const unitPrice = Number(it.unit_price ?? it.product.price);
+                const lineTotal = unitPrice * it.quantity;
                 return (
                   <div
-                    key={it.product_id}
+                    key={cartLineKey(it.product_id, it.variant)}
                     className="premium-card flex flex-col items-stretch gap-4 p-4 sm:flex-row sm:items-center"
                   >
                     <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-cream/[0.05]">
@@ -257,14 +262,17 @@ export default function CartPage() {
                       >
                         {it.product.name}
                       </Link>
+                      {it.variant && (
+                        <p className="mt-0.5 text-xs font-bold text-gold">{it.variant}</p>
+                      )}
                       <p className="mt-0.5 text-xs text-cream/40">
-                        ৳{Number(it.product.price).toLocaleString()} · {it.product.stock} in stock
+                        ৳{unitPrice.toLocaleString()} · {it.product.stock} in stock
                       </p>
                     </div>
 
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => setQuantity(it.product_id, it.quantity - 1)}
+                        onClick={() => setQuantity(it.product_id, it.quantity - 1, it.product, it.variant)}
                         className="flex h-8 w-8 items-center justify-center rounded-lg border border-cream/10 text-cream/70 hover:bg-cream/[0.05]"
                         aria-label="Decrease quantity"
                       >
@@ -272,7 +280,7 @@ export default function CartPage() {
                       </button>
                       <span className="min-w-[24px] text-center text-sm font-bold text-cream">{it.quantity}</span>
                       <button
-                        onClick={() => setQuantity(it.product_id, it.quantity + 1)}
+                        onClick={() => setQuantity(it.product_id, it.quantity + 1, it.product, it.variant)}
                         disabled={it.quantity >= it.product.stock}
                         className="flex h-8 w-8 items-center justify-center rounded-lg border border-cream/10 text-cream/70 hover:bg-cream/[0.05] disabled:opacity-40"
                         aria-label="Increase quantity"
@@ -284,7 +292,7 @@ export default function CartPage() {
                     <div className="flex items-center gap-3 sm:flex-col sm:items-end">
                       <p className="text-lg font-black text-cream">৳{lineTotal.toLocaleString()}</p>
                       <button
-                        onClick={() => removeItem(it.product_id)}
+                        onClick={() => removeItem(it.product_id, it.variant)}
                         className="text-cream/40 transition hover:text-red-400"
                         aria-label="Remove item"
                       >

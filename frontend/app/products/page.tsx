@@ -4,31 +4,25 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Header } from "@/components/Header";
 import { ProductCard } from "@/components/ProductCard";
-import { fetchProducts, type Product } from "@/lib/products";
+import { fetchCategories, fetchProducts, type Category, type Product } from "@/lib/products";
 import {
   ArrowRight,
-  CookingPot,
-  Dumbbell,
   PackageCheck,
-  Pill,
   Search,
   ShieldCheck,
-  Truck,
-  UtensilsCrossed
+  Truck
 } from "lucide-react";
 
-const filterCategories = [
-  { id: "all", label: "All Products", icon: Dumbbell },
-  { id: "Gym Supplements", label: "Gym Supplements", icon: Dumbbell },
-  { id: "Vitamins & Supplements", label: "Vitamins", icon: Pill },
-  { id: "Protein Oats", label: "Protein Oats", icon: CookingPot },
-  { id: "Peanut Butter", label: "Peanut Butter", icon: UtensilsCrossed }
-];
+// Short labels for the long-winded seeded categories; anything else uses its own name.
+const SHORT_LABELS: Record<string, string> = {
+  "Vitamins & Supplements": "Vitamins",
+};
 
 export default function ProductsPage() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [query, setQuery] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const catalogRef = useRef<HTMLDivElement>(null);
 
   const [loading, setLoading] = useState(true);
@@ -36,14 +30,26 @@ export default function ProductsPage() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       window.scrollTo(0, 0);
-      const params = new URLSearchParams(window.location.search);
-      const cat = params.get("category");
-      if (cat && filterCategories.some((c) => c.id === cat)) {
-        setActiveCategory(cat);
-      }
+      // Trust whatever category the header/footer linked to — the catalog is
+      // driven by the API, so a brand-new category must work without a redeploy.
+      const cat = new URLSearchParams(window.location.search).get("category");
+      if (cat) setActiveCategory(cat);
     }
     fetchProducts().then((p) => { setProducts(p); setLoading(false); });
+    fetchCategories().then(setCategories);
   }, []);
+
+  // Tabs come from the category list, plus any category that products reference
+  // (so a tab never disappears if /api/categories is briefly unavailable).
+  const filterCategories = [
+    { id: "all", label: "All Products" },
+    ...Array.from(
+      new Set([
+        ...categories.map((c) => c.name),
+        ...products.map((p) => p.category?.name).filter(Boolean) as string[],
+      ])
+    ).map((name) => ({ id: name, label: SHORT_LABELS[name] || name })),
+  ];
 
   const categoryProducts = activeCategory === "all"
     ? products
@@ -68,7 +74,7 @@ export default function ProductsPage() {
 
   const activeCategoryLabel = activeCategory === "all"
     ? "All products"
-    : filterCategories.find((category) => category.id === activeCategory)?.label;
+    : filterCategories.find((category) => category.id === activeCategory)?.label || activeCategory;
 
   return (
     <div className="min-h-screen bg-transparent text-cream selection:bg-gold selection:text-ink">
@@ -242,30 +248,15 @@ export default function ProductsPage() {
                 Store Categories
               </strong>
               <ul className="mt-3 space-y-2.5 text-sm text-cream/60 sm:mt-4">
-                <li
-                  className="cursor-pointer transition hover:text-cream"
-                  onClick={() => handleCategoryChange("Gym Supplements")}
-                >
-                  Gym Supplements
-                </li>
-                <li
-                  className="cursor-pointer transition hover:text-cream"
-                  onClick={() => handleCategoryChange("Vitamins & Supplements")}
-                >
-                  Vitamins &amp; Supplements
-                </li>
-                <li
-                  className="cursor-pointer transition hover:text-cream"
-                  onClick={() => handleCategoryChange("Protein Oats")}
-                >
-                  Protein Oats
-                </li>
-                <li
-                  className="cursor-pointer transition hover:text-cream"
-                  onClick={() => handleCategoryChange("Peanut Butter")}
-                >
-                  Peanut Butter
-                </li>
+                {filterCategories.slice(1).map((category) => (
+                  <li
+                    key={category.id}
+                    className="cursor-pointer transition hover:text-cream"
+                    onClick={() => handleCategoryChange(category.id)}
+                  >
+                    {category.id}
+                  </li>
+                ))}
               </ul>
             </div>
             <div>

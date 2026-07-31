@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { csrfHeader, useAuth } from "@/lib/auth";
+import { VARIANT_SEPARATOR, variantPrice } from "@/lib/products";
 
 const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").trim().replace(/\/$/, "");
 
@@ -17,6 +18,10 @@ export interface CartProduct {
 export interface CartItem {
   product_id: string;
   quantity: number;
+  /** Chosen option labels, e.g. "1kg / Strawberry". Null/empty for plain products. */
+  variant: string | null;
+  /** Product price plus the variant's deltas — always trust this over product.price. */
+  unit_price: string;
   product: CartProduct;
 }
 
@@ -25,10 +30,15 @@ interface CartState {
   loading: boolean;
   totalCount: number;
   totalPrice: number;
-  setQuantity: (productId: string, quantity: number, product?: any) => Promise<void>;
-  removeItem: (productId: string) => Promise<void>;
+  setQuantity: (productId: string, quantity: number, product?: any, variant?: string | null) => Promise<void>;
+  removeItem: (productId: string, variant?: string | null) => Promise<void>;
   clear: () => Promise<void>;
   refresh: () => Promise<void>;
+}
+
+/** Two variants of one product are two cart lines — key them apart. */
+export function cartLineKey(productId: string, variant?: string | null) {
+  return `${productId}::${variant || ""}`;
 }
 
 const CartContext = createContext<CartState | null>(null);
@@ -111,7 +121,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
                       "Content-Type": "application/json",
                       ...csrfHeader("PUT"),
                     },
-                    body: JSON.stringify({ quantity: item.quantity }),
+                    body: JSON.stringify({ quantity: item.quantity, variant: item.variant || null }),
                   });
                 }
                 window.localStorage.removeItem("nhb_guest_cart");
@@ -132,14 +142,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [user, refresh]);
 
   const setQuantity = useCallback(
-    async (productId: string, quantity: number, product?: any) => {
+    async (productId: string, quantity: number, product?: any, variant?: string | null) => {
+      const key = cartLineKey(productId, variant);
       if (user) {
         if (quantity < 1) {
-          await api(`/api/cart/items/${productId}`, { method: "DELETE" });
+          await api(`/api/cart/items/${productId}?variant=${encodeURIComponent(variant || "")}`, {
+            method: "DELETE",
+          });
         } else {
           await api(`/api/cart/items/${productId}`, {
             method: "PUT",
-            body: JSON.stringify({ quantity }),
+            body: JSON.stringify({ quantity, variant: variant || null }),
           });
         }
         await refresh();
@@ -152,15 +165,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
           } catch {}
 
           if (quantity < 1) {
-            localItems = localItems.filter((it) => it.product_id !== productId);
+            localItems = localItems.filter((it) => cartLineKey(it.product_id, it.variant) !== key);
           } else {
-            const index = localItems.findIndex((it) => it.product_id === productId);
+            const index = localItems.findIndex((it) => cartLineKey(it.product_id, it.variant) === key);
             if (index > -1) {
               localItems[index].quantity = quantity;
             } else if (product) {
               localItems.push({
                 product_id: productId,
                 quantity,
+                variant: variant || null,
+                unit_price: String(variantPrice(product, (variant || "").split(VARIANT_SEPARATOR).filter(Boolean))),
                 product: {
                   id: product.id,
                   name: product.name,
@@ -181,9 +196,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
 
   const removeItem = useCallback(
-    async (productId: string) => {
+    async (productId: string, variant?: string | null) => {
       if (user) {
-        await api(`/api/cart/items/${productId}`, { method: "DELETE" });
+        await api(`/api/cart/items/${productId}?variant=${encodeURIComponent(variant || "")}`, {
+          method: "DELETE",
+        });
         await refresh();
       } else {
         if (typeof window !== "undefined") {
@@ -192,7 +209,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
             const stored = window.localStorage.getItem("nhb_guest_cart");
             if (stored) localItems = JSON.parse(stored);
           } catch {}
-          localItems = localItems.filter((it) => it.product_id !== productId);
+          const key = cartLineKey(productId, variant);
+          localItems = localItems.filter((it) => cartLineKey(it.product_id, it.variant) !== key);
           window.localStorage.setItem("nhb_guest_cart", JSON.stringify(localItems));
           setItems(localItems);
         }
@@ -214,7 +232,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   const totalCount = items.reduce((n, it) => n + it.quantity, 0);
-  const totalPrice = items.reduce((n, it) => n + Number(it.product.price) * it.quantity, 0);
+  const totalPrice = items.reduce(
+    (n, it) => n + Number(it.unit_price ?? it.product.price) * it.quantity,
+    0
+  );
 
   return (
     <CartContext.Provider
