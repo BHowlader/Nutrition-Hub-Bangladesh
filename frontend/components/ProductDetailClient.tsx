@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/Header";
 import { ProductCard } from "@/components/ProductCard";
-import { formatTaka, productGallery, type Product } from "@/lib/products";
+import { formatTaka, productGallery, variantKey, variantPrice, type Product } from "@/lib/products";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
 import { Reveal } from "@/components/Reveal";
@@ -38,6 +38,14 @@ export function ProductDetailClient({
   const [adding, setAdding] = useState(false);
   const [addMsg, setAddMsg] = useState("");
   const gallery = productGallery(product);
+
+  // One selection per variant group, defaulting to the first option of each.
+  const variantGroups = product.variants || [];
+  const [selected, setSelected] = useState<string[]>(() =>
+    variantGroups.map((group) => group.options[0]?.label || "")
+  );
+  const variant = variantGroups.length > 0 ? variantKey(selected) : null;
+  const unitPrice = variantPrice(product, selected);
 
   // Swipe handling
   const touchStart = useRef<{ x: number; y: number } | null>(null);
@@ -72,7 +80,8 @@ export function ProductDetailClient({
     swiping.current = false;
   }
 
-  const inCart = items.find((it) => it.product_id === product.id)?.quantity || 0;
+  const inCart =
+    items.find((it) => it.product_id === product.id && (it.variant || null) === variant)?.quantity || 0;
 
   useEffect(() => {
     if (typeof window !== "undefined") window.scrollTo(0, 0);
@@ -85,8 +94,8 @@ export function ProductDetailClient({
     setAdding(true);
     setAddMsg("");
     try {
-      await setQuantity(product.id, inCart + 1, product);
-      setAddMsg(`Added to cart (${inCart + 1})`);
+      await setQuantity(product.id, inCart + 1, product, variant);
+      setAddMsg(variant ? `Added ${variant} (${inCart + 1})` : `Added to cart (${inCart + 1})`);
     } catch (e) {
       setAddMsg(e instanceof Error ? e.message : "Failed to add");
     } finally {
@@ -98,7 +107,7 @@ export function ProductDetailClient({
     setAdding(true);
     setAddMsg("");
     try {
-      await setQuantity(product.id, inCart > 0 ? inCart : 1, product);
+      await setQuantity(product.id, inCart > 0 ? inCart : 1, product, variant);
       router.push("/cart?checkout=1");
     } catch (e) {
       setAddMsg(e instanceof Error ? e.message : "Failed");
@@ -220,8 +229,8 @@ export function ProductDetailClient({
 
                 {/* Price — prominent on mobile */}
                 <div className="mt-3 flex items-baseline gap-3 sm:mt-4">
-                  <strong className="text-2xl font-black text-cream sm:text-3xl">{formatTaka(product.price)}</strong>
-                  {product.compare_at_price && Number(product.compare_at_price) > Number(product.price) && (
+                  <strong className="text-2xl font-black text-cream sm:text-3xl">{formatTaka(unitPrice)}</strong>
+                  {product.compare_at_price && Number(product.compare_at_price) > unitPrice && (
                     <span className="text-base font-bold text-cream/35 line-through sm:text-lg">
                       {formatTaka(Number(product.compare_at_price))}
                     </span>
@@ -247,6 +256,51 @@ export function ProductDetailClient({
                       >
                         {spec}
                       </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Variant pickers — one row per option group */}
+                {variantGroups.length > 0 && (
+                  <div className="mt-5 space-y-4">
+                    {variantGroups.map((group, groupIndex) => (
+                      <div key={group.name}>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-[10px] font-black uppercase tracking-[0.16em] text-cream/40">
+                            {group.name}
+                          </span>
+                          <span className="text-xs font-bold text-cream">{selected[groupIndex]}</span>
+                        </div>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {group.options.map((option) => {
+                            const active = selected[groupIndex] === option.label;
+                            return (
+                              <button
+                                key={option.label}
+                                type="button"
+                                onClick={() =>
+                                  setSelected((prev) =>
+                                    prev.map((value, i) => (i === groupIndex ? option.label : value))
+                                  )
+                                }
+                                className={`min-h-10 rounded-xl border px-3.5 text-xs font-bold transition ${
+                                  active
+                                    ? "border-gold bg-gold/10 text-gold"
+                                    : "border-cream/15 bg-transparent text-cream/60 hover:border-cream/35 hover:text-cream"
+                                }`}
+                              >
+                                {option.label}
+                                {Number(option.price_delta) !== 0 && (
+                                  <span className="ml-1.5 text-[10px] font-black opacity-70">
+                                    {Number(option.price_delta) > 0 ? "+" : "−"}
+                                    {Math.abs(Number(option.price_delta)).toLocaleString("en-BD")}
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -348,10 +402,13 @@ export function ProductDetailClient({
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-cream/10 bg-card/95 backdrop-blur-xl px-4 py-3 md:hidden">
         <div className="flex items-center gap-2">
           <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-bold text-cream/70">{product.name}</p>
+            <p className="truncate text-xs font-bold text-cream/70">
+              {product.name}
+              {variant && <span className="text-cream/40"> · {variant}</span>}
+            </p>
             <div className="flex items-baseline gap-1.5">
-              <strong className="text-base font-black text-cream">{formatTaka(product.price)}</strong>
-              {product.compare_at_price && Number(product.compare_at_price) > Number(product.price) && (
+              <strong className="text-base font-black text-cream">{formatTaka(unitPrice)}</strong>
+              {product.compare_at_price && Number(product.compare_at_price) > unitPrice && (
                 <span className="text-xs font-bold text-cream/35 line-through">{formatTaka(Number(product.compare_at_price))}</span>
               )}
             </div>

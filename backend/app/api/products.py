@@ -17,6 +17,7 @@ from app.core.cache import cache_delete_prefix, cache_get_json, cache_set_json
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.limiter import limiter
+from app.core.variants import variants_to_json
 from app.models.catalog import Category, Product, ProductStatus
 from app.models.user import User
 from app.schemas.catalog import ProductCreate, ProductRead, ProductUpdate
@@ -127,7 +128,9 @@ def create_product(
     _admin: User = Depends(require_admin_google),
 ) -> Product:
     require_trusted_admin_origin(request)
-    product = Product(**payload.model_dump())
+    data = payload.model_dump()
+    data["variants"] = variants_to_json(payload.variants)
+    product = Product(**data)
     db.add(product)
     db.flush()
     write_audit_log(
@@ -160,7 +163,10 @@ def update_product(
         raise HTTPException(status_code=404, detail="Product not found")
 
     changes = payload.model_dump(exclude_unset=True)
-    for key, value in payload.model_dump(exclude_unset=True).items():
+    if "variants" in changes:
+        # JSON columns can't hold Decimal, so re-serialize the validated groups.
+        changes["variants"] = variants_to_json(payload.variants)
+    for key, value in changes.items():
         setattr(product, key, value)
 
     write_audit_log(

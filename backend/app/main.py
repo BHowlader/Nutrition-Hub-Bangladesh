@@ -175,6 +175,32 @@ def create_tables() -> None:
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS accent VARCHAR(20)"))
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS subcategory VARCHAR(120)"))
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS gallery JSONB"))
+        conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS variants JSONB"))
+        conn.execute(text("ALTER TABLE order_items ADD COLUMN IF NOT EXISTS variant VARCHAR(200)"))
+        # Variants make (user, product) too coarse a cart key — 500g and 1kg of the
+        # same product are separate lines. Widen the primary key once, idempotently.
+        conn.execute(
+            text("ALTER TABLE cart_items ADD COLUMN IF NOT EXISTS variant VARCHAR(200) NOT NULL DEFAULT ''")
+        )
+        conn.execute(
+            text(
+                """
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (
+                        SELECT 1 FROM information_schema.key_column_usage
+                        WHERE table_name = 'cart_items'
+                          AND constraint_name = 'cart_items_pkey'
+                          AND column_name = 'variant'
+                    ) THEN
+                        ALTER TABLE cart_items DROP CONSTRAINT IF EXISTS cart_items_pkey;
+                        ALTER TABLE cart_items
+                            ADD CONSTRAINT cart_items_pkey PRIMARY KEY (user_id, product_id, variant);
+                    END IF;
+                END $$;
+                """
+            )
+        )
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS rating NUMERIC(2,1) NOT NULL DEFAULT 5.0"))
         conn.execute(text("ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS category_image_1 VARCHAR(500)"))
         conn.execute(text("ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS category_image_2 VARCHAR(500)"))

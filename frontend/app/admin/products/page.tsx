@@ -35,7 +35,7 @@ import {
 import { useRouter } from "next/navigation";
 import { csrfHeader } from "@/lib/auth";
 import { useAdminAuth } from "@/lib/adminAuth";
-import { productImage } from "@/lib/products";
+import { formatOrderId, productImage } from "@/lib/products";
 
 const BACKEND_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").trim().replace(/\/$/, "");
 
@@ -87,6 +87,16 @@ interface Category {
   slug: string;
 }
 
+interface VariantOption {
+  label: string;
+  price_delta: string;
+}
+
+interface VariantGroup {
+  name: string;
+  options: VariantOption[];
+}
+
 interface Product {
   id: string;
   name: string;
@@ -100,6 +110,8 @@ interface Product {
   batch_no: string | null;
   expiry_date: string | null;
   image_url: string | null;
+  gallery: string[] | null;
+  variants: VariantGroup[] | null;
   badge: string | null;
   detail: string | null;
   accent: string | null;
@@ -113,6 +125,7 @@ interface OrderItem {
   product_id: string;
   quantity: number;
   unit_price: string;
+  variant?: string | null;
   product_name?: string | null;
   product_image_url?: string | null;
   product_slug?: string | null;
@@ -180,7 +193,7 @@ interface Coupon {
 
 type CouponForm = Omit<Coupon, "id" | "usage_count" | "created_at"> & { id?: string };
 
-type FormState = Omit<Product, "id" | "category"> & { id?: string; gallery: string[] | null };
+type FormState = Omit<Product, "id" | "category"> & { id?: string };
 
 const EMPTY_FORM: FormState = {
   name: "",
@@ -195,11 +208,14 @@ const EMPTY_FORM: FormState = {
   expiry_date: null,
   image_url: null,
   gallery: null,
+  variants: null,
   badge: null,
   detail: null,
   accent: "#F59E0B",
   subcategory: null,
-  status: "draft",
+  // Products are created to be sold — draft was a trap that silently kept new
+  // products off the storefront. Flip it back per product when staging one.
+  status: "published",
   category_id: "",
 };
 
@@ -289,6 +305,19 @@ function uniqueSlug(value: string, taken: string[]) {
 }
 
 function cleanProductPayload(form: FormState) {
+  // Drop half-filled variant rows so an empty "Add option" click can't 422 the save.
+  const variants = (form.variants || [])
+    .map((group) => ({
+      name: group.name.trim(),
+      options: group.options
+        .filter((option) => option.label.trim())
+        .map((option) => ({
+          label: option.label.trim(),
+          price_delta: String(option.price_delta || "0"),
+        })),
+    }))
+    .filter((group) => group.name && group.options.length > 0);
+
   return {
     ...form,
     compare_at_price: form.compare_at_price || null,
@@ -299,6 +328,7 @@ function cleanProductPayload(form: FormState) {
     detail: form.detail || null,
     accent: form.accent || null,
     subcategory: form.subcategory || null,
+    variants: variants.length > 0 ? variants : null,
     price: String(form.price || "0"),
     stock: Number(form.stock || 0),
     rating: String(form.rating || "5"),
@@ -647,7 +677,10 @@ export default function AdminProductsPage() {
       const formData = new FormData();
       formData.append("file", file);
       const data = await uploadApi<{ image_url: string }>("/api/products/admin/upload-image", formData);
-      if (editing) setEditing({ ...editing, image_url: data.image_url });
+      // Functional update: the upload can take seconds, and anything the admin
+      // edited meanwhile (category, price…) must not be reverted to the snapshot
+      // this closure captured.
+      setEditing((prev) => (prev ? { ...prev, image_url: data.image_url } : prev));
       setNotice("Image uploaded");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Image upload failed");
@@ -663,10 +696,9 @@ export default function AdminProductsPage() {
       const formData = new FormData();
       formData.append("file", file);
       const data = await uploadApi<{ image_url: string }>("/api/products/admin/upload-image", formData);
-      if (editing) {
-        const current = editing.gallery || [];
-        setEditing({ ...editing, gallery: [...current, data.image_url] });
-      }
+      setEditing((prev) =>
+        prev ? { ...prev, gallery: [...(prev.gallery || []), data.image_url] } : prev
+      );
       setNotice("Gallery image uploaded");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Gallery upload failed");
@@ -1237,7 +1269,7 @@ function ProductsSection({
 function productToForm(product: Product): FormState {
   const { category, ...form } = product;
   void category;
-  return { ...form, gallery: (product as any).gallery ?? null };
+  return { ...form, gallery: product.gallery ?? null, variants: product.variants ?? null };
 }
 
 function couponToForm(coupon: Coupon): CouponForm {
@@ -1352,7 +1384,7 @@ function OrdersSection({ orders, saving, onStatusChange, onDelete, canDelete }: 
                     {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                   </span>
                   <div>
-                    <strong className="text-sm font-bold text-cream">#{order.id.slice(0, 8).toUpperCase()}</strong>
+                    <strong className="text-sm font-bold text-cream">{formatOrderId(order.id)}</strong>
                     <span className="ml-2 text-[10px] font-black tracking-wider text-cream/35">{order.payment_method.toUpperCase()}</span>
                   </div>
                 </div>
@@ -1423,6 +1455,9 @@ function OrdersSection({ orders, saving, onStatusChange, onDelete, canDelete }: 
                               <p className="text-xs font-bold text-cream truncate">
                                 {item.product_name || `Product (${item.product_id.slice(0, 8)})`}
                               </p>
+                              {item.variant && (
+                                <p className="mt-0.5 text-[10px] font-black text-gold">{item.variant}</p>
+                              )}
                               <p className="text-[10px] text-cream/40 mt-0.5">
                                 Tk {Number(item.unit_price).toLocaleString()} × {item.quantity}
                               </p>
@@ -1527,7 +1562,7 @@ function OrdersSection({ orders, saving, onStatusChange, onDelete, canDelete }: 
                           {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                         </span>
                         <div>
-                          <strong className="block text-sm text-cream font-bold">#{order.id.slice(0, 8).toUpperCase()}</strong>
+                          <strong className="block text-sm text-cream font-bold">{formatOrderId(order.id)}</strong>
                           <span className="text-[10px] font-black tracking-wider text-cream/35 mt-0.5">{order.payment_method.toUpperCase()}</span>
                         </div>
                       </div>
@@ -1608,6 +1643,9 @@ function OrdersSection({ orders, saving, onStatusChange, onDelete, canDelete }: 
                                       <p className="text-sm font-extrabold text-cream truncate">
                                         {item.product_name || `Product (${item.product_id.slice(0, 8)})`}
                                       </p>
+                                      {item.variant && (
+                                        <p className="mt-0.5 text-xs font-black text-gold">{item.variant}</p>
+                                      )}
                                       <p className="mt-0.5 text-xs text-cream/40">
                                         SKU/ID: {item.product_id}
                                       </p>
@@ -2092,7 +2130,7 @@ function CustomerDetailModal({ customer, onClose }: { customer: Customer; onClos
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                     <div>
-                      <strong className="text-sm font-black text-cream">#{order.id.slice(0, 8)}</strong>
+                      <strong className="text-sm font-black text-cream">{formatOrderId(order.id)}</strong>
                       <span className="ml-2 text-[10px] font-black uppercase tracking-wider text-cream/40">
                         {order.payment_method}
                       </span>
@@ -2644,6 +2682,12 @@ function ProductModal({
           </label>
         </div>
 
+        <VariantsEditor
+          groups={editing.variants || []}
+          basePrice={editing.price}
+          onChange={(variants) => setEditing({ ...editing, variants: variants.length > 0 ? variants : null })}
+        />
+
         <div>
           <label className="mb-1 block text-xs font-black uppercase tracking-[0.08em] text-cream/40">Detail chips</label>
           <input
@@ -2657,6 +2701,132 @@ function ProductModal({
         <ModalActions saving={saving} submitLabel={editing.id ? "Save changes" : "Create product"} onCancel={onClose} />
       </form>
     </Modal>
+  );
+}
+
+function VariantsEditor({
+  groups,
+  basePrice,
+  onChange,
+}: {
+  groups: VariantGroup[];
+  basePrice: string;
+  onChange: (groups: VariantGroup[]) => void;
+}) {
+  const update = (index: number, group: VariantGroup) =>
+    onChange(groups.map((g, i) => (i === index ? group : g)));
+
+  return (
+    <div className="rounded-2xl border border-cream/[0.08] bg-cream/[0.02] p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <label className="block text-xs font-black uppercase tracking-[0.08em] text-cream/40">
+            Variants
+          </label>
+          <p className="mt-0.5 text-[11px] text-cream/35">
+            One group per axis — e.g. Size (500g, 1kg) and Flavor (Strawberry, Chocolate).
+            Price adjust is added to the base price of Tk {Number(basePrice || 0).toLocaleString("en-BD")}.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => onChange([...groups, { name: "", options: [{ label: "", price_delta: "0" }] }])}
+          className="btn-secondary min-h-9 shrink-0 rounded-xl px-3 py-1.5 text-[11px]"
+        >
+          <Plus size={13} />
+          Add group
+        </button>
+      </div>
+
+      {groups.length === 0 ? (
+        <p className="mt-3 text-[11px] font-bold text-cream/25">
+          No variants — the product is sold as a single option.
+        </p>
+      ) : (
+        <div className="mt-4 space-y-4">
+          {groups.map((group, groupIndex) => (
+            <div key={groupIndex} className="rounded-xl border border-cream/[0.08] bg-forest/40 p-3.5">
+              <div className="flex items-center gap-2">
+                <input
+                  value={group.name}
+                  onChange={(e) => update(groupIndex, { ...group, name: e.target.value })}
+                  placeholder="Group name (Size, Flavor…)"
+                  className="h-9 flex-1 rounded-lg border border-cream/[0.12] bg-ink/40 px-3 text-xs font-black text-cream outline-none focus:border-gold/50"
+                />
+                <button
+                  type="button"
+                  onClick={() => onChange(groups.filter((_, i) => i !== groupIndex))}
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-red-500/20 bg-red-500/5 text-red-400"
+                  title="Remove group"
+                >
+                  <Trash2 size={13} />
+                </button>
+              </div>
+
+              <div className="mt-2.5 space-y-2">
+                {group.options.map((option, optionIndex) => (
+                  <div key={optionIndex} className="flex items-center gap-2">
+                    <input
+                      value={option.label}
+                      onChange={(e) =>
+                        update(groupIndex, {
+                          ...group,
+                          options: group.options.map((o, i) =>
+                            i === optionIndex ? { ...o, label: e.target.value } : o
+                          ),
+                        })
+                      }
+                      placeholder="Option (500g, Strawberry…)"
+                      className="h-9 flex-1 rounded-lg border border-cream/[0.12] bg-ink/40 px-3 text-xs font-bold text-cream outline-none focus:border-gold/50"
+                    />
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={option.price_delta}
+                      onChange={(e) =>
+                        update(groupIndex, {
+                          ...group,
+                          options: group.options.map((o, i) =>
+                            i === optionIndex ? { ...o, price_delta: e.target.value } : o
+                          ),
+                        })
+                      }
+                      placeholder="Price ±"
+                      title="Added to the base price when this option is chosen"
+                      className="h-9 w-24 shrink-0 rounded-lg border border-cream/[0.12] bg-ink/40 px-3 text-xs font-bold text-cream outline-none focus:border-gold/50"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        update(groupIndex, {
+                          ...group,
+                          options: group.options.filter((_, i) => i !== optionIndex),
+                        })
+                      }
+                      className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-cream/[0.12] bg-cream/[0.02] text-cream/50 hover:text-red-400"
+                      title="Remove option"
+                    >
+                      <X size={13} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  update(groupIndex, { ...group, options: [...group.options, { label: "", price_delta: "0" }] })
+                }
+                className="mt-2.5 inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-cream/[0.12] bg-cream/[0.02] px-3 text-[11px] font-black text-cream/60 hover:text-cream"
+              >
+                <Plus size={12} />
+                Add option
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 

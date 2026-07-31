@@ -44,6 +44,8 @@ class Product(Base):
     expiry_date: Mapped[str | None] = mapped_column(String(40), nullable=True)
     image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     gallery: Mapped[list | None] = mapped_column(JSON, nullable=True, default=None)
+    # Option groups — see app/core/variants.py for the shape.
+    variants: Mapped[list | None] = mapped_column(JSON, nullable=True, default=None)
     badge: Mapped[str | None] = mapped_column(String(120), nullable=True)
     detail: Mapped[str | None] = mapped_column(String(200), nullable=True)
     accent: Mapped[str | None] = mapped_column(String(20), nullable=True)

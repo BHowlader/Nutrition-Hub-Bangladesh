@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 class OrderItemCreate(BaseModel):
     product_id: str
     quantity: int = Field(ge=1, le=99)
+    variant: str | None = Field(default=None, max_length=200)
 
 
 class OrderCreate(BaseModel):
@@ -22,6 +23,7 @@ class OrderItemRead(BaseModel):
     product_id: str
     quantity: int
     unit_price: Decimal
+    variant: str | None = None
     product_name: str | None = None
     product_image_url: str | None = None
     product_slug: str | None = None

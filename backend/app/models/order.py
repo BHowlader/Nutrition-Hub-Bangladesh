@@ -10,13 +10,16 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 from app.models.catalog import Product
 
-# Short, human-friendly order IDs (e.g. NHB-7F3K9Q). The alphabet omits the
+# Short, human-friendly order IDs (e.g. NHB-7F3K). The alphabet omits the
 # ambiguous characters 0/O/1/I so customers can read and re-type the code.
+# 32^4 ≈ 1M codes; create_order retries on the (rare) collision, so the space
+# only has to stay comfortably larger than the shop's lifetime order count.
 ORDER_ID_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+ORDER_ID_LENGTH = 4
 
 
 def generate_order_id() -> str:
-    return "NHB-" + "".join(secrets.choice(ORDER_ID_ALPHABET) for _ in range(6))
+    return "NHB-" + "".join(secrets.choice(ORDER_ID_ALPHABET) for _ in range(ORDER_ID_LENGTH))
 
 
 class OrderStatus(str, Enum):
@@ -55,6 +58,8 @@ class OrderItem(Base):
     product_id: Mapped[str] = mapped_column(ForeignKey("products.id"), index=True)
     quantity: Mapped[int] = mapped_column(Integer)
     unit_price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+    # Chosen option labels, e.g. "1kg / Strawberry". NULL for plain products.
+    variant: Mapped[str | None] = mapped_column(String(200), nullable=True)
 
     order: Mapped[Order] = relationship(back_populates="items")
     product: Mapped[Product] = relationship("Product")

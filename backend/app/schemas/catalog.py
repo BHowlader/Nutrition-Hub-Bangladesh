@@ -1,8 +1,32 @@
 from decimal import Decimal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.models.catalog import ProductStatus
+from app.core.variants import VARIANT_SEPARATOR
+
+
+class VariantOption(BaseModel):
+    label: str = Field(min_length=1, max_length=60)
+    price_delta: Decimal = Decimal("0")
+
+    @field_validator("label")
+    @classmethod
+    def _keep_separator_unambiguous(cls, value: str) -> str:
+        value = value.strip()
+        if "/" in value:
+            raise ValueError(f"Variant labels cannot contain '/' (it separates choices as '{VARIANT_SEPARATOR.strip()}')")
+        return value
+
+
+class VariantGroup(BaseModel):
+    name: str = Field(min_length=1, max_length=60)
+    options: list[VariantOption] = Field(min_length=1, max_length=20)
+
+    @field_validator("name")
+    @classmethod
+    def _strip(cls, value: str) -> str:
+        return value.strip()
 
 
 class CategoryRead(BaseModel):
@@ -31,6 +55,7 @@ class ProductBase(BaseModel):
     expiry_date: str | None = None
     image_url: str | None = None
     gallery: list[str] | None = None
+    variants: list[VariantGroup] | None = None
     badge: str | None = None
     detail: str | None = None
     accent: str | None = None
@@ -60,6 +85,7 @@ class ProductUpdate(BaseModel):
     subcategory: str | None = None
     image_url: str | None = None
     gallery: list[str] | None = None
+    variants: list[VariantGroup] | None = None
     status: ProductStatus | None = None
     category_id: str | None = None
 

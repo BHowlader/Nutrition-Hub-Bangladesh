@@ -9,6 +9,7 @@ from app.core.auth import get_current_user, get_optional_user, require_admin_goo
 from app.core.coupons import get_valid_coupon, money, normalize_coupon_code
 from app.core.database import get_db
 from app.core.limiter import limiter
+from app.core.variants import resolve_variant
 from app.models.catalog import Product
 from app.models.order import Order, OrderItem, OrderStatus, generate_order_id
 from app.models.user import User, UserRole
@@ -26,10 +27,17 @@ def create_order(
     db: Session = Depends(get_db),
     user: User | None = Depends(get_optional_user),
 ) -> Order:
-    # H3: collapse duplicate product_ids so a single item can't bypass per-row stock checks.
-    aggregated: dict[str, int] = {}
+    # H3: collapse duplicate lines so a single item can't bypass per-row stock checks.
+    # Lines are keyed by (product, variant) — two variants of one product are
+    # separate order items but share the product's single stock pool.
+    aggregated: dict[tuple[str, str], int] = {}
     for item in payload.items:
-        aggregated[item.product_id] = aggregated.get(item.product_id, 0) + item.quantity
+        key = (item.product_id, (item.variant or "").strip())
+        aggregated[key] = aggregated.get(key, 0) + item.quantity
+
+    stock_needed: dict[str, int] = {}
+    for (product_id, _variant), quantity in aggregated.items():
+        stock_needed[product_id] = stock_needed.get(product_id, 0) + quantity
 
     # Generate a short, human-friendly order ID and guard against the (astronomically
     # unlikely) collision so the primary key stays unique.
@@ -47,12 +55,13 @@ def create_order(
     )
 
     total = Decimal("0")
-    decremented: list[tuple[str, int]] = []
     try:
-        for product_id, quantity in aggregated.items():
+        products: dict[str, Product] = {}
+        for product_id, quantity in stock_needed.items():
             product = db.get(Product, product_id)
             if not product:
                 raise HTTPException(status_code=404, detail=f"Product {product_id} not found")
+            products[product_id] = product
 
             # H3: atomic conditional decrement. Only succeeds if there is still enough stock
             # at the moment of UPDATE, preventing race conditions across concurrent orders.
@@ -66,11 +75,19 @@ def create_order(
                     status_code=409,
                     detail=f"{product.name} does not have enough stock",
                 )
-            decremented.append((product_id, quantity))
 
-            total += product.price * quantity
+        for (product_id, variant), quantity in aggregated.items():
+            product = products[product_id]
+            # Re-price the variant here; the client only ever sends the labels.
+            canonical, unit_price = resolve_variant(product, variant)
+            total += unit_price * quantity
             order.items.append(
-                OrderItem(product_id=product_id, quantity=quantity, unit_price=product.price)
+                OrderItem(
+                    product_id=product_id,
+                    quantity=quantity,
+                    unit_price=unit_price,
+                    variant=canonical,
+                )
             )
 
         discount = Decimal("0")
