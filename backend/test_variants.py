@@ -60,8 +60,10 @@ def test_serializer_keeps_money_as_strings():
         SimpleNamespace(
             name="Size",
             options=[
-                SimpleNamespace(label="1kg", price=Decimal("1800.00"), description="Bulk tub"),
-                SimpleNamespace(label="500g", price=None, description=None),
+                SimpleNamespace(
+                    label="1kg", price=Decimal("1800.00"), description="Bulk tub", image_url="https://cdn/1kg.jpg"
+                ),
+                SimpleNamespace(label="500g", price=None, description=None, image_url=None),
             ],
         )
     ]
@@ -69,8 +71,13 @@ def test_serializer_keeps_money_as_strings():
         {
             "name": "Size",
             "options": [
-                {"label": "1kg", "price": "1800.00", "description": "Bulk tub"},
-                {"label": "500g", "price": None, "description": None},
+                {
+                    "label": "1kg",
+                    "price": "1800.00",
+                    "description": "Bulk tub",
+                    "image_url": "https://cdn/1kg.jpg",
+                },
+                {"label": "500g", "price": None, "description": None, "image_url": None},
             ],
         }
     ]

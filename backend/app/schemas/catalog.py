@@ -12,6 +12,8 @@ class VariantOption(BaseModel):
     price: Decimal | None = Field(default=None, ge=0)
     # Replaces the product description while this option is selected.
     description: str | None = Field(default=None, max_length=2000)
+    # Photo shown when this option is selected; joins the product gallery.
+    image_url: str | None = Field(default=None, max_length=500)
 
     @field_validator("label")
     @classmethod

@@ -2,14 +2,16 @@
 
 Shape (as persisted in `products.variants`):
 
-    [{"name": "Size",   "options": [{"label": "500g", "price": "1000", "description": null},
-                                    {"label": "1kg",  "price": "1800", "description": "Bulk tub"}]},
-     {"name": "Flavor", "options": [{"label": "Strawberry", "price": null, "description": null}]}]
+    [{"name": "Size",   "options": [{"label": "500g", "price": "1000", "description": null, "image_url": null},
+                                    {"label": "1kg",  "price": "1800", "description": "Bulk tub", "image_url": "https://…"}]},
+     {"name": "Flavor", "options": [{"label": "Strawberry", "price": null, "description": null, "image_url": null}]}]
 
 `price` is the option's OWN price, not an adjustment to the product price. A null
 price means "use the product price". When more than one chosen option carries a
 price, the last group wins — groups are read in order, so put the pricing axis
-(usually Size) last if a product ever prices on two axes.
+(usually Size) last if a product ever prices on two axes. `description` and
+`image_url` follow the same last-wins rule, but the storefront resolves those —
+only price is re-derived server-side.
 
 A customer's choice travels as ONE human-readable string built by joining the
 chosen labels in group order: "1kg / Strawberry". That single string is the cart
@@ -45,6 +47,7 @@ def variants_to_json(groups) -> list[dict] | None:
                     "label": option.label,
                     "price": None if option.price is None else str(option.price),
                     "description": option.description or None,
+                    "image_url": option.image_url or None,
                 }
                 for option in group.options
             ],

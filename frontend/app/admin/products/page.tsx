@@ -94,6 +94,8 @@ interface VariantOption {
   price: string | null;
   // Shown instead of the product description while this option is selected.
   description: string | null;
+  // Photo slid into the gallery when this option is selected.
+  image_url: string | null;
 }
 
 interface VariantGroup {
@@ -322,6 +324,7 @@ function cleanProductPayload(form: FormState) {
           // Blank price means "sell at the product price".
           price: String(option.price ?? "").trim() || null,
           description: String(option.description ?? "").trim() || null,
+          image_url: String(option.image_url ?? "").trim() || null,
         })),
     }))
     .filter((group) => group.name && group.options.length > 0);
@@ -2846,6 +2849,10 @@ function VariantsEditor({
   const update = (index: number, group: VariantGroup) =>
     onChange(groups.map((g, i) => (i === index ? group : g)));
 
+  // Keyed "<group>-<option>" so only the row being uploaded shows a spinner.
+  const [uploadingKey, setUploadingKey] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState("");
+
   return (
     <div className="rounded-2xl border border-cream/[0.08] bg-cream/[0.02] p-4">
       <div className="flex items-center justify-between gap-3">
@@ -2857,12 +2864,13 @@ function VariantsEditor({
             One group per axis — e.g. Size (500g, 1kg) and Flavor (Strawberry, Chocolate).
             Each option sells at its own price; leave the price blank to use the product
             price of Tk {Number(basePrice || 0).toLocaleString("en-BD")}. With two priced
-            groups the last group wins.
+            groups the last group wins. An option photo slides into the gallery when
+            the shopper picks it.
           </p>
         </div>
         <button
           type="button"
-          onClick={() => onChange([...groups, { name: "", options: [{ label: "", price: "", description: "" }] }])}
+          onClick={() => onChange([...groups, { name: "", options: [{ label: "", price: "", description: "", image_url: null }] }])}
           className="btn-secondary min-h-9 shrink-0 rounded-xl px-3 py-1.5 text-[11px]"
         >
           <Plus size={13} />
@@ -2902,6 +2910,24 @@ function VariantsEditor({
                       ...group,
                       options: group.options.map((o, i) => (i === optionIndex ? { ...o, ...patch } : o)),
                     });
+                  const uploadKey = `${groupIndex}-${optionIndex}`;
+                  async function handlePhoto(file: File) {
+                    const body = new FormData();
+                    body.append("file", file);
+                    setUploadingKey(uploadKey);
+                    setUploadError("");
+                    try {
+                      const data = await uploadApi<{ image_url: string }>(
+                        "/api/products/admin/upload-image",
+                        body
+                      );
+                      patchOption({ image_url: data.image_url });
+                    } catch (e) {
+                      setUploadError(e instanceof Error ? e.message : "Photo upload failed");
+                    } finally {
+                      setUploadingKey(null);
+                    }
+                  }
                   return (
                     <div key={optionIndex} className="space-y-2">
                       <div className="flex items-center gap-2">
@@ -2942,6 +2968,51 @@ function VariantsEditor({
                         rows={2}
                         className="w-full rounded-lg border border-cream/[0.12] bg-ink/40 px-3 py-2 text-xs font-semibold text-cream outline-none focus:border-gold/50"
                       />
+                      <div className="flex items-center gap-2">
+                        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-cream/[0.12] bg-cream/[0.04]">
+                          {option.image_url ? (
+                            <Image
+                              src={productImage({ image_url: option.image_url })}
+                              alt={option.label || "Variant photo"}
+                              fill
+                              className="object-cover"
+                              sizes="48px"
+                            />
+                          ) : (
+                            <div className="grid h-full w-full place-items-center text-cream/30">
+                              <ImageIcon size={14} />
+                            </div>
+                          )}
+                        </div>
+                        <label className="inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-lg border border-gold/30 bg-gold/5 px-3 text-[11px] font-black text-gold hover:bg-gold/10">
+                          <Upload size={12} />
+                          {uploadingKey === uploadKey
+                            ? "Uploading…"
+                            : option.image_url
+                            ? "Replace photo"
+                            : "Upload photo"}
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            className="hidden"
+                            disabled={uploadingKey !== null}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handlePhoto(file);
+                              e.target.value = "";
+                            }}
+                          />
+                        </label>
+                        {option.image_url && (
+                          <button
+                            type="button"
+                            onClick={() => patchOption({ image_url: null })}
+                            className="text-[11px] font-bold text-cream/40 hover:text-red-400"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
@@ -2952,7 +3023,7 @@ function VariantsEditor({
                 onClick={() =>
                   update(groupIndex, {
                     ...group,
-                    options: [...group.options, { label: "", price: "", description: "" }],
+                    options: [...group.options, { label: "", price: "", description: "", image_url: null }],
                   })
                 }
                 className="mt-2.5 inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-cream/[0.12] bg-cream/[0.02] px-3 text-[11px] font-black text-cream/60 hover:text-cream"
@@ -2964,6 +3035,8 @@ function VariantsEditor({
           ))}
         </div>
       )}
+
+      {uploadError && <p className="mt-3 text-[11px] font-bold text-red-400">{uploadError}</p>}
     </div>
   );
 }

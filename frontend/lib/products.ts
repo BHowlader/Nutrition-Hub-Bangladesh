@@ -23,6 +23,8 @@ export interface VariantOption {
   price: string | null;
   // Replaces the product description while this option is selected.
   description: string | null;
+  // Photo for this option; joins the gallery and is slid into view on selection.
+  image_url: string | null;
 }
 
 export interface VariantGroup {
@@ -89,6 +91,23 @@ export function variantDescription(
   );
 }
 
+// …and for the photo the gallery slides to. null when no chosen option has one.
+export function variantImage(
+  product: { variants?: VariantGroup[] | null },
+  labels: string[]
+): string | null {
+  return chosenOptions(product, labels).reduce<string | null>(
+    (url, option) => (option.image_url ? resolveImageUrl(option.image_url) : url),
+    null
+  );
+}
+
+function variantImages(p?: Product | null): string[] {
+  return (p?.variants || []).flatMap((group) =>
+    group.options.map((option) => option.image_url).filter(Boolean).map((url) => resolveImageUrl(url as string))
+  );
+}
+
 export interface ProductPage {
   items: Product[];
   total: number;
@@ -127,11 +146,12 @@ function resolveImageUrl(url: string): string {
   return url;
 }
 
+// Hero, then the extra gallery shots, then one frame per variant photo — so
+// selecting an option can slide to a slot the swipe/thumbnail UI already knows.
 export function productGallery(p?: Product | null): string[] {
   const hero = productImage(p);
-  if (!p?.gallery || p.gallery.length === 0) return [hero];
-  const extras = p.gallery.map(resolveImageUrl);
-  return [hero, ...extras.filter((u) => u !== hero)];
+  const extras = [...(p?.gallery || []).map(resolveImageUrl), ...variantImages(p)];
+  return [hero, ...Array.from(new Set(extras)).filter((u) => u !== hero)];
 }
 
 function productCacheKey(opts: FetchProductsOptions) {
