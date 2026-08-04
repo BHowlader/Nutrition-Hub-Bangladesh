@@ -75,7 +75,7 @@ def list_products(
         stmt = stmt.join(Category, Product.category_id == Category.id).where(Category.name == category)
         count_stmt = count_stmt.join(Category, Product.category_id == Category.id).where(Category.name == category)
     total = db.scalar(count_stmt) or 0
-    stmt = stmt.order_by(Product.created_at.desc()).offset(offset).limit(limit)
+    stmt = stmt.order_by(Product.sort_order, Product.created_at.desc()).offset(offset).limit(limit)
     response.headers["Cache-Control"] = "public, max-age=30, s-maxage=120, stale-while-revalidate=300"
     response.headers["X-Total-Count"] = str(total)
     response.headers["X-Limit"] = str(limit)
@@ -115,7 +115,10 @@ def admin_list_products(
     db: Session = Depends(get_db),
     _admin: User = Depends(require_admin_google),
 ) -> list[Product]:
-    stmt = select(Product).options(selectinload(Product.category)).order_by(Product.created_at.desc())
+    # Same order the storefront uses, so the admin list reflects the serial they set.
+    stmt = select(Product).options(selectinload(Product.category)).order_by(
+        Product.sort_order, Product.created_at.desc()
+    )
     return list(db.scalars(stmt))
 
 

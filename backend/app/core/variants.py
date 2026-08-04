@@ -2,9 +2,16 @@
 
 Shape (as persisted in `products.variants`):
 
-    [{"name": "Size",   "options": [{"label": "500g", "price_delta": "0"},
-                                    {"label": "1kg",  "price_delta": "450"}]},
-     {"name": "Flavor", "options": [{"label": "Strawberry", "price_delta": "0"}]}]
+    [{"name": "Size",   "options": [{"label": "500g", "price": "1000", "description": null, "image_url": null},
+                                    {"label": "1kg",  "price": "1800", "description": "Bulk tub", "image_url": "https://…"}]},
+     {"name": "Flavor", "options": [{"label": "Strawberry", "price": null, "description": null, "image_url": null}]}]
+
+`price` is the option's OWN price, not an adjustment to the product price. A null
+price means "use the product price". When more than one chosen option carries a
+price, the last group wins — groups are read in order, so put the pricing axis
+(usually Size) last if a product ever prices on two axes. `description` and
+`image_url` follow the same last-wins rule, but the storefront resolves those —
+only price is re-derived server-side.
 
 A customer's choice travels as ONE human-readable string built by joining the
 chosen labels in group order: "1kg / Strawberry". That single string is the cart
@@ -36,7 +43,12 @@ def variants_to_json(groups) -> list[dict] | None:
         {
             "name": group.name,
             "options": [
-                {"label": option.label, "price_delta": str(option.price_delta)}
+                {
+                    "label": option.label,
+                    "price": None if option.price is None else str(option.price),
+                    "description": option.description or None,
+                    "image_url": option.image_url or None,
+                }
                 for option in group.options
             ],
         }
@@ -49,11 +61,11 @@ def _groups(product) -> list[dict]:
     return [g for g in raw if isinstance(g, dict)] if isinstance(raw, list) else []
 
 
-def _delta(raw) -> Decimal:
+def _money(raw, fallback: Decimal) -> Decimal:
     try:
-        return Decimal(str(raw or "0"))
-    except (InvalidOperation, ValueError):
-        return Decimal("0")
+        return Decimal(str(raw))
+    except (InvalidOperation, ValueError, TypeError):
+        return fallback
 
 
 def resolve_variant(product, variant: str | None) -> tuple[str | None, Decimal]:
@@ -87,6 +99,7 @@ def resolve_variant(product, variant: str | None) -> tuple[str | None, Decimal]:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"'{label}' is not an available {group.get('name') or 'option'} for {product.name}",
             )
-        price += _delta(option.get("price_delta"))
+        if option.get("price") not in (None, ""):
+            price = _money(option["price"], price)
 
     return VARIANT_SEPARATOR.join(parts), price

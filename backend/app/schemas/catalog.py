@@ -8,7 +8,12 @@ from app.core.variants import VARIANT_SEPARATOR
 
 class VariantOption(BaseModel):
     label: str = Field(min_length=1, max_length=60)
-    price_delta: Decimal = Decimal("0")
+    # The option's own price. None means "sell at the product price".
+    price: Decimal | None = Field(default=None, ge=0)
+    # Replaces the product description while this option is selected.
+    description: str | None = Field(default=None, max_length=2000)
+    # Photo shown when this option is selected; joins the product gallery.
+    image_url: str | None = Field(default=None, max_length=500)
 
     @field_validator("label")
     @classmethod
@@ -33,6 +38,7 @@ class CategoryRead(BaseModel):
     id: str
     name: str
     slug: str
+    sort_order: int = 0
 
     model_config = {"from_attributes": True}
 
@@ -40,6 +46,13 @@ class CategoryRead(BaseModel):
 class CategoryCreate(BaseModel):
     name: str = Field(min_length=2, max_length=120)
     slug: str = Field(min_length=2, max_length=140)
+    sort_order: int = 0
+
+
+class CategoryUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=2, max_length=120)
+    slug: str | None = Field(default=None, min_length=2, max_length=140)
+    sort_order: int | None = None
 
 
 class ProductBase(BaseModel):
@@ -60,6 +73,8 @@ class ProductBase(BaseModel):
     detail: str | None = None
     accent: str | None = None
     subcategory: str | None = None
+    # Storefront position within the category — lower shows first, ties fall back to newest.
+    sort_order: int = 0
     status: ProductStatus = ProductStatus.draft
     category_id: str
 
@@ -83,6 +98,7 @@ class ProductUpdate(BaseModel):
     detail: str | None = None
     accent: str | None = None
     subcategory: str | None = None
+    sort_order: int | None = None
     image_url: str | None = None
     gallery: list[str] | None = None
     variants: list[VariantGroup] | None = None

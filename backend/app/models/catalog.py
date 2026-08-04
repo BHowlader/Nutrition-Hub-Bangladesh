@@ -21,6 +21,8 @@ class Category(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
     name: Mapped[str] = mapped_column(String(120), unique=True, index=True)
     slug: Mapped[str] = mapped_column(String(140), unique=True, index=True)
+    # Admin-set display position; lower shows first, ties fall back to name.
+    sort_order: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     products: Mapped[list["Product"]] = relationship(back_populates="category")
 
 
@@ -50,6 +52,8 @@ class Product(Base):
     detail: Mapped[str | None] = mapped_column(String(200), nullable=True)
     accent: Mapped[str | None] = mapped_column(String(20), nullable=True)
     subcategory: Mapped[str | None] = mapped_column(String(120), nullable=True, index=True)
+    # Admin-set display position; lower shows first, ties fall back to newest.
+    sort_order: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     status: Mapped[ProductStatus] = mapped_column(SqlEnum(ProductStatus), default=ProductStatus.draft, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

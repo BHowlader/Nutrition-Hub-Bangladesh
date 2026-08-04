@@ -111,6 +111,50 @@ export default async function HomePage() {
       {/* Spacer line */}
       <div className="h-[1px] bg-cream/[0.05]" />
 
+      {/* Best Sellers (Catalog) */}
+      <section id="catalog" className="relative bg-transparent py-14 text-cream sm:py-20 lg:py-28">
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgb(var(--color-cream)/0.035),transparent_22%),radial-gradient(circle_at_85%_0%,rgb(var(--color-gold)/0.10),transparent_30%)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-cream/[0.06]" />
+        <div className="shell">
+          <Reveal>
+            <div className="mb-7 sm:mb-12">
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gold sm:text-xs">
+                Best sellers
+              </p>
+
+              <h2 className="mt-3 max-w-2xl text-[clamp(1.75rem,7vw,4rem)] font-black leading-[1.05] tracking-tight text-cream sm:mt-4 sm:leading-[0.98] lg:max-w-[980px] xl:max-w-[1080px]">
+                Popular picks at Nutrition Hub.
+              </h2>
+              <p className="mt-3 max-w-xl text-sm leading-6 text-cream/55 sm:mt-4 sm:text-base sm:leading-7 lg:max-w-[820px] xl:max-w-[920px]">
+                Curated products for gym-goers, coaches, students, professionals, and
+                anyone building a cleaner daily nutrition routine.
+              </p>
+            </div>
+          </Reveal>
+
+          <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
+            {featured.map((product, index) => (
+              <Reveal delay={index * 0.05} key={product.id}>
+                <ProductCard product={product} priority={index < 2} />
+              </Reveal>
+            ))}
+          </div>
+
+          <div className="mt-8 sm:mt-14 sm:text-center">
+            <Link
+              href="/products"
+              className="group flex w-full items-center justify-center gap-2.5 rounded-full border border-cream/10 bg-cream/[0.03] px-5 py-3.5 text-xs font-black uppercase tracking-[0.18em] text-cream/75 transition hover:border-gold hover:bg-gold hover:text-ink sm:inline-flex sm:w-auto sm:px-8 sm:py-4 sm:text-sm"
+            >
+              View All Products
+              <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Spacer line */}
+      <div className="h-[1px] bg-cream/[0.05]" />
+
       {/* Shop by Goal */}
       <section className="relative bg-transparent py-16 sm:py-20 lg:py-28">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgb(var(--color-gold)/0.10),transparent_32%),radial-gradient(circle_at_85%_15%,rgb(var(--color-mint)/0.07),transparent_30%)]" />
@@ -184,47 +228,6 @@ export default async function HomePage() {
 
       {/* Spacer line */}
       <div className="h-[1px] bg-cream/[0.05]" />
-
-      {/* Best Sellers (Catalog) */}
-      <section id="catalog" className="relative bg-transparent py-14 text-cream sm:py-20 lg:py-28">
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgb(var(--color-cream)/0.035),transparent_22%),radial-gradient(circle_at_85%_0%,rgb(var(--color-gold)/0.10),transparent_30%)]" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-cream/[0.06]" />
-        <div className="shell">
-          <Reveal>
-            <div className="mb-7 sm:mb-12">
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gold sm:text-xs">
-                Best sellers
-              </p>
-
-              <h2 className="mt-3 max-w-2xl text-[clamp(1.75rem,7vw,4rem)] font-black leading-[1.05] tracking-tight text-cream sm:mt-4 sm:leading-[0.98] lg:max-w-[980px] xl:max-w-[1080px]">
-                Popular picks at Nutrition Hub.
-              </h2>
-              <p className="mt-3 max-w-xl text-sm leading-6 text-cream/55 sm:mt-4 sm:text-base sm:leading-7 lg:max-w-[820px] xl:max-w-[920px]">
-                Curated products for gym-goers, coaches, students, professionals, and
-                anyone building a cleaner daily nutrition routine.
-              </p>
-            </div>
-          </Reveal>
-
-          <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
-            {featured.map((product, index) => (
-              <Reveal delay={index * 0.05} key={product.id}>
-                <ProductCard product={product} priority={index < 2} />
-              </Reveal>
-            ))}
-          </div>
-
-          <div className="mt-8 sm:mt-14 sm:text-center">
-            <Link
-              href="/products"
-              className="group flex w-full items-center justify-center gap-2.5 rounded-full border border-cream/10 bg-cream/[0.03] px-5 py-3.5 text-xs font-black uppercase tracking-[0.18em] text-cream/75 transition hover:border-gold hover:bg-gold hover:text-ink sm:inline-flex sm:w-auto sm:px-8 sm:py-4 sm:text-sm"
-            >
-              View All Products
-              <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-            </Link>
-          </div>
-        </div>
-      </section>
 
       {/* Authenticity Process */}
       <section id="authenticity" className="bg-transparent py-28">

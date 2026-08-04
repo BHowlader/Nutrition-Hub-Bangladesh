@@ -6,7 +6,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/Header";
 import { ProductCard } from "@/components/ProductCard";
-import { formatTaka, productGallery, variantKey, variantPrice, type Product } from "@/lib/products";
+import {
+  formatTaka,
+  productGallery,
+  variantDescription,
+  variantImage,
+  variantKey,
+  variantPrice,
+  type Product
+} from "@/lib/products";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
 import { Reveal } from "@/components/Reveal";
@@ -35,6 +43,7 @@ export function ProductDetailClient({
   const router = useRouter();
   const [hoveredImage, setHoveredImage] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [slide, setSlide] = useState<"left" | "right">("right");
   const [adding, setAdding] = useState(false);
   const [addMsg, setAddMsg] = useState("");
   const gallery = productGallery(product);
@@ -46,6 +55,24 @@ export function ProductDetailClient({
   );
   const variant = variantGroups.length > 0 ? variantKey(selected) : null;
   const unitPrice = variantPrice(product, selected);
+  // Title, copy, and photo follow the selection — a flavour is a different
+  // product to the buyer.
+  const title = variant ? `${product.name} · ${variant}` : product.name;
+  const description = variantDescription(product, selected);
+  const variantImageIndex = gallery.indexOf(variantImage(product, selected) || "");
+
+  // Every image change routes through here so the slide direction is always set.
+  function goToImage(next: number) {
+    setSlide(next >= activeImageIndex ? "right" : "left");
+    setActiveImageIndex(next);
+  }
+
+  // Selecting an option slides its photo into the frame.
+  useEffect(() => {
+    if (variantImageIndex < 0) return;
+    setSlide("right");
+    setActiveImageIndex(variantImageIndex);
+  }, [variantImageIndex]);
 
   // Swipe handling
   const touchStart = useRef<{ x: number; y: number } | null>(null);
@@ -72,9 +99,9 @@ export function ProductDetailClient({
     }
     const dx = e.changedTouches[0].clientX - touchStart.current.x;
     if (dx < -40 && activeImageIndex < gallery.length - 1) {
-      setActiveImageIndex(activeImageIndex + 1);
+      goToImage(activeImageIndex + 1);
     } else if (dx > 40 && activeImageIndex > 0) {
-      setActiveImageIndex(activeImageIndex - 1);
+      goToImage(activeImageIndex - 1);
     }
     touchStart.current = null;
     swiping.current = false;
@@ -153,10 +180,11 @@ export function ProductDetailClient({
                   />
                   <div className={`relative h-full w-full transition-transform duration-700 ease-out ${hoveredImage ? "scale-105" : "scale-100"}`}>
                     <Image
+                      key={activeImageIndex}
                       src={gallery[activeImageIndex]}
-                      alt={product.name}
+                      alt={title}
                       fill
-                      className="object-cover"
+                      className={`object-cover ${slide === "right" ? "animate-slide-right" : "animate-slide-left"}`}
                       sizes="(max-width: 1024px) 100vw, 550px"
                       priority
                       quality={85}
@@ -175,7 +203,7 @@ export function ProductDetailClient({
                       {gallery.map((_, i) => (
                         <button
                           key={i}
-                          onClick={() => setActiveImageIndex(i)}
+                          onClick={() => goToImage(i)}
                           className={`h-1.5 rounded-full transition-all duration-300 ${
                             i === activeImageIndex
                               ? "w-5 bg-gold"
@@ -193,7 +221,7 @@ export function ProductDetailClient({
                     {gallery.map((url, i) => (
                       <button
                         key={i}
-                        onClick={() => setActiveImageIndex(i)}
+                        onClick={() => goToImage(i)}
                         className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-all duration-200 sm:h-20 sm:w-20 ${
                           i === activeImageIndex
                             ? "border-gold ring-1 ring-gold/30"
@@ -224,7 +252,7 @@ export function ProductDetailClient({
 
                 {/* Title */}
                 <h1 className="mt-2 text-xl font-black leading-tight text-cream sm:mt-3 sm:text-2xl md:text-3xl lg:text-4xl">
-                  {product.name}
+                  {title}
                 </h1>
 
                 {/* Price — prominent on mobile */}
@@ -290,12 +318,6 @@ export function ProductDetailClient({
                                 }`}
                               >
                                 {option.label}
-                                {Number(option.price_delta) !== 0 && (
-                                  <span className="ml-1.5 text-[10px] font-black opacity-70">
-                                    {Number(option.price_delta) > 0 ? "+" : "−"}
-                                    {Math.abs(Number(option.price_delta)).toLocaleString("en-BD")}
-                                  </span>
-                                )}
                               </button>
                             );
                           })}
@@ -305,9 +327,9 @@ export function ProductDetailClient({
                   </div>
                 )}
 
-                {/* Description */}
+                {/* Description — swaps with the selected option when it defines its own */}
                 <p className="mt-4 text-sm leading-relaxed text-cream/55 sm:text-base sm:leading-7">
-                  {product.description}
+                  {description}
                 </p>
               </Reveal>
 

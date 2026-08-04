@@ -85,11 +85,17 @@ interface Category {
   id: string;
   name: string;
   slug: string;
+  sort_order: number;
 }
 
 interface VariantOption {
   label: string;
-  price_delta: string;
+  // The option's own price (blank/null = sell at the product price).
+  price: string | null;
+  // Shown instead of the product description while this option is selected.
+  description: string | null;
+  // Photo slid into the gallery when this option is selected.
+  image_url: string | null;
 }
 
 interface VariantGroup {
@@ -116,6 +122,7 @@ interface Product {
   detail: string | null;
   accent: string | null;
   subcategory: string | null;
+  sort_order: number;
   status: ProductStatus;
   category_id: string;
   category?: Category | null;
@@ -213,6 +220,7 @@ const EMPTY_FORM: FormState = {
   detail: null,
   accent: "#F59E0B",
   subcategory: null,
+  sort_order: 0,
   // Products are created to be sold — draft was a trap that silently kept new
   // products off the storefront. Flip it back per product when staging one.
   status: "published",
@@ -313,7 +321,10 @@ function cleanProductPayload(form: FormState) {
         .filter((option) => option.label.trim())
         .map((option) => ({
           label: option.label.trim(),
-          price_delta: String(option.price_delta || "0"),
+          // Blank price means "sell at the product price".
+          price: String(option.price ?? "").trim() || null,
+          description: String(option.description ?? "").trim() || null,
+          image_url: String(option.image_url ?? "").trim() || null,
         })),
     }))
     .filter((group) => group.name && group.options.length > 0);
@@ -332,6 +343,7 @@ function cleanProductPayload(form: FormState) {
     price: String(form.price || "0"),
     stock: Number(form.stock || 0),
     rating: String(form.rating || "5"),
+    sort_order: Number(form.sort_order || 0),
   };
 }
 
@@ -592,6 +604,32 @@ export default function AdminProductsPage() {
       setNotice("Hero section updated");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to update hero");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleCategoryOrderSave(orders: { id: string; sort_order: number }[]) {
+    setSaving(true);
+    setError("");
+    try {
+      for (const { id, sort_order } of orders) {
+        await api(`/api/categories/${id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ sort_order }),
+        });
+      }
+      setNotice("Category order updated");
+      await load();
+      for (const tag of ["categories", "products"]) {
+        fetch("/api/revalidate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tag }),
+        }).catch(() => {});
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to update category order");
     } finally {
       setSaving(false);
     }
@@ -958,11 +996,18 @@ export default function AdminProductsPage() {
             />
           )}
           {activeTab === "categories" && (
-            <CategoryImagesSection
-              settings={categoryImages}
-              saving={saving}
-              onSave={handleCategoryImagesSave}
-            />
+            <div className="space-y-6">
+              <CategoryOrderSection
+                categories={categories}
+                saving={saving}
+                onSave={handleCategoryOrderSave}
+              />
+              <CategoryImagesSection
+                settings={categoryImages}
+                saving={saving}
+                onSave={handleCategoryImagesSave}
+              />
+            </div>
           )}
         </main>
       </div>
@@ -1192,6 +1237,9 @@ function ProductsSection({
                       <div className="flex items-center gap-2 mt-1">
                         <span className="inline-block text-[9px] font-black tracking-wider text-gold bg-gold/10 px-1.5 py-0.5 rounded border border-gold/15 font-mono">{product.sku}</span>
                         <span className="text-[10px] font-black text-cream/30">/{product.slug}</span>
+                        <span className="text-[10px] font-black text-cream/30" title="Serial (display order)">
+                          #{product.sort_order ?? 0}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -2306,6 +2354,84 @@ function HeroSection({
 // Labels mirror the homepage "Shop by goal" cards, in display order (slots 1-4).
 const CATEGORY_LABELS = ["Gym Supplements", "Vitamins & Supplements", "Protein Oats", "Peanut Butter"];
 
+function CategoryOrderSection({
+  categories,
+  saving,
+  onSave,
+}: {
+  categories: Category[];
+  saving: boolean;
+  onSave: (orders: { id: string; sort_order: number }[]) => void;
+}) {
+  const [orders, setOrders] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    setOrders(Object.fromEntries(categories.map((c) => [c.id, c.sort_order ?? 0])));
+  }, [categories]);
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    // Only send what actually moved — one PATCH per changed category.
+    onSave(
+      categories
+        .filter((c) => (orders[c.id] ?? 0) !== (c.sort_order ?? 0))
+        .map((c) => ({ id: c.id, sort_order: orders[c.id] ?? 0 }))
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="premium-card p-6 space-y-6">
+      <div>
+        <h2 className="text-lg font-black text-cream">Category Order</h2>
+        <p className="text-xs text-cream/40 mt-0.5">
+          Serial for the storefront category tabs — lower shows first, ties fall back to name.
+          Product serials are set per product in the edit form.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        {[...categories]
+          .sort((a, b) => (orders[a.id] ?? 0) - (orders[b.id] ?? 0) || a.name.localeCompare(b.name))
+          .map((category) => (
+            <div
+              key={category.id}
+              className="flex items-center gap-3 rounded-xl border border-cream/[0.08] bg-cream/[0.02] px-4 py-3"
+            >
+              <input
+                type="number"
+                value={orders[category.id] ?? 0}
+                onChange={(e) =>
+                  setOrders((prev) => ({
+                    ...prev,
+                    [category.id]: Number.parseInt(e.target.value || "0", 10) || 0,
+                  }))
+                }
+                className="h-9 w-20 shrink-0 rounded-lg border border-cream/[0.12] bg-forest/60 px-3 text-xs font-black text-cream outline-none focus:border-gold/50"
+              />
+              <div className="min-w-0">
+                <strong className="block truncate text-sm font-bold text-cream">{category.name}</strong>
+                <span className="text-[10px] font-black text-cream/30">/{category.slug}</span>
+              </div>
+            </div>
+          ))}
+        {categories.length === 0 && (
+          <p className="text-xs font-bold text-cream/30">No categories yet.</p>
+        )}
+      </div>
+
+      <div className="flex justify-end gap-3 pt-4 border-t border-cream/[0.06]">
+        <button
+          type="submit"
+          disabled={saving || categories.length === 0}
+          className="btn-primary min-h-11 text-sm rounded-xl py-2 px-6 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {saving ? "Saving..." : "Save order"}
+        </button>
+      </div>
+    </form>
+  );
+}
+
 function CategoryImagesSection({
   settings,
   saving,
@@ -2608,6 +2734,13 @@ function ProductModal({
           <Field label="Batch no." value={editing.batch_no || ""} onChange={(value) => setEditing({ ...editing, batch_no: value })} required={false} />
           <Field label="Expiry date" value={editing.expiry_date || ""} onChange={(value) => setEditing({ ...editing, expiry_date: value })} required={false} />
           <Field label="Accent color" value={editing.accent || ""} onChange={(value) => setEditing({ ...editing, accent: value })} required={false} />
+          <Field
+            label="Serial (order)"
+            value={String(editing.sort_order ?? 0)}
+            onChange={(value) => setEditing({ ...editing, sort_order: Number.parseInt(value || "0", 10) || 0 })}
+            type="number"
+            hint="Lower shows first in its category. Ties fall back to newest."
+          />
         </div>
 
         <div className="grid gap-4 md:grid-cols-[1fr_220px]">
@@ -2716,6 +2849,10 @@ function VariantsEditor({
   const update = (index: number, group: VariantGroup) =>
     onChange(groups.map((g, i) => (i === index ? group : g)));
 
+  // Keyed "<group>-<option>" so only the row being uploaded shows a spinner.
+  const [uploadingKey, setUploadingKey] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState("");
+
   return (
     <div className="rounded-2xl border border-cream/[0.08] bg-cream/[0.02] p-4">
       <div className="flex items-center justify-between gap-3">
@@ -2725,12 +2862,15 @@ function VariantsEditor({
           </label>
           <p className="mt-0.5 text-[11px] text-cream/35">
             One group per axis — e.g. Size (500g, 1kg) and Flavor (Strawberry, Chocolate).
-            Price adjust is added to the base price of Tk {Number(basePrice || 0).toLocaleString("en-BD")}.
+            Each option sells at its own price; leave the price blank to use the product
+            price of Tk {Number(basePrice || 0).toLocaleString("en-BD")}. With two priced
+            groups the last group wins. An option photo slides into the gallery when
+            the shopper picks it.
           </p>
         </div>
         <button
           type="button"
-          onClick={() => onChange([...groups, { name: "", options: [{ label: "", price_delta: "0" }] }])}
+          onClick={() => onChange([...groups, { name: "", options: [{ label: "", price: "", description: "", image_url: null }] }])}
           className="btn-secondary min-h-9 shrink-0 rounded-xl px-3 py-1.5 text-[11px]"
         >
           <Plus size={13} />
@@ -2763,59 +2903,128 @@ function VariantsEditor({
                 </button>
               </div>
 
-              <div className="mt-2.5 space-y-2">
-                {group.options.map((option, optionIndex) => (
-                  <div key={optionIndex} className="flex items-center gap-2">
-                    <input
-                      value={option.label}
-                      onChange={(e) =>
-                        update(groupIndex, {
-                          ...group,
-                          options: group.options.map((o, i) =>
-                            i === optionIndex ? { ...o, label: e.target.value } : o
-                          ),
-                        })
-                      }
-                      placeholder="Option (500g, Strawberry…)"
-                      className="h-9 flex-1 rounded-lg border border-cream/[0.12] bg-ink/40 px-3 text-xs font-bold text-cream outline-none focus:border-gold/50"
-                    />
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={option.price_delta}
-                      onChange={(e) =>
-                        update(groupIndex, {
-                          ...group,
-                          options: group.options.map((o, i) =>
-                            i === optionIndex ? { ...o, price_delta: e.target.value } : o
-                          ),
-                        })
-                      }
-                      placeholder="Price ±"
-                      title="Added to the base price when this option is chosen"
-                      className="h-9 w-24 shrink-0 rounded-lg border border-cream/[0.12] bg-ink/40 px-3 text-xs font-bold text-cream outline-none focus:border-gold/50"
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        update(groupIndex, {
-                          ...group,
-                          options: group.options.filter((_, i) => i !== optionIndex),
-                        })
-                      }
-                      className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-cream/[0.12] bg-cream/[0.02] text-cream/50 hover:text-red-400"
-                      title="Remove option"
-                    >
-                      <X size={13} />
-                    </button>
-                  </div>
-                ))}
+              <div className="mt-2.5 space-y-3">
+                {group.options.map((option, optionIndex) => {
+                  const patchOption = (patch: Partial<VariantOption>) =>
+                    update(groupIndex, {
+                      ...group,
+                      options: group.options.map((o, i) => (i === optionIndex ? { ...o, ...patch } : o)),
+                    });
+                  const uploadKey = `${groupIndex}-${optionIndex}`;
+                  async function handlePhoto(file: File) {
+                    const body = new FormData();
+                    body.append("file", file);
+                    setUploadingKey(uploadKey);
+                    setUploadError("");
+                    try {
+                      const data = await uploadApi<{ image_url: string }>(
+                        "/api/products/admin/upload-image",
+                        body
+                      );
+                      patchOption({ image_url: data.image_url });
+                    } catch (e) {
+                      setUploadError(e instanceof Error ? e.message : "Photo upload failed");
+                    } finally {
+                      setUploadingKey(null);
+                    }
+                  }
+                  return (
+                    <div key={optionIndex} className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <input
+                          value={option.label}
+                          onChange={(e) => patchOption({ label: e.target.value })}
+                          placeholder="Option (500g, Strawberry…)"
+                          className="h-9 flex-1 rounded-lg border border-cream/[0.12] bg-ink/40 px-3 text-xs font-bold text-cream outline-none focus:border-gold/50"
+                        />
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={option.price ?? ""}
+                          onChange={(e) => patchOption({ price: e.target.value })}
+                          placeholder={`Tk ${Number(basePrice || 0).toLocaleString("en-BD")}`}
+                          title="This option's own price. Blank = the product price."
+                          className="h-9 w-28 shrink-0 rounded-lg border border-cream/[0.12] bg-ink/40 px-3 text-xs font-bold text-cream outline-none focus:border-gold/50"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            update(groupIndex, {
+                              ...group,
+                              options: group.options.filter((_, i) => i !== optionIndex),
+                            })
+                          }
+                          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-cream/[0.12] bg-cream/[0.02] text-cream/50 hover:text-red-400"
+                          title="Remove option"
+                        >
+                          <X size={13} />
+                        </button>
+                      </div>
+                      <textarea
+                        value={option.description ?? ""}
+                        onChange={(e) => patchOption({ description: e.target.value })}
+                        placeholder="Description for this option (blank = the product description)"
+                        rows={2}
+                        className="w-full rounded-lg border border-cream/[0.12] bg-ink/40 px-3 py-2 text-xs font-semibold text-cream outline-none focus:border-gold/50"
+                      />
+                      <div className="flex items-center gap-2">
+                        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-cream/[0.12] bg-cream/[0.04]">
+                          {option.image_url ? (
+                            <Image
+                              src={productImage({ image_url: option.image_url })}
+                              alt={option.label || "Variant photo"}
+                              fill
+                              className="object-cover"
+                              sizes="48px"
+                            />
+                          ) : (
+                            <div className="grid h-full w-full place-items-center text-cream/30">
+                              <ImageIcon size={14} />
+                            </div>
+                          )}
+                        </div>
+                        <label className="inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-lg border border-gold/30 bg-gold/5 px-3 text-[11px] font-black text-gold hover:bg-gold/10">
+                          <Upload size={12} />
+                          {uploadingKey === uploadKey
+                            ? "Uploading…"
+                            : option.image_url
+                            ? "Replace photo"
+                            : "Upload photo"}
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            className="hidden"
+                            disabled={uploadingKey !== null}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handlePhoto(file);
+                              e.target.value = "";
+                            }}
+                          />
+                        </label>
+                        {option.image_url && (
+                          <button
+                            type="button"
+                            onClick={() => patchOption({ image_url: null })}
+                            className="text-[11px] font-bold text-cream/40 hover:text-red-400"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
               <button
                 type="button"
                 onClick={() =>
-                  update(groupIndex, { ...group, options: [...group.options, { label: "", price_delta: "0" }] })
+                  update(groupIndex, {
+                    ...group,
+                    options: [...group.options, { label: "", price: "", description: "", image_url: null }],
+                  })
                 }
                 className="mt-2.5 inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-cream/[0.12] bg-cream/[0.02] px-3 text-[11px] font-black text-cream/60 hover:text-cream"
               >
@@ -2826,6 +3035,8 @@ function VariantsEditor({
           ))}
         </div>
       )}
+
+      {uploadError && <p className="mt-3 text-[11px] font-bold text-red-400">{uploadError}</p>}
     </div>
   );
 }
@@ -2947,6 +3158,7 @@ function Field({
   min,
   max,
   required = true,
+  hint,
 }: {
   label: string;
   value: string;
@@ -2956,6 +3168,7 @@ function Field({
   min?: string;
   max?: string;
   required?: boolean;
+  hint?: string;
 }) {
   return (
     <div>
@@ -2970,6 +3183,7 @@ function Field({
         className="h-10 w-full rounded-xl border border-cream/[0.12] bg-forest/60 px-3.5 text-xs font-bold text-cream outline-none focus:border-gold/50 focus:ring-4 focus:ring-gold/10 transition-all duration-300"
         required={required}
       />
+      {hint && <p className="mt-1 text-[10px] font-bold text-cream/30">{hint}</p>}
     </div>
   );
 }
