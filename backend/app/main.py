@@ -1,4 +1,6 @@
+import json
 import secrets
+from decimal import Decimal, InvalidOperation
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -176,6 +178,31 @@ def create_tables() -> None:
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS subcategory VARCHAR(120)"))
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS gallery JSONB"))
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS variants JSONB"))
+        conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS sort_order INTEGER NOT NULL DEFAULT 0"))
+        conn.execute(text("ALTER TABLE categories ADD COLUMN IF NOT EXISTS sort_order INTEGER NOT NULL DEFAULT 0"))
+        # Variant options moved from "price_delta" (added to the product price) to
+        # "price" (the option's own price). One-time, idempotent backfill.
+        for product_id, base_price, groups in conn.execute(
+            text("SELECT id, price, variants FROM products WHERE variants IS NOT NULL")
+        ).all():
+            if not isinstance(groups, list):
+                continue
+            converted = False
+            for group in groups:
+                for option in (group.get("options") or []) if isinstance(group, dict) else []:
+                    if not isinstance(option, dict) or "price_delta" not in option:
+                        continue
+                    delta = option.pop("price_delta")
+                    try:
+                        option.setdefault("price", str(Decimal(base_price) + Decimal(str(delta or "0"))))
+                    except (InvalidOperation, TypeError):
+                        option.setdefault("price", str(base_price))
+                    converted = True
+            if converted:
+                conn.execute(
+                    text("UPDATE products SET variants = CAST(:variants AS JSONB) WHERE id = :id"),
+                    {"variants": json.dumps(groups), "id": product_id},
+                )
         conn.execute(text("ALTER TABLE order_items ADD COLUMN IF NOT EXISTS variant VARCHAR(200)"))
         # Variants make (user, product) too coarse a cart key — 500g and 1kg of the
         # same product are separate lines. Widen the primary key once, idempotently.

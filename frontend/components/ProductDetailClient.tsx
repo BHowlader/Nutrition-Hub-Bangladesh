@@ -6,7 +6,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/Header";
 import { ProductCard } from "@/components/ProductCard";
-import { formatTaka, productGallery, variantKey, variantPrice, type Product } from "@/lib/products";
+import {
+  formatTaka,
+  productGallery,
+  variantDescription,
+  variantKey,
+  variantPrice,
+  type Product
+} from "@/lib/products";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
 import { Reveal } from "@/components/Reveal";
@@ -46,6 +53,9 @@ export function ProductDetailClient({
   );
   const variant = variantGroups.length > 0 ? variantKey(selected) : null;
   const unitPrice = variantPrice(product, selected);
+  // Title and copy follow the selection — a flavour is a different product to the buyer.
+  const title = variant ? `${product.name} · ${variant}` : product.name;
+  const description = variantDescription(product, selected);
 
   // Swipe handling
   const touchStart = useRef<{ x: number; y: number } | null>(null);
@@ -224,7 +234,7 @@ export function ProductDetailClient({
 
                 {/* Title */}
                 <h1 className="mt-2 text-xl font-black leading-tight text-cream sm:mt-3 sm:text-2xl md:text-3xl lg:text-4xl">
-                  {product.name}
+                  {title}
                 </h1>
 
                 {/* Price — prominent on mobile */}
@@ -290,12 +300,6 @@ export function ProductDetailClient({
                                 }`}
                               >
                                 {option.label}
-                                {Number(option.price_delta) !== 0 && (
-                                  <span className="ml-1.5 text-[10px] font-black opacity-70">
-                                    {Number(option.price_delta) > 0 ? "+" : "−"}
-                                    {Math.abs(Number(option.price_delta)).toLocaleString("en-BD")}
-                                  </span>
-                                )}
                               </button>
                             );
                           })}
@@ -305,9 +309,9 @@ export function ProductDetailClient({
                   </div>
                 )}
 
-                {/* Description */}
+                {/* Description — swaps with the selected option when it defines its own */}
                 <p className="mt-4 text-sm leading-relaxed text-cream/55 sm:text-base sm:leading-7">
-                  {product.description}
+                  {description}
                 </p>
               </Reveal>
 
