@@ -387,6 +387,7 @@ export default function AdminProductsPage() {
   const [activeTab, setActiveTab] = useState<AdminTab>("products");
   const [editing, setEditing] = useState<FormState | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
+  const [categoryDeleteTarget, setCategoryDeleteTarget] = useState<Category | null>(null);
   const [showCategoryForm, setShowCategoryForm] = useState(false);
   const [newCategory, setNewCategory] = useState({ name: "", slug: "" });
   const [query, setQuery] = useState("");
@@ -612,27 +613,48 @@ export default function AdminProductsPage() {
     }
   }
 
-  async function handleCategoryOrderSave(orders: { id: string; sort_order: number }[]) {
+  function revalidateCategories() {
+    for (const tag of ["categories", "products"]) {
+      fetch("/api/revalidate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tag }),
+      }).catch(() => {});
+    }
+  }
+
+  async function handleCategorySave(changes: ({ id: string } & Partial<CategoryEdit>)[]) {
     setSaving(true);
     setError("");
     try {
-      for (const { id, sort_order } of orders) {
+      for (const { id, ...fields } of changes) {
         await api(`/api/categories/${id}`, {
           method: "PATCH",
-          body: JSON.stringify({ sort_order }),
+          body: JSON.stringify(fields),
         });
       }
-      setNotice("Category order updated");
+      setNotice("Categories updated");
       await load();
-      for (const tag of ["categories", "products"]) {
-        fetch("/api/revalidate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tag }),
-        }).catch(() => {});
-      }
+      revalidateCategories();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to update category order");
+      setError(e instanceof Error ? e.message : "Failed to update categories");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleCategoryDelete() {
+    if (!categoryDeleteTarget) return;
+    setSaving(true);
+    setError("");
+    try {
+      await api(`/api/categories/${categoryDeleteTarget.id}`, { method: "DELETE" });
+      setNotice("Category deleted");
+      setCategoryDeleteTarget(null);
+      await load();
+      revalidateCategories();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to delete category");
     } finally {
       setSaving(false);
     }
@@ -1003,7 +1025,11 @@ export default function AdminProductsPage() {
               <CategoryOrderSection
                 categories={categories}
                 saving={saving}
-                onSave={handleCategoryOrderSave}
+                onSave={handleCategorySave}
+                onDelete={(category) => {
+                  setError("");
+                  setCategoryDeleteTarget(category);
+                }}
               />
               <CategoryImagesSection
                 settings={categoryImages}
@@ -1081,6 +1107,31 @@ export default function AdminProductsPage() {
             </button>
             <button
               onClick={() => setDeleteTarget(null)}
+              className="btn-secondary min-h-11 text-sm rounded-xl py-2 flex-1"
+            >
+              Cancel
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {categoryDeleteTarget && (
+        <Modal title="Delete category" onClose={() => setCategoryDeleteTarget(null)} maxWidth="max-w-md">
+          <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
+            This permanently deletes <strong>{categoryDeleteTarget.name}</strong>. Categories still used by a
+            product cannot be deleted — move those products first.
+          </div>
+          {error && <p className="mt-3 text-xs font-bold text-red-400">{error}</p>}
+          <div className="mt-5 flex gap-3">
+            <button
+              onClick={handleCategoryDelete}
+              disabled={saving}
+              className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-red-600 hover:bg-red-700 px-4 text-sm font-black text-white disabled:opacity-50 transition-colors"
+            >
+              Delete category
+            </button>
+            <button
+              onClick={() => setCategoryDeleteTarget(null)}
               className="btn-secondary min-h-11 text-sm rounded-xl py-2 flex-1"
             >
               Cancel
@@ -2357,44 +2408,61 @@ function HeroSection({
 // Labels mirror the homepage "Shop by goal" cards, in display order (slots 1-4).
 const CATEGORY_LABELS = ["Gym Supplements", "Vitamins & Supplements", "Protein Oats", "Peanut Butter"];
 
+type CategoryEdit = { name: string; slug: string; sort_order: number };
+
 function CategoryOrderSection({
   categories,
   saving,
   onSave,
+  onDelete,
 }: {
   categories: Category[];
   saving: boolean;
-  onSave: (orders: { id: string; sort_order: number }[]) => void;
+  onSave: (changes: ({ id: string } & Partial<CategoryEdit>)[]) => void;
+  onDelete: (category: Category) => void;
 }) {
-  const [orders, setOrders] = useState<Record<string, number>>({});
+  const [edits, setEdits] = useState<Record<string, CategoryEdit>>({});
 
   useEffect(() => {
-    setOrders(Object.fromEntries(categories.map((c) => [c.id, c.sort_order ?? 0])));
+    setEdits(
+      Object.fromEntries(
+        categories.map((c) => [c.id, { name: c.name, slug: c.slug, sort_order: c.sort_order ?? 0 }])
+      )
+    );
   }, [categories]);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // Only send what actually moved — one PATCH per changed category.
+    // Only send what actually changed — one PATCH per touched category.
     onSave(
-      categories
-        .filter((c) => (orders[c.id] ?? 0) !== (c.sort_order ?? 0))
-        .map((c) => ({ id: c.id, sort_order: orders[c.id] ?? 0 }))
+      categories.flatMap((c) => {
+        const edit = edits[c.id];
+        if (!edit) return [];
+        const changed: { id: string } & Partial<CategoryEdit> = { id: c.id };
+        if (edit.name.trim() && edit.name.trim() !== c.name) changed.name = edit.name.trim();
+        if (edit.slug !== c.slug) changed.slug = edit.slug;
+        if (edit.sort_order !== (c.sort_order ?? 0)) changed.sort_order = edit.sort_order;
+        return Object.keys(changed).length > 1 ? [changed] : [];
+      })
     );
   }
 
   return (
     <form onSubmit={handleSubmit} className="premium-card p-6 space-y-6">
       <div>
-        <h2 className="text-lg font-black text-cream">Category Order</h2>
+        <h2 className="text-lg font-black text-cream">Categories</h2>
         <p className="text-xs text-cream/40 mt-0.5">
           Serial for the storefront category tabs — lower shows first, ties fall back to name.
-          Product serials are set per product in the edit form.
+          Edit a name to rename it. Product serials are set per product in the edit form.
         </p>
       </div>
 
       <div className="space-y-2">
         {[...categories]
-          .sort((a, b) => (orders[a.id] ?? 0) - (orders[b.id] ?? 0) || a.name.localeCompare(b.name))
+          .sort(
+            (a, b) =>
+              (edits[a.id]?.sort_order ?? 0) - (edits[b.id]?.sort_order ?? 0) || a.name.localeCompare(b.name)
+          )
           .map((category) => (
             <div
               key={category.id}
@@ -2402,19 +2470,43 @@ function CategoryOrderSection({
             >
               <input
                 type="number"
-                value={orders[category.id] ?? 0}
+                value={edits[category.id]?.sort_order ?? 0}
                 onChange={(e) =>
-                  setOrders((prev) => ({
+                  setEdits((prev) => ({
                     ...prev,
-                    [category.id]: Number.parseInt(e.target.value || "0", 10) || 0,
+                    [category.id]: {
+                      ...prev[category.id],
+                      sort_order: Number.parseInt(e.target.value || "0", 10) || 0,
+                    },
                   }))
                 }
                 className="h-9 w-20 shrink-0 rounded-lg border border-cream/[0.12] bg-forest/60 px-3 text-xs font-black text-cream outline-none focus:border-gold/50"
               />
-              <div className="min-w-0">
-                <strong className="block truncate text-sm font-bold text-cream">{category.name}</strong>
-                <span className="text-[10px] font-black text-cream/30">/{category.slug}</span>
+              <div className="min-w-0 flex-1">
+                <input
+                  value={edits[category.id]?.name ?? category.name}
+                  onChange={(e) =>
+                    setEdits((prev) => ({
+                      ...prev,
+                      [category.id]: {
+                        ...prev[category.id],
+                        name: e.target.value,
+                        // Slug is admin-facing only; keep it readable by tracking the name.
+                        slug: slugify(e.target.value) || prev[category.id].slug,
+                      },
+                    }))
+                  }
+                  className="h-9 w-full rounded-lg border border-cream/[0.12] bg-forest/60 px-3 text-sm font-bold text-cream outline-none focus:border-gold/50"
+                />
+                <span className="text-[10px] font-black text-cream/30">/{edits[category.id]?.slug ?? category.slug}</span>
               </div>
+              <button
+                type="button"
+                onClick={() => onDelete(category)}
+                className="min-h-9 shrink-0 rounded-lg border border-red-500/30 px-3 text-xs font-black text-red-400 transition-colors hover:bg-red-500/10"
+              >
+                Delete
+              </button>
             </div>
           ))}
         {categories.length === 0 && (
@@ -2428,7 +2520,7 @@ function CategoryOrderSection({
           disabled={saving || categories.length === 0}
           className="btn-primary min-h-11 text-sm rounded-xl py-2 px-6 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {saving ? "Saving..." : "Save order"}
+          {saving ? "Saving..." : "Save changes"}
         </button>
       </div>
     </form>
