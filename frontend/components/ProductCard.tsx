@@ -86,7 +86,8 @@ export function ProductCard({ product, priority = false }: { product: Product; p
         </h3>
 
         {/* Description — sm+ only */}
-        <p className="mt-2 line-clamp-2 hidden text-xs leading-relaxed text-cream/50 sm:block">
+        {/* ponytail: sm:line-clamp-2, not line-clamp-2 + sm:block — Tailwind emits .block after .line-clamp-*, so sm:block would kill the clamp's display:-webkit-box */}
+        <p className="mt-2 hidden text-xs leading-relaxed text-cream/50 sm:line-clamp-2">
           {product.description}
         </p>
 
