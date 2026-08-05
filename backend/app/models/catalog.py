@@ -3,7 +3,7 @@ from decimal import Decimal
 from enum import Enum
 from uuid import uuid4
 
-from sqlalchemy import DateTime, Enum as SqlEnum, ForeignKey, Index, Integer, JSON, Numeric, String, Text
+from sqlalchemy import Boolean, DateTime, Enum as SqlEnum, ForeignKey, Index, Integer, JSON, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -54,6 +54,8 @@ class Product(Base):
     subcategory: Mapped[str | None] = mapped_column(String(120), nullable=True, index=True)
     # Admin-set display position; lower shows first, ties fall back to newest.
     sort_order: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    # Show in the homepage "Best sellers" strip.
+    is_featured: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     status: Mapped[ProductStatus] = mapped_column(SqlEnum(ProductStatus), default=ProductStatus.draft, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

@@ -180,6 +180,9 @@ def create_tables() -> None:
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS variants JSONB"))
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS sort_order INTEGER NOT NULL DEFAULT 0"))
         conn.execute(text("ALTER TABLE categories ADD COLUMN IF NOT EXISTS sort_order INTEGER NOT NULL DEFAULT 0"))
+        conn.execute(
+            text("ALTER TABLE products ADD COLUMN IF NOT EXISTS is_featured BOOLEAN NOT NULL DEFAULT FALSE")
+        )
         # Variant options moved from "price_delta" (added to the product price) to
         # "price" (the option's own price). One-time, idempotent backfill.
         for product_id, base_price, groups in conn.execute(

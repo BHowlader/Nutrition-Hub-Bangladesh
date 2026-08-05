@@ -94,7 +94,11 @@ export default async function HomePage() {
     fetchHeroSettings(),
     fetchCategoryImages(),
   ]);
-  const featured = allProducts.slice(0, BEST_SELLERS_LIMIT);
+  // Admin-picked showcase. ponytail: no `?featured=true` endpoint — the page already
+  // has the full list. Nothing ticked yet falls back to the first few so the strip is
+  // never blank.
+  const picked = allProducts.filter((product) => product.is_featured);
+  const featured = (picked.length > 0 ? picked : allProducts).slice(0, BEST_SELLERS_LIMIT);
   // Admin-managed category photos (1-4, in display order). Fall back to the bundled
   // static image whenever a slot has not been customised.
   const categoryImageOverrides = [

@@ -49,6 +49,7 @@ export interface Product {
   image_url: string | null;
   gallery: string[] | null;
   variants: VariantGroup[] | null;
+  is_featured?: boolean;
   status: string;
   category_id: string;
   category: Category | null;

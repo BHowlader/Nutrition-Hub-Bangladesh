@@ -123,6 +123,7 @@ interface Product {
   accent: string | null;
   subcategory: string | null;
   sort_order: number;
+  is_featured: boolean;
   status: ProductStatus;
   category_id: string;
   category?: Category | null;
@@ -221,6 +222,7 @@ const EMPTY_FORM: FormState = {
   accent: "#F59E0B",
   subcategory: null,
   sort_order: 0,
+  is_featured: false,
   // Products are created to be sold — draft was a trap that silently kept new
   // products off the storefront. Flip it back per product when staging one.
   status: "published",
@@ -344,6 +346,7 @@ function cleanProductPayload(form: FormState) {
     stock: Number(form.stock || 0),
     rating: String(form.rating || "5"),
     sort_order: Number(form.sort_order || 0),
+    is_featured: Boolean(form.is_featured),
   };
 }
 
@@ -2767,11 +2770,22 @@ function ProductModal({
               />
             </label>
           </div>
-          <SelectField label="Status" value={editing.status} onChange={(value) => setEditing({ ...editing, status: value as ProductStatus })}>
-            <option value="draft">Draft</option>
-            <option value="published">Published</option>
-            <option value="archived">Archived</option>
-          </SelectField>
+          <div>
+            <SelectField label="Status" value={editing.status} onChange={(value) => setEditing({ ...editing, status: value as ProductStatus })}>
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+              <option value="archived">Archived</option>
+            </SelectField>
+            <label className="mt-2.5 flex cursor-pointer items-center gap-3 rounded-xl border border-cream/[0.08] bg-cream/[0.02] px-4 py-3 text-xs font-black text-cream/70 select-none">
+              <input
+                type="checkbox"
+                checked={Boolean(editing.is_featured)}
+                onChange={(e) => setEditing({ ...editing, is_featured: e.target.checked })}
+                className="h-4 w-4 accent-gold"
+              />
+              Show in Best sellers
+            </label>
+          </div>
         </div>
 
         {/* Gallery images */}

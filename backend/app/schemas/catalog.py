@@ -75,6 +75,8 @@ class ProductBase(BaseModel):
     subcategory: str | None = None
     # Storefront position within the category — lower shows first, ties fall back to newest.
     sort_order: int = 0
+    # Show in the homepage "Best sellers" strip.
+    is_featured: bool = False
     status: ProductStatus = ProductStatus.draft
     category_id: str
 
@@ -99,6 +101,7 @@ class ProductUpdate(BaseModel):
     accent: str | None = None
     subcategory: str | None = None
     sort_order: int | None = None
+    is_featured: bool | None = None
     image_url: str | None = None
     gallery: list[str] | None = None
     variants: list[VariantGroup] | None = None
