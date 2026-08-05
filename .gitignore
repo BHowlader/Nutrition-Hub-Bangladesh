@@ -31,6 +31,12 @@ backend/.env
 frontend/.env
 frontend/.env.local
 
+# Locally uploaded product/category images — runtime data, not source
+backend/static/uploads/
+
+# Browser automation artifacts
+.playwright-mcp/
+
 # OS files
 .DS_Store
 .DS_Store?
