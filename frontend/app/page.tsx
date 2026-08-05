@@ -452,7 +452,7 @@ export default async function HomePage() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/products?category=Vitamins & Supplements" className="inline-block transition hover:text-slate-900 dark:hover:text-cream">
+                  <Link href="/products?category=Vitamins%20%26%20Supplements" className="inline-block transition hover:text-slate-900 dark:hover:text-cream">
                     Vitamins &amp; Supplements
                   </Link>
                 </li>

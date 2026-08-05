@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Header } from "@/components/Header";
 import { ProductCard } from "@/components/ProductCard";
 import { fetchCategories, fetchProducts, type Category, type Product } from "@/lib/products";
@@ -19,7 +20,21 @@ const SHORT_LABELS: Record<string, string> = {
 };
 
 export default function ProductsPage() {
-  const [activeCategory, setActiveCategory] = useState("all");
+  return (
+    <Suspense>
+      <ProductsCatalog />
+    </Suspense>
+  );
+}
+
+function ProductsCatalog() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  // The URL is the single source of truth so header/footer/landing links keep
+  // working when we are already on /products (no remount, so a mount-only read
+  // of window.location would go stale). Trust whatever category was linked —
+  // the catalog is API-driven, so a brand-new category works without a redeploy.
+  const activeCategory = searchParams.get("category") || "all";
   const [query, setQuery] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -28,13 +43,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.scrollTo(0, 0);
-      // Trust whatever category the header/footer linked to — the catalog is
-      // driven by the API, so a brand-new category must work without a redeploy.
-      const cat = new URLSearchParams(window.location.search).get("category");
-      if (cat) setActiveCategory(cat);
-    }
+    window.scrollTo(0, 0);
     fetchProducts().then((p) => { setProducts(p); setLoading(false); });
     fetchCategories().then(setCategories);
   }, []);
@@ -61,7 +70,10 @@ export default function ProductsPage() {
   });
 
   const handleCategoryChange = (categoryId: string) => {
-    setActiveCategory(categoryId);
+    router.push(
+      categoryId === "all" ? "/products" : `/products?category=${encodeURIComponent(categoryId)}`,
+      { scroll: false }
+    );
     catalogRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
@@ -177,7 +189,7 @@ export default function ProductsPage() {
                 </p>
                 <button
                   onClick={() => {
-                    setActiveCategory("all");
+                    handleCategoryChange("all");
                     setQuery("");
                   }}
                   className="mt-5 inline-flex h-11 items-center gap-2 border border-cream px-5 text-[11px] font-black uppercase tracking-[0.22em] text-cream transition hover:bg-cream hover:text-ink"
