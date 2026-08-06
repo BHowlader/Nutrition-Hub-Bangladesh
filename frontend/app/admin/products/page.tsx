@@ -2391,7 +2391,7 @@ function HeroSection({
         <button
           type="submit"
           disabled={saving}
-          className="btn-primary min-h-11 text-sm rounded-xl py-2 px-6 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="btn-primary min-h-11 min-w-[9.5rem] text-sm rounded-xl py-2 px-6 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {saving ? "Saving..." : "Save changes"}
         </button>
@@ -2513,7 +2513,7 @@ function CategoryOrderSection({
         <button
           type="submit"
           disabled={saving || categories.length === 0}
-          className="btn-primary min-h-11 text-sm rounded-xl py-2 px-6 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="btn-primary min-h-11 min-w-[9.5rem] text-sm rounded-xl py-2 px-6 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {saving ? "Saving..." : "Save changes"}
         </button>
@@ -2672,7 +2672,7 @@ function CategoryImagesSection({
         <button
           type="submit"
           disabled={saving || uploadingIndex !== null}
-          className="btn-primary min-h-11 text-sm rounded-xl py-2 px-6 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="btn-primary min-h-11 min-w-[9.5rem] text-sm rounded-xl py-2 px-6 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {saving ? "Saving..." : "Save changes"}
         </button>
