@@ -1018,7 +1018,6 @@ export default function AdminProductsPage() {
             <div className="space-y-6">
               <CategoryOrderSection
                 categories={categories}
-                saving={saving}
                 onSave={handleCategorySave}
                 onDelete={(category) => {
                   setError("");
@@ -1028,7 +1027,6 @@ export default function AdminProductsPage() {
               <CategoryImagesSection
                 settings={categoryImages}
                 categories={categories}
-                saving={saving}
                 onSave={handleCategoryImagesSave}
               />
             </div>
@@ -2405,18 +2403,35 @@ const CATEGORY_LABELS = ["Gym Supplements", "Vitamins & Supplements", "Protein O
 
 type CategoryEdit = { name: string; slug: string; sort_order: number };
 
+// Submit row for the settings forms: dim while there is nothing to save, pulse once
+// something has been edited, and report only its own form's save.
+function SaveButton({ saving, dirty, disabled }: { saving: boolean; dirty: boolean; disabled?: boolean }) {
+  return (
+    <div className="flex justify-end gap-3 pt-4 border-t border-cream/[0.06]">
+      <button
+        type="submit"
+        disabled={saving || disabled || !dirty}
+        className={`btn-primary min-h-11 min-w-[9.5rem] text-sm rounded-xl py-2 px-6 transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+          dirty && !saving ? "animate-pulse" : ""
+        }`}
+      >
+        {saving ? "Saving..." : dirty ? "Save changes" : "No changes"}
+      </button>
+    </div>
+  );
+}
+
 function CategoryOrderSection({
   categories,
-  saving,
   onSave,
   onDelete,
 }: {
   categories: Category[];
-  saving: boolean;
-  onSave: (changes: ({ id: string } & Partial<CategoryEdit>)[]) => void;
+  onSave: (changes: ({ id: string } & Partial<CategoryEdit>)[]) => Promise<void>;
   onDelete: (category: Category) => void;
 }) {
   const [edits, setEdits] = useState<Record<string, CategoryEdit>>({});
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     setEdits(
@@ -2426,20 +2441,26 @@ function CategoryOrderSection({
     );
   }, [categories]);
 
-  function handleSubmit(e: React.FormEvent) {
+  // Only what actually changed gets sent — one PATCH per touched category. This also
+  // tells the Save button whether there is anything worth pressing it for.
+  const changes = categories.flatMap((c) => {
+    const edit = edits[c.id];
+    if (!edit) return [];
+    const changed: { id: string } & Partial<CategoryEdit> = { id: c.id };
+    if (edit.name.trim() && edit.name.trim() !== c.name) changed.name = edit.name.trim();
+    if (edit.slug !== c.slug) changed.slug = edit.slug;
+    if (edit.sort_order !== (c.sort_order ?? 0)) changed.sort_order = edit.sort_order;
+    return Object.keys(changed).length > 1 ? [changed] : [];
+  });
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // Only send what actually changed — one PATCH per touched category.
-    onSave(
-      categories.flatMap((c) => {
-        const edit = edits[c.id];
-        if (!edit) return [];
-        const changed: { id: string } & Partial<CategoryEdit> = { id: c.id };
-        if (edit.name.trim() && edit.name.trim() !== c.name) changed.name = edit.name.trim();
-        if (edit.slug !== c.slug) changed.slug = edit.slug;
-        if (edit.sort_order !== (c.sort_order ?? 0)) changed.sort_order = edit.sort_order;
-        return Object.keys(changed).length > 1 ? [changed] : [];
-      })
-    );
+    setSaving(true);
+    try {
+      await onSave(changes);
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -2509,15 +2530,7 @@ function CategoryOrderSection({
         )}
       </div>
 
-      <div className="flex justify-end gap-3 pt-4 border-t border-cream/[0.06]">
-        <button
-          type="submit"
-          disabled={saving || categories.length === 0}
-          className="btn-primary min-h-11 min-w-[9.5rem] text-sm rounded-xl py-2 px-6 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {saving ? "Saving..." : "Save changes"}
-        </button>
-      </div>
+      <SaveButton saving={saving} dirty={changes.length > 0} />
     </form>
   );
 }
@@ -2525,13 +2538,11 @@ function CategoryOrderSection({
 function CategoryImagesSection({
   settings,
   categories,
-  saving,
   onSave,
 }: {
   settings: CategoryImages | null;
   categories: Category[];
-  saving: boolean;
-  onSave: (payload: CategoryImages) => void;
+  onSave: (payload: CategoryImages) => Promise<void>;
 }) {
   const toArray = (s: CategoryImages | null): (string | null)[] => [
     s?.category_image_1 ?? null,
@@ -2547,8 +2558,12 @@ function CategoryImagesSection({
   ];
   const [images, setImages] = useState<(string | null)[]>(toArray(settings));
   const [names, setNames] = useState<string[]>(toNames(settings));
+  const [saving, setSaving] = useState(false);
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [uploadError, setUploadError] = useState("");
+  const dirty =
+    images.some((url, i) => url !== toArray(settings)[i]) ||
+    names.some((name, i) => name.trim() !== (toNames(settings)[i] ?? ""));
 
   useEffect(() => {
     if (settings) {
@@ -2572,18 +2587,23 @@ function CategoryImagesSection({
     }
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    onSave({
-      category_image_1: images[0],
-      category_image_2: images[1],
-      category_image_3: images[2],
-      category_image_4: images[3],
-      category_name_1: names[0].trim() || null,
-      category_name_2: names[1].trim() || null,
-      category_name_3: names[2].trim() || null,
-      category_name_4: names[3].trim() || null,
-    });
+    setSaving(true);
+    try {
+      await onSave({
+        category_image_1: images[0],
+        category_image_2: images[1],
+        category_image_3: images[2],
+        category_image_4: images[3],
+        category_name_1: names[0].trim() || null,
+        category_name_2: names[1].trim() || null,
+        category_name_3: names[2].trim() || null,
+        category_name_4: names[3].trim() || null,
+      });
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -2668,15 +2688,7 @@ function CategoryImagesSection({
 
       {uploadError && <p className="text-xs font-bold text-red-400">{uploadError}</p>}
 
-      <div className="flex justify-end gap-3 pt-4 border-t border-cream/[0.06]">
-        <button
-          type="submit"
-          disabled={saving || uploadingIndex !== null}
-          className="btn-primary min-h-11 min-w-[9.5rem] text-sm rounded-xl py-2 px-6 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {saving ? "Saving..." : "Save changes"}
-        </button>
-      </div>
+      <SaveButton saving={saving} dirty={dirty} disabled={uploadingIndex !== null} />
     </form>
   );
 }
