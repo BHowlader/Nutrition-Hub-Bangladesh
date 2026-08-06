@@ -76,13 +76,16 @@ def update_category_images(
     row.category_image_2 = payload.category_image_2
     row.category_image_3 = payload.category_image_3
     row.category_image_4 = payload.category_image_4
+    for slot in (1, 2, 3, 4):
+        name = getattr(payload, f"category_name_{slot}")
+        setattr(row, f"category_name_{slot}", name.strip() or None if name else None)
     write_audit_log(
         db,
         actor=admin,
         action="settings.category_images.update",
         entity_type="site_settings",
         entity_id="1",
-        summary="Updated homepage category photos",
+        summary="Updated homepage category cards",
         request=request,
     )
     db.commit()

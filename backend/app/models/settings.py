@@ -23,4 +23,10 @@ class SiteSettings(Base):
     category_image_2: Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)
     category_image_3: Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)
     category_image_4: Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)
+    # Card titles for the same four slots. Null keeps the storefront's built-in label.
+    # The title is also the category the card links to, so it should match a real one.
+    category_name_1: Mapped[str | None] = mapped_column(String(120), nullable=True, default=None)
+    category_name_2: Mapped[str | None] = mapped_column(String(120), nullable=True, default=None)
+    category_name_3: Mapped[str | None] = mapped_column(String(120), nullable=True, default=None)
+    category_name_4: Mapped[str | None] = mapped_column(String(120), nullable=True, default=None)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

@@ -107,6 +107,13 @@ export default async function HomePage() {
     categoryImages?.category_image_3,
     categoryImages?.category_image_4,
   ];
+  // Same for the card titles — the title is also the category the card opens.
+  const categoryNameOverrides = [
+    categoryImages?.category_name_1,
+    categoryImages?.category_name_2,
+    categoryImages?.category_name_3,
+    categoryImages?.category_name_4,
+  ];
   return (
     <main className="min-h-screen overflow-x-hidden bg-transparent text-cream antialiased">
       <Header />
@@ -183,10 +190,11 @@ export default async function HomePage() {
             {categories.map(({ title, text, icon: Icon, image, accent }, index) => {
               const override = categoryImageOverrides[index];
               const displayImage = override ? productImage({ image_url: override }) : image;
+              const displayTitle = categoryNameOverrides[index] || title;
               return (
               <Reveal className="h-full" delay={index * 0.06} key={title}>
                 <Link
-                  href={`/products?category=${encodeURIComponent(title)}`}
+                  href={`/products?category=${encodeURIComponent(displayTitle)}`}
                   className="group relative flex h-full min-h-[210px] overflow-hidden rounded-2xl border border-white/10 bg-black p-5 shadow-[0_18px_55px_rgba(0,0,0,0.25)] transition-all duration-300 hover:-translate-y-1 hover:border-white/20 sm:min-h-[250px] sm:p-6 lg:min-h-[300px]"
                 >
                   {/* Photo background with always-dark overlay for legibility in both themes */}
@@ -194,7 +202,7 @@ export default async function HomePage() {
                     <div className="absolute inset-0 z-0 overflow-hidden">
                       <Image
                         src={displayImage}
-                        alt={title}
+                        alt={displayTitle}
                         fill
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                         className="object-cover opacity-[0.88] transition-all duration-700 ease-out group-hover:scale-105 group-hover:opacity-[0.98]"
@@ -214,7 +222,7 @@ export default async function HomePage() {
                     </div>
                     <div className="mt-auto pt-8">
                       <h3 className="text-lg font-black leading-tight text-white transition-colors duration-300 group-hover:text-gold sm:text-xl">
-                        {title}
+                        {displayTitle}
                       </h3>
                       <p className="mt-3 line-clamp-3 text-sm leading-6 text-white/60">{text}</p>
                       <div className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-white/40 transition group-hover:text-gold">

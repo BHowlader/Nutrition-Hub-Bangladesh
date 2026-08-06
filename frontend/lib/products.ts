@@ -283,11 +283,16 @@ export async function fetchHeroSettings(): Promise<HeroSettings | null> {
   }
 }
 
+// The four homepage "Shop by goal" cards: photo and title per slot, null = built-in default.
 export interface CategoryImages {
   category_image_1: string | null;
   category_image_2: string | null;
   category_image_3: string | null;
   category_image_4: string | null;
+  category_name_1: string | null;
+  category_name_2: string | null;
+  category_name_3: string | null;
+  category_name_4: string | null;
 }
 
 export async function fetchCategoryImages(): Promise<CategoryImages | null> {

@@ -22,6 +22,10 @@ class CategoryImagesRead(BaseModel):
     category_image_2: str | None = None
     category_image_3: str | None = None
     category_image_4: str | None = None
+    category_name_1: str | None = None
+    category_name_2: str | None = None
+    category_name_3: str | None = None
+    category_name_4: str | None = None
 
     model_config = {"from_attributes": True}
 
@@ -31,3 +35,7 @@ class CategoryImagesUpdate(BaseModel):
     category_image_2: str | None = Field(default=None, max_length=500)
     category_image_3: str | None = Field(default=None, max_length=500)
     category_image_4: str | None = Field(default=None, max_length=500)
+    category_name_1: str | None = Field(default=None, max_length=120)
+    category_name_2: str | None = Field(default=None, max_length=120)
+    category_name_3: str | None = Field(default=None, max_length=120)
+    category_name_4: str | None = Field(default=None, max_length=120)

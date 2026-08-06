@@ -236,6 +236,10 @@ def create_tables() -> None:
         conn.execute(text("ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS category_image_2 VARCHAR(500)"))
         conn.execute(text("ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS category_image_3 VARCHAR(500)"))
         conn.execute(text("ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS category_image_4 VARCHAR(500)"))
+        conn.execute(text("ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS category_name_1 VARCHAR(120)"))
+        conn.execute(text("ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS category_name_2 VARCHAR(120)"))
+        conn.execute(text("ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS category_name_3 VARCHAR(120)"))
+        conn.execute(text("ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS category_name_4 VARCHAR(120)"))
         conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(20) NOT NULL DEFAULT 'customer'"))
         conn.execute(
             text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS user_id VARCHAR(36) REFERENCES users(id)")

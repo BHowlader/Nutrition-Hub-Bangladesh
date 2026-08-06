@@ -35,7 +35,7 @@ import {
 import { useRouter } from "next/navigation";
 import { csrfHeader } from "@/lib/auth";
 import { useAdminAuth } from "@/lib/adminAuth";
-import { formatOrderId, productImage } from "@/lib/products";
+import { formatOrderId, productImage, type CategoryImages } from "@/lib/products";
 
 const BACKEND_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").trim().replace(/\/$/, "");
 
@@ -73,12 +73,6 @@ interface HeroSettings {
   hero_product_slug_3: string | null;
 }
 
-interface CategoryImages {
-  category_image_1: string | null;
-  category_image_2: string | null;
-  category_image_3: string | null;
-  category_image_4: string | null;
-}
 type OrderStatus = "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
 
 interface Category {
@@ -669,7 +663,7 @@ export default function AdminProductsPage() {
         body: JSON.stringify(payload),
       });
       setCategoryImages(updated);
-      setNotice("Category photos updated");
+      setNotice("Category cards updated");
       // Bust the homepage cache so the new photos show immediately.
       fetch("/api/revalidate", {
         method: "POST",
@@ -926,7 +920,7 @@ export default function AdminProductsPage() {
                 {activeTab === "analytics" && "Review sales, stock health, and performance snapshot metrics."}
                 {activeTab === "coupons" && "Create discount codes, control limits, and track coupon usage."}
                 {activeTab === "audit" && "Inspect security logs and administrative action history."}
-                {activeTab === "categories" && "Replace the four homepage “Shop by goal” category photos."}
+                {activeTab === "categories" && "Order and rename your categories, and set the four homepage “Shop by goal” cards."}
                 {activeTab === "users" && "Manage administration access levels and roles."}
                 {activeTab === "hero" && "Edit the homepage hero description and the 3 floating product cards."}
               </p>
@@ -1033,6 +1027,7 @@ export default function AdminProductsPage() {
               />
               <CategoryImagesSection
                 settings={categoryImages}
+                categories={categories}
                 saving={saving}
                 onSave={handleCategoryImagesSave}
               />
@@ -2529,10 +2524,12 @@ function CategoryOrderSection({
 
 function CategoryImagesSection({
   settings,
+  categories,
   saving,
   onSave,
 }: {
   settings: CategoryImages | null;
+  categories: Category[];
   saving: boolean;
   onSave: (payload: CategoryImages) => void;
 }) {
@@ -2542,12 +2539,22 @@ function CategoryImagesSection({
     s?.category_image_3 ?? null,
     s?.category_image_4 ?? null,
   ];
+  const toNames = (s: CategoryImages | null): string[] => [
+    s?.category_name_1 ?? "",
+    s?.category_name_2 ?? "",
+    s?.category_name_3 ?? "",
+    s?.category_name_4 ?? "",
+  ];
   const [images, setImages] = useState<(string | null)[]>(toArray(settings));
+  const [names, setNames] = useState<string[]>(toNames(settings));
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [uploadError, setUploadError] = useState("");
 
   useEffect(() => {
-    if (settings) setImages(toArray(settings));
+    if (settings) {
+      setImages(toArray(settings));
+      setNames(toNames(settings));
+    }
   }, [settings]);
 
   async function handleFile(index: number, file: File) {
@@ -2572,17 +2579,30 @@ function CategoryImagesSection({
       category_image_2: images[1],
       category_image_3: images[2],
       category_image_4: images[3],
+      category_name_1: names[0].trim() || null,
+      category_name_2: names[1].trim() || null,
+      category_name_3: names[2].trim() || null,
+      category_name_4: names[3].trim() || null,
     });
   }
 
   return (
     <form onSubmit={handleSubmit} className="premium-card p-6 space-y-6">
       <div>
-        <h2 className="text-lg font-black text-cream">Category Photos</h2>
+        <h2 className="text-lg font-black text-cream">Category Cards</h2>
         <p className="text-xs text-cream/40 mt-0.5">
-          These four photos power the homepage “Shop by goal” cards. Changes appear immediately after saving.
+          The four homepage “Shop by goal” cards. The title is also the category the card opens,
+          so pick one of your category names — leave it blank to keep the default.
+          Changes appear immediately after saving.
         </p>
       </div>
+
+      {/* Real category names, so a title can be picked instead of typed. */}
+      <datalist id="category-card-names">
+        {categories.map((category) => (
+          <option key={category.id} value={category.name} />
+        ))}
+      </datalist>
 
       <div className="grid gap-4 sm:grid-cols-2">
         {CATEGORY_LABELS.map((label, index) => {
@@ -2592,8 +2612,15 @@ function CategoryImagesSection({
           return (
             <div key={label} className="rounded-xl border border-cream/[0.08] bg-cream/[0.02] p-4">
               <label className="mb-2 block text-xs font-black uppercase tracking-[0.08em] text-cream/40">
-                {index + 1}. {label}
+                Card {index + 1}
               </label>
+              <input
+                list="category-card-names"
+                value={names[index]}
+                placeholder={label}
+                onChange={(e) => setNames((prev) => prev.map((v, i) => (i === index ? e.target.value : v)))}
+                className="mb-3 h-9 w-full rounded-lg border border-cream/[0.12] bg-forest/60 px-3 text-sm font-bold text-cream outline-none placeholder:font-normal placeholder:text-cream/25 focus:border-gold/50"
+              />
               <div className="flex items-center gap-3">
                 <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-cream/[0.08] bg-cream/[0.04]">
                   {preview ? (
