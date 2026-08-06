@@ -59,20 +59,26 @@ export function ProductDetailClient({
   // product to the buyer.
   const title = variant ? `${product.name} · ${variant}` : product.name;
   const description = variantDescription(product, selected);
-  const variantImageIndex = gallery.indexOf(variantImage(product, selected) || "");
+  // The chosen option's photo, if it has one. It is not a carousel frame — it
+  // takes over the canvas until the shopper browses the gallery again.
+  const selectedVariantImage = variantImage(product, selected);
+  const [showVariantImage, setShowVariantImage] = useState(true);
+  const canvasImage = (showVariantImage && selectedVariantImage) || gallery[activeImageIndex];
 
   // Every image change routes through here so the slide direction is always set.
-  function goToImage(next: number) {
-    setSlide(next >= activeImageIndex ? "right" : "left");
+  // `dir` overrides the default when the carousel wraps around.
+  function goToImage(next: number, dir?: "left" | "right") {
+    setSlide(dir ?? (next >= activeImageIndex ? "right" : "left"));
     setActiveImageIndex(next);
+    setShowVariantImage(false);
   }
 
   // Selecting an option slides its photo into the frame.
   useEffect(() => {
-    if (variantImageIndex < 0) return;
+    if (!selectedVariantImage) return;
     setSlide("right");
-    setActiveImageIndex(variantImageIndex);
-  }, [variantImageIndex]);
+    setShowVariantImage(true);
+  }, [selectedVariantImage]);
 
   // Swipe handling
   const touchStart = useRef<{ x: number; y: number } | null>(null);
@@ -98,10 +104,11 @@ export function ProductDetailClient({
       return;
     }
     const dx = e.changedTouches[0].clientX - touchStart.current.x;
-    if (dx < -40 && activeImageIndex < gallery.length - 1) {
-      goToImage(activeImageIndex + 1);
-    } else if (dx > 40 && activeImageIndex > 0) {
-      goToImage(activeImageIndex - 1);
+    // Wrap around at both ends so a swipe never dead-ends.
+    if (dx < -40) {
+      goToImage((activeImageIndex + 1) % gallery.length, "right");
+    } else if (dx > 40) {
+      goToImage((activeImageIndex - 1 + gallery.length) % gallery.length, "left");
     }
     touchStart.current = null;
     swiping.current = false;
@@ -180,8 +187,8 @@ export function ProductDetailClient({
                   />
                   <div className={`relative h-full w-full transition-transform duration-700 ease-out ${hoveredImage ? "scale-105" : "scale-100"}`}>
                     <Image
-                      key={activeImageIndex}
-                      src={gallery[activeImageIndex]}
+                      key={canvasImage}
+                      src={canvasImage}
                       alt={title}
                       fill
                       className={`object-cover ${slide === "right" ? "animate-slide-right" : "animate-slide-left"}`}
@@ -205,7 +212,7 @@ export function ProductDetailClient({
                           key={i}
                           onClick={() => goToImage(i)}
                           className={`h-1.5 rounded-full transition-all duration-300 ${
-                            i === activeImageIndex
+                            i === activeImageIndex && canvasImage === gallery[i]
                               ? "w-5 bg-gold"
                               : "w-1.5 bg-cream/30"
                           }`}
@@ -223,7 +230,7 @@ export function ProductDetailClient({
                         key={i}
                         onClick={() => goToImage(i)}
                         className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-all duration-200 sm:h-20 sm:w-20 ${
-                          i === activeImageIndex
+                          i === activeImageIndex && canvasImage === gallery[i]
                             ? "border-gold ring-1 ring-gold/30"
                             : "border-cream/10 opacity-60 hover:opacity-100"
                         }`}

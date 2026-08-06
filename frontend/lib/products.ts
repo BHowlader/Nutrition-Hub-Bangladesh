@@ -103,12 +103,6 @@ export function variantImage(
   );
 }
 
-function variantImages(p?: Product | null): string[] {
-  return (p?.variants || []).flatMap((group) =>
-    group.options.map((option) => option.image_url).filter(Boolean).map((url) => resolveImageUrl(url as string))
-  );
-}
-
 export interface ProductPage {
   items: Product[];
   total: number;
@@ -147,11 +141,11 @@ function resolveImageUrl(url: string): string {
   return url;
 }
 
-// Hero, then the extra gallery shots, then one frame per variant photo — so
-// selecting an option can slide to a slot the swipe/thumbnail UI already knows.
+// Hero, then the extra gallery shots. Variant photos stay out of it — they belong
+// to a selection, not to the carousel, and only show while their option is picked.
 export function productGallery(p?: Product | null): string[] {
   const hero = productImage(p);
-  const extras = [...(p?.gallery || []).map(resolveImageUrl), ...variantImages(p)];
+  const extras = (p?.gallery || []).map(resolveImageUrl);
   return [hero, ...Array.from(new Set(extras)).filter((u) => u !== hero)];
 }
 
