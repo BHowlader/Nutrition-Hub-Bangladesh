@@ -90,15 +90,19 @@ class CSRFMiddleware(BaseHTTPMiddleware):
             and path not in CSRF_EXEMPT_PATHS
         )
 
-        if needs_check:
-            header_token = request.headers.get(CSRF_HEADER_NAME)
-            if not cookie_token or not header_token or not secrets.compare_digest(cookie_token, header_token):
-                return JSONResponse(
-                    status_code=403,
-                    content={"detail": "CSRF token missing or invalid"},
-                )
-
-        response = await call_next(request)
+        header_token = request.headers.get(CSRF_HEADER_NAME)
+        if needs_check and (
+            not cookie_token or not header_token or not secrets.compare_digest(cookie_token, header_token)
+        ):
+            # Fall through to the minting block below rather than returning here: a client
+            # whose cookie is missing or expired would otherwise 403 forever, never being
+            # issued the token its retry needs.
+            response = JSONResponse(
+                status_code=403,
+                content={"detail": "CSRF token missing or invalid"},
+            )
+        else:
+            response = await call_next(request)
 
         # Mint a fresh CSRF token if the client doesn't have one yet. Same lifetime
         # semantics as the auth cookie. Non-httponly on purpose so the SPA can read it.

@@ -96,6 +96,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // for the majority of users who are anonymous.
     const maybeLoggedIn = localStorage.getItem(AUTH_SIGNAL_KEY) === "1";
     if (!maybeLoggedIn) {
+      // But a guest with no CSRF cookie must still make one credentialed call to be
+      // issued it, or every POST they make (guest checkout) is rejected with 403 —
+      // pages render server-side and public GETs are uncredentialed, so nothing else
+      // mints it. Fire-and-forget so it never blocks render, and the 7-day cookie
+      // means it costs at most one round-trip per visitor. Bare fetch, no JSON
+      // content-type, to stay a simple request and skip the CORS preflight.
+      if (!readCsrfToken()) {
+        void fetch(`${API}/api/auth/me`, { credentials: "include" }).catch(() => {});
+      }
       setLoading(false);
       return;
     }
