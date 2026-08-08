@@ -1,15 +1,16 @@
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
-from sqlalchemy import func, select, update
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm.attributes import flag_modified
 
 from app.core.audit import write_audit_log
 from app.core.auth import get_current_user, get_optional_user, require_admin_google, require_trusted_admin_origin
 from app.core.coupons import get_valid_coupon, money, normalize_coupon_code
 from app.core.database import get_db
 from app.core.limiter import limiter
-from app.core.variants import resolve_variant
+from app.core.variants import chosen_options, option_stock, resolve_variant
 from app.models.catalog import Product
 from app.models.order import Order, OrderItem, OrderStatus, generate_order_id
 from app.models.user import User, UserRole
@@ -29,15 +30,12 @@ def create_order(
 ) -> Order:
     # H3: collapse duplicate lines so a single item can't bypass per-row stock checks.
     # Lines are keyed by (product, variant) — two variants of one product are
-    # separate order items but share the product's single stock pool.
+    # separate order items, drawing on their own option pools where they declare
+    # one and on the product's shared pool where they don't.
     aggregated: dict[tuple[str, str], int] = {}
     for item in payload.items:
         key = (item.product_id, (item.variant or "").strip())
         aggregated[key] = aggregated.get(key, 0) + item.quantity
-
-    stock_needed: dict[str, int] = {}
-    for (product_id, _variant), quantity in aggregated.items():
-        stock_needed[product_id] = stock_needed.get(product_id, 0) + quantity
 
     # Generate a short, human-friendly order ID and guard against the (astronomically
     # unlikely) collision so the primary key stays unique.
@@ -56,30 +54,38 @@ def create_order(
 
     total = Decimal("0")
     try:
+        # H3: lock each product row for the rest of the transaction, so concurrent
+        # orders queue up behind us instead of both reading the same stock and
+        # overselling it. Held until commit/rollback.
         products: dict[str, Product] = {}
-        for product_id, quantity in stock_needed.items():
-            product = db.get(Product, product_id)
+        for product_id in {product_id for product_id, _variant in aggregated}:
+            product = db.execute(
+                select(Product).where(Product.id == product_id).with_for_update()
+            ).scalar_one_or_none()
             if not product:
                 raise HTTPException(status_code=404, detail=f"Product {product_id} not found")
             products[product_id] = product
-
-            # H3: atomic conditional decrement. Only succeeds if there is still enough stock
-            # at the moment of UPDATE, preventing race conditions across concurrent orders.
-            result = db.execute(
-                update(Product)
-                .where(Product.id == product_id, Product.stock >= quantity)
-                .values(stock=Product.stock - quantity)
-            )
-            if result.rowcount == 0:
-                raise HTTPException(
-                    status_code=409,
-                    detail=f"{product.name} does not have enough stock",
-                )
 
         for (product_id, variant), quantity in aggregated.items():
             product = products[product_id]
             # Re-price the variant here; the client only ever sends the labels.
             canonical, unit_price = resolve_variant(product, variant)
+
+            # Decrement under the lock. Lines are processed one at a time, so two
+            # flavours of one size correctly draw the size down twice.
+            declared = [o for o in chosen_options(product, variant) if option_stock(o) is not None]
+            available = min(option_stock(o) for o in declared) if declared else product.stock
+            if available < quantity:
+                name = f"{product.name} ({canonical})" if canonical else product.name
+                raise HTTPException(status_code=409, detail=f"{name} does not have enough stock")
+            if declared:
+                for option in declared:
+                    option["stock"] = option_stock(option) - quantity
+                # SQLAlchemy can't see mutations inside a JSON column on its own.
+                flag_modified(product, "variants")
+            else:
+                product.stock -= quantity
+
             total += unit_price * quantity
             order.items.append(
                 OrderItem(
@@ -104,7 +110,7 @@ def create_order(
         return order
     except HTTPException:
         # Roll the SQLAlchemy unit-of-work back so the order row is not persisted.
-        # The atomic UPDATEs above are part of the same transaction — rollback restores stock.
+        # The decrements above are part of the same transaction — rollback restores stock.
         db.rollback()
         raise
     except Exception:

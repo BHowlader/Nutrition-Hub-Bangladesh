@@ -21,6 +21,8 @@ export interface VariantOption {
   label: string;
   // The option's own price. null means "sell at the product price".
   price: string | null;
+  // The option's own stock pool. null means "count against the product's stock".
+  stock: number | null;
   // Replaces the product description while this option is selected.
   description: string | null;
   // Photo for this option; joins the gallery and is slid into view on selection.
@@ -50,6 +52,7 @@ export interface Product {
   gallery: string[] | null;
   variants: VariantGroup[] | null;
   is_featured?: boolean;
+  created_at?: string;
   status: string;
   category_id: string;
   category: Category | null;
@@ -79,6 +82,19 @@ export function variantPrice(product: { price: string; variants?: VariantGroup[]
     (price, option) => (option.price == null || option.price === "" ? price : Number(option.price)),
     Number(product.price)
   );
+}
+
+// Mirror of variant_stock() in the backend: an option that declares its own stock
+// IS the pool for every choice containing it, so a two-group choice is capped by
+// its scarcest half. The product's number is the fallback for options without one.
+export function variantStock(
+  product: { stock: number; variants?: VariantGroup[] | null },
+  labels: string[]
+): number {
+  const declared = chosenOptions(product, labels)
+    .map((option) => option.stock)
+    .filter((stock): stock is number => typeof stock === "number");
+  return declared.length > 0 ? Math.min(...declared) : product.stock;
 }
 
 // Same last-wins rule for the copy shown under the title.

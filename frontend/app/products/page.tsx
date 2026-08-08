@@ -8,11 +8,24 @@ import { ProductCard } from "@/components/ProductCard";
 import { fetchCategories, fetchProducts, type Category, type Product } from "@/lib/products";
 import {
   ArrowRight,
+  ChevronDown,
   PackageCheck,
   Search,
   ShieldCheck,
   Truck
 } from "lucide-react";
+
+// ponytail: sorts on the already-loaded list — the whole catalog arrives in one
+// request, so a round-trip per sort change would buy nothing.
+const SORTS = {
+  featured: { label: "Featured", compare: null },
+  latest: { label: "Latest", compare: (a: Product, b: Product) => (b.created_at || "").localeCompare(a.created_at || "") },
+  "price-asc": { label: "Price: low to high", compare: (a: Product, b: Product) => Number(a.price) - Number(b.price) },
+  "price-desc": { label: "Price: high to low", compare: (a: Product, b: Product) => Number(b.price) - Number(a.price) },
+  name: { label: "Name: A–Z", compare: (a: Product, b: Product) => a.name.localeCompare(b.name) },
+} satisfies Record<string, { label: string; compare: ((a: Product, b: Product) => number) | null }>;
+
+type SortKey = keyof typeof SORTS;
 
 // Short labels for the long-winded seeded categories; anything else uses its own name.
 const SHORT_LABELS: Record<string, string> = {
@@ -36,6 +49,7 @@ function ProductsCatalog() {
   // the catalog is API-driven, so a brand-new category works without a redeploy.
   const activeCategory = searchParams.get("category") || "all";
   const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<SortKey>("featured");
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const catalogRef = useRef<HTMLDivElement>(null);
@@ -64,10 +78,14 @@ function ProductsCatalog() {
     ? products
     : products.filter((product) => product.category?.name === activeCategory);
 
-  const filteredProducts = categoryProducts.filter((product) => {
+  const matchedProducts = categoryProducts.filter((product) => {
     const searchText = `${product.name} ${product.category?.name || ""} ${product.description} ${product.detail || ""}`.toLowerCase();
     return searchText.includes(query.trim().toLowerCase());
   });
+
+  // "Featured" keeps the order the API sent, which is the sequence the admin set.
+  const compare = SORTS[sort].compare;
+  const filteredProducts = compare ? [...matchedProducts].sort(compare) : matchedProducts;
 
   const handleCategoryChange = (categoryId: string) => {
     router.push(
@@ -112,18 +130,41 @@ function ProductsCatalog() {
               </p>
             </div>
 
-            <label className="relative block w-full md:w-[320px] lg:w-[360px]">
-              <Search
-                size={15}
-                className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 text-cream/40"
-              />
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search the catalog"
-                className="h-11 w-full border-0 border-b border-cream/15 bg-transparent pl-6 pr-2 text-sm font-semibold text-cream outline-none transition placeholder:text-cream/30 focus:border-gold sm:h-12"
-              />
-            </label>
+            <div className="flex w-full items-end gap-3 md:w-auto">
+              <label className="relative block min-w-0 flex-1 md:w-[240px] md:flex-none lg:w-[300px]">
+                <Search
+                  size={15}
+                  className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 text-cream/40"
+                />
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search the catalog"
+                  className="h-11 w-full border-0 border-b border-cream/15 bg-transparent pl-6 pr-2 text-sm font-semibold text-cream outline-none transition placeholder:text-cream/30 focus:border-gold sm:h-12"
+                />
+              </label>
+
+              {/* ponytail: native select — it gets the mobile wheel picker and keyboard
+                  support for free, which a custom dropdown would have to rebuild. */}
+              <label className="relative shrink-0">
+                <span className="sr-only">Sort products</span>
+                <select
+                  value={sort}
+                  onChange={(event) => setSort(event.target.value as SortKey)}
+                  className="h-11 cursor-pointer appearance-none border-0 border-b border-cream/15 bg-transparent pr-6 text-sm font-semibold text-cream outline-none transition focus:border-gold sm:h-12"
+                >
+                  {Object.entries(SORTS).map(([key, { label }]) => (
+                    <option key={key} value={key} className="bg-ink text-cream">
+                      {label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  size={14}
+                  className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-cream/40"
+                />
+              </label>
+            </div>
           </div>
 
           {/* Category tab nav — full-width hairline, scrolls horizontally at every breakpoint */}

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.core.auth import get_current_user
 from app.core.database import get_db
-from app.core.variants import resolve_variant
+from app.core.variants import resolve_variant, variant_stock
 from app.models.cart import CartItem
 from app.models.catalog import Product
 from app.models.user import User
@@ -21,13 +21,16 @@ def _read(item: CartItem) -> CartItemRead:
     """
     try:
         _canonical, unit_price = resolve_variant(item.product, item.variant)
+        available = variant_stock(item.product, item.variant)
     except HTTPException:
         unit_price = item.product.price
+        available = item.product.stock
     return CartItemRead(
         product_id=item.product_id,
         quantity=item.quantity,
         variant=item.variant or None,
         unit_price=unit_price,
+        available_stock=available,
         product=item.product,
     )
 
@@ -53,13 +56,18 @@ def upsert_item(
     product = db.get(Product, product_id)
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
-    if body.quantity > product.stock:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"Only {product.stock} unit(s) of {product.name} available",
-        )
 
     canonical, _price = resolve_variant(product, body.variant)
+    # Check against the chosen option's pool, not the product's — one sold-out
+    # flavour must not be orderable just because its siblings are stocked.
+    available = variant_stock(product, body.variant)
+    if body.quantity > available:
+        label = f"{product.name} ({canonical})" if canonical else product.name
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Only {available} unit(s) of {label} available" if available else f"{label} is sold out",
+        )
+
     key = canonical or ""
 
     item = db.get(CartItem, (user.id, product_id, key))

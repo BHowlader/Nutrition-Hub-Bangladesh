@@ -26,6 +26,9 @@ class CartItemRead(BaseModel):
     # Base price plus the selected variant's deltas — the storefront must never
     # compute what the customer pays from the product price alone.
     unit_price: Decimal
+    # Units left for THIS variant. Falls back to the product's pool when no chosen
+    # option declares its own, so the storefront never has to work that rule out.
+    available_stock: int
     product: CartItemProduct
 
     model_config = {"from_attributes": True}

@@ -2,9 +2,9 @@
 
 Shape (as persisted in `products.variants`):
 
-    [{"name": "Size",   "options": [{"label": "500g", "price": "1000", "description": null, "image_url": null},
-                                    {"label": "1kg",  "price": "1800", "description": "Bulk tub", "image_url": "https://…"}]},
-     {"name": "Flavor", "options": [{"label": "Strawberry", "price": null, "description": null, "image_url": null}]}]
+    [{"name": "Size",   "options": [{"label": "500g", "price": "1000", "stock": 12, "description": null, "image_url": null},
+                                    {"label": "1kg",  "price": "1800", "stock": null, "description": "Bulk tub", "image_url": "https://…"}]},
+     {"name": "Flavor", "options": [{"label": "Strawberry", "price": null, "stock": 0, "description": null, "image_url": null}]}]
 
 `price` is the option's OWN price, not an adjustment to the product price. A null
 price means "use the product price". When more than one chosen option carries a
@@ -19,8 +19,9 @@ line key, what the admin reads off the order, and what we re-price against.
 Labels are rejected at write time if they contain "/", which keeps the split
 unambiguous without needing a second identifier column.
 
-ponytail: stock stays a single per-product pool rather than per-variant. Split it
-only if the shop actually needs to sell out one flavour independently.
+`stock` is that option's own pool, so one flavour can sell out while its siblings
+keep selling. Null means "no separate pool" and the product-level stock applies —
+which is what every product written before this field existed stores.
 """
 
 from decimal import Decimal, InvalidOperation
@@ -46,6 +47,7 @@ def variants_to_json(groups) -> list[dict] | None:
                 {
                     "label": option.label,
                     "price": None if option.price is None else str(option.price),
+                    "stock": option.stock,
                     "description": option.description or None,
                     "image_url": option.image_url or None,
                 }
@@ -68,19 +70,29 @@ def _money(raw, fallback: Decimal) -> Decimal:
         return fallback
 
 
-def resolve_variant(product, variant: str | None) -> tuple[str | None, Decimal]:
-    """Validate a customer's variant choice and price it.
+def option_stock(option: dict) -> int | None:
+    """The option's own stock, or None when it doesn't declare one."""
+    raw = option.get("stock")
+    if raw is None or str(raw).strip() == "":
+        return None
+    try:
+        return max(int(raw), 0)
+    except (ValueError, TypeError):
+        return None
 
-    Returns the canonical variant string (None when the product has no variants)
-    and the authoritative unit price. The client never supplies a price.
+
+def chosen_options(product, variant: str | None) -> list[dict]:
+    """Validate a customer's variant choice and return the option dicts they picked.
+
+    Empty when the product has no variants. The dicts are the live entries inside
+    `product.variants`, so callers holding a locked row can decrement them in place.
     """
     groups = _groups(product)
-    chosen = (variant or "").strip()
-
     if not groups:
         # Products without variants ignore whatever the client sent.
-        return None, Decimal(product.price)
+        return []
 
+    chosen = (variant or "").strip()
     parts = [part.strip() for part in chosen.split(VARIANT_SEPARATOR)] if chosen else []
     if len(parts) != len(groups):
         raise HTTPException(
@@ -88,7 +100,7 @@ def resolve_variant(product, variant: str | None) -> tuple[str | None, Decimal]:
             detail=f"Choose an option for every {product.name} variant",
         )
 
-    price = Decimal(product.price)
+    picked = []
     for group, label in zip(groups, parts):
         option = next(
             (o for o in group.get("options", []) if str(o.get("label", "")).strip() == label),
@@ -99,7 +111,34 @@ def resolve_variant(product, variant: str | None) -> tuple[str | None, Decimal]:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"'{label}' is not an available {group.get('name') or 'option'} for {product.name}",
             )
+        picked.append(option)
+    return picked
+
+
+def resolve_variant(product, variant: str | None) -> tuple[str | None, Decimal]:
+    """Validate a customer's variant choice and price it.
+
+    Returns the canonical variant string (None when the product has no variants)
+    and the authoritative unit price. The client never supplies a price.
+    """
+    options = chosen_options(product, variant)
+    if not options:
+        return None, Decimal(product.price)
+
+    price = Decimal(product.price)
+    for option in options:
         if option.get("price") not in (None, ""):
             price = _money(option["price"], price)
 
-    return VARIANT_SEPARATOR.join(parts), price
+    return VARIANT_SEPARATOR.join(str(o.get("label", "")).strip() for o in options), price
+
+
+def variant_stock(product, variant: str | None) -> int:
+    """Units of this exact choice a customer can still buy.
+
+    An option that declares its own stock IS the pool for every choice containing
+    it, so a two-group choice is capped by its scarcest half. The product-level
+    number is the fallback, used only when no chosen option declares one.
+    """
+    declared = [stock for stock in map(option_stock, chosen_options(product, variant)) if stock is not None]
+    return min(declared) if declared else int(product.stock)

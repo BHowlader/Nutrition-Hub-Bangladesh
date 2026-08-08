@@ -241,62 +241,67 @@ export default function CartPage() {
                 const img = it.product.image_url ? productImage(it.product) : null;
                 const unitPrice = Number(it.unit_price ?? it.product.price);
                 const lineTotal = unitPrice * it.quantity;
+                // Lines saved before per-variant stock existed carry no available_stock.
+                const available = it.available_stock ?? it.product.stock;
                 return (
                   <div
                     key={cartLineKey(it.product_id, it.variant)}
-                    className="premium-card flex flex-col items-stretch gap-4 p-4 sm:flex-row sm:items-center"
+                    // Wraps rather than stacking: on a phone the quantity and total drop
+                    // to a second line under the title instead of making a tall card.
+                    className="premium-card flex flex-wrap items-center gap-x-3 gap-y-2 p-3 sm:flex-nowrap sm:gap-4 sm:p-4"
                   >
-                    <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-cream/[0.05]">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-cream/[0.05] sm:h-20 sm:w-20">
                       {img ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={img} alt={it.product.name} className="h-full w-full object-cover" />
                       ) : (
-                        <ShoppingBag size={24} className="text-cream/30" />
+                        <ShoppingBag size={22} className="text-cream/30" />
                       )}
                     </div>
 
-                    <div className="flex-1 min-w-0">
+                    {/* basis forces the quantity and total onto a second line on a
+                        phone; sm:flex-nowrap puts everything back on one row above it. */}
+                    <div className="min-w-0 basis-[calc(100%-4.25rem)] sm:flex-1 sm:basis-auto">
                       <Link
                         href={`/products/${it.product.slug}`}
-                        className="block truncate text-base font-extrabold text-cream hover:text-gold"
+                        // line-clamp needs display:-webkit-box, so no `block` here to fight it.
+                        className="line-clamp-2 text-sm font-extrabold leading-snug text-cream hover:text-gold sm:block sm:truncate sm:text-base"
                       >
                         {it.product.name}
                       </Link>
-                      {it.variant && (
-                        <p className="mt-0.5 text-xs font-bold text-gold">{it.variant}</p>
-                      )}
-                      <p className="mt-0.5 text-xs text-cream/40">
-                        ৳{unitPrice.toLocaleString()} · {it.product.stock} in stock
+                      <p className="mt-0.5 text-[11px] leading-tight text-cream/40 sm:text-xs">
+                        {it.variant && <span className="font-bold text-gold">{it.variant} · </span>}
+                        ৳{unitPrice.toLocaleString()} · {available} left
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
                       <button
                         onClick={() => setQuantity(it.product_id, it.quantity - 1, it.product, it.variant)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-cream/10 text-cream/70 hover:bg-cream/[0.05]"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-cream/10 text-cream/70 hover:bg-cream/[0.05] sm:h-8 sm:w-8"
                         aria-label="Decrease quantity"
                       >
-                        <Minus size={14} />
+                        <Minus size={13} />
                       </button>
-                      <span className="min-w-[24px] text-center text-sm font-bold text-cream">{it.quantity}</span>
+                      <span className="min-w-[20px] text-center text-sm font-bold text-cream">{it.quantity}</span>
                       <button
                         onClick={() => setQuantity(it.product_id, it.quantity + 1, it.product, it.variant)}
-                        disabled={it.quantity >= it.product.stock}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-cream/10 text-cream/70 hover:bg-cream/[0.05] disabled:opacity-40"
+                        disabled={it.quantity >= available}
+                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-cream/10 text-cream/70 hover:bg-cream/[0.05] disabled:opacity-40 sm:h-8 sm:w-8"
                         aria-label="Increase quantity"
                       >
-                        <Plus size={14} />
+                        <Plus size={13} />
                       </button>
                     </div>
 
-                    <div className="flex items-center gap-3 sm:flex-col sm:items-end">
-                      <p className="text-lg font-black text-cream">৳{lineTotal.toLocaleString()}</p>
+                    <div className="ml-auto flex items-center gap-2 sm:ml-0 sm:flex-col sm:items-end sm:gap-3">
+                      <p className="text-base font-black text-cream sm:text-lg">৳{lineTotal.toLocaleString()}</p>
                       <button
                         onClick={() => removeItem(it.product_id, it.variant)}
                         className="text-cream/40 transition hover:text-red-400"
                         aria-label="Remove item"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={15} />
                       </button>
                     </div>
                   </div>

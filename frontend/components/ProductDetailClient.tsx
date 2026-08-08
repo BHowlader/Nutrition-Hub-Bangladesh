@@ -13,6 +13,7 @@ import {
   variantImage,
   variantKey,
   variantPrice,
+  variantStock,
   type Product
 } from "@/lib/products";
 import { useAuth } from "@/lib/auth";
@@ -48,13 +49,20 @@ export function ProductDetailClient({
   const [addMsg, setAddMsg] = useState("");
   const gallery = productGallery(product);
 
-  // One selection per variant group, defaulting to the first option of each.
+  // One selection per variant group, defaulting to the first option that is
+  // actually buyable so a sold-out flavour is never what the page opens on.
   const variantGroups = product.variants || [];
   const [selected, setSelected] = useState<string[]>(() =>
-    variantGroups.map((group) => group.options[0]?.label || "")
+    variantGroups.map(
+      (group) => (group.options.find((option) => option.stock !== 0) ?? group.options[0])?.label || ""
+    )
   );
   const variant = variantGroups.length > 0 ? variantKey(selected) : null;
   const unitPrice = variantPrice(product, selected);
+  // Everything below gates on THIS choice's stock, not the product's — one sold-out
+  // flavour must not put the whole product behind a "Sold Out" button, nor sell
+  // while its own pool is empty.
+  const available = variantStock(product, selected);
   // Title, copy, and photo follow the selection — a flavour is a different
   // product to the buyer.
   const title = variant ? `${product.name} · ${variant}` : product.name;
@@ -125,6 +133,10 @@ export function ProductDetailClient({
   const accent = product.accent || "#B45309";
 
   async function handleAddToCart() {
+    if (inCart >= available) {
+      setAddMsg(`Only ${available} left`);
+      return;
+    }
     setAdding(true);
     setAddMsg("");
     try {
@@ -270,7 +282,7 @@ export function ProductDetailClient({
                       {formatTaka(Number(product.compare_at_price))}
                     </span>
                   )}
-                  {product.stock > 0 ? (
+                  {available > 0 ? (
                     <span className="inline-flex items-center gap-1 text-xs font-bold text-mint">
                       <span className="h-1.5 w-1.5 rounded-full bg-mint" /> In Stock
                     </span>
@@ -309,17 +321,22 @@ export function ProductDetailClient({
                         <div className="mt-2 flex flex-wrap gap-2">
                           {group.options.map((option) => {
                             const active = selected[groupIndex] === option.label;
+                            const soldOut = option.stock === 0;
                             return (
                               <button
                                 key={option.label}
                                 type="button"
+                                disabled={soldOut}
+                                title={soldOut ? `${option.label} is sold out` : undefined}
                                 onClick={() =>
                                   setSelected((prev) =>
                                     prev.map((value, i) => (i === groupIndex ? option.label : value))
                                   )
                                 }
                                 className={`min-h-10 rounded-xl border px-3.5 text-xs font-bold transition ${
-                                  active
+                                  soldOut
+                                    ? "cursor-not-allowed border-cream/10 bg-cream/[0.02] text-cream/25 line-through"
+                                    : active
                                     ? "border-gold bg-gold/10 text-gold"
                                     : "border-cream/15 bg-transparent text-cream/60 hover:border-cream/35 hover:text-cream"
                                 }`}
@@ -343,7 +360,7 @@ export function ProductDetailClient({
               {/* Desktop Add-to-Cart + Buy Now (hidden on mobile — sticky bar used instead) */}
               <Reveal delay={0.05}>
                 <div className="mt-6 hidden md:block">
-                  {product.stock > 0 ? (
+                  {available > 0 ? (
                     <div className="flex gap-3">
                       <button
                         onClick={handleAddToCart}
@@ -442,7 +459,7 @@ export function ProductDetailClient({
               )}
             </div>
           </div>
-          {product.stock > 0 ? (
+          {available > 0 ? (
             <div className="flex shrink-0 gap-2">
               <button
                 onClick={handleAddToCart}

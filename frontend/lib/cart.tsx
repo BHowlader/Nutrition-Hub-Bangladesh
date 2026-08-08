@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { csrfHeader, useAuth } from "@/lib/auth";
-import { VARIANT_SEPARATOR, variantPrice } from "@/lib/products";
+import { VARIANT_SEPARATOR, variantPrice, variantStock } from "@/lib/products";
 
 const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").trim().replace(/\/$/, "");
 
@@ -22,6 +22,9 @@ export interface CartItem {
   variant: string | null;
   /** Product price plus the variant's deltas — always trust this over product.price. */
   unit_price: string;
+  /** Units left for THIS variant, not the product as a whole. Absent on lines
+   *  saved before per-option stock existed — fall back to product.stock. */
+  available_stock?: number;
   product: CartProduct;
 }
 
@@ -171,11 +174,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
             if (index > -1) {
               localItems[index].quantity = quantity;
             } else if (product) {
+              const labels = (variant || "").split(VARIANT_SEPARATOR).filter(Boolean);
               localItems.push({
                 product_id: productId,
                 quantity,
                 variant: variant || null,
-                unit_price: String(variantPrice(product, (variant || "").split(VARIANT_SEPARATOR).filter(Boolean))),
+                unit_price: String(variantPrice(product, labels)),
+                available_stock: variantStock(product, labels),
                 product: {
                   id: product.id,
                   name: product.name,

@@ -7,11 +7,11 @@ from types import SimpleNamespace
 
 from fastapi import HTTPException
 
-from app.core.variants import resolve_variant, variants_to_json
+from app.core.variants import resolve_variant, variant_stock, variants_to_json
 
 
-def product(price="1000", variants=None):
-    return SimpleNamespace(name="Whey", price=Decimal(price), variants=variants)
+def product(price="1000", variants=None, stock=5):
+    return SimpleNamespace(name="Whey", price=Decimal(price), variants=variants, stock=stock)
 
 
 GROUPS = [
@@ -61,9 +61,9 @@ def test_serializer_keeps_money_as_strings():
             name="Size",
             options=[
                 SimpleNamespace(
-                    label="1kg", price=Decimal("1800.00"), description="Bulk tub", image_url="https://cdn/1kg.jpg"
+                    label="1kg", price=Decimal("1800.00"), stock=3, description="Bulk tub", image_url="https://cdn/1kg.jpg"
                 ),
-                SimpleNamespace(label="500g", price=None, description=None, image_url=None),
+                SimpleNamespace(label="500g", price=None, stock=None, description=None, image_url=None),
             ],
         )
     ]
@@ -74,10 +74,11 @@ def test_serializer_keeps_money_as_strings():
                 {
                     "label": "1kg",
                     "price": "1800.00",
+                    "stock": 3,
                     "description": "Bulk tub",
                     "image_url": "https://cdn/1kg.jpg",
                 },
-                {"label": "500g", "price": None, "description": None, "image_url": None},
+                {"label": "500g", "price": None, "stock": None, "description": None, "image_url": None},
             ],
         }
     ]
@@ -85,9 +86,48 @@ def test_serializer_keeps_money_as_strings():
     assert variants_to_json([]) is None
 
 
+STOCKED = [
+    {"name": "Size", "options": [{"label": "500g", "stock": 10}, {"label": "1kg", "stock": 3}]},
+    {"name": "Flavor", "options": [{"label": "Strawberry", "stock": 4}, {"label": "Coffee", "stock": 0}]},
+]
+
+
+def test_stock_falls_back_to_the_product_pool():
+    # Nothing on the product, and nothing on the options it was written before.
+    assert variant_stock(product(stock=7), None) == 7
+    assert variant_stock(product(variants=GROUPS, stock=7), "Coffee / 1kg") == 7
+
+
+def test_an_option_pool_overrides_the_product_pool():
+    groups = [{"name": "Flavor", "options": [{"label": "Mango", "stock": 2}, {"label": "Coffee"}]}]
+    p = product(variants=groups, stock=99)
+    assert variant_stock(p, "Mango") == 2
+    assert variant_stock(p, "Coffee") == 99  # blank option still falls back
+
+
+def test_a_choice_is_capped_by_its_scarcest_half():
+    p = product(variants=STOCKED, stock=99)
+    assert variant_stock(p, "500g / Strawberry") == 4  # flavour is scarcer than the size
+    assert variant_stock(p, "1kg / Strawberry") == 3  # now the size is
+    assert variant_stock(p, "500g / Coffee") == 0  # one sold-out half sells out the pair
+
+
+def test_zero_is_a_real_pool_not_a_missing_one():
+    # The bug this guards: falsy 0 read as "not declared" would fall back to the
+    # product's stock and keep selling a sold-out flavour.
+    groups = [{"name": "Flavor", "options": [{"label": "Coffee", "stock": 0}]}]
+    assert variant_stock(product(variants=groups, stock=50), "Coffee") == 0
+
+
+def test_junk_stock_values_fall_back_rather_than_crash():
+    for junk in ["", "  ", None, "abc"]:
+        groups = [{"name": "Flavor", "options": [{"label": "Coffee", "stock": junk}]}]
+        assert variant_stock(product(variants=groups, stock=6), "Coffee") == 6
+
+
 if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_"):
             fn()
             print(f"ok  {name}")
-    print("all variant pricing checks passed")
+    print("all variant pricing and stock checks passed")

@@ -86,6 +86,9 @@ interface VariantOption {
   label: string;
   // The option's own price (blank/null = sell at the product price).
   price: string | null;
+  // The option's own stock (blank/null = draws on the product's stock instead).
+  // A number when it comes back from the API, a string while it's being typed.
+  stock: number | string | null;
   // Shown instead of the product description while this option is selected.
   description: string | null;
   // Photo slid into the gallery when this option is selected.
@@ -319,6 +322,8 @@ function cleanProductPayload(form: FormState) {
           label: option.label.trim(),
           // Blank price means "sell at the product price".
           price: String(option.price ?? "").trim() || null,
+          // Blank stock means "draw on the product's stock" — 0 is a real sold-out pool.
+          stock: String(option.stock ?? "").trim() === "" ? null : Number(option.stock),
           description: String(option.description ?? "").trim() || null,
           image_url: String(option.image_url ?? "").trim() || null,
         })),
@@ -3015,7 +3020,7 @@ function VariantsEditor({
         </div>
         <button
           type="button"
-          onClick={() => onChange([...groups, { name: "", options: [{ label: "", price: "", description: "", image_url: null }] }])}
+          onClick={() => onChange([...groups, { name: "", options: [{ label: "", price: "", stock: "", description: "", image_url: null }] }])}
           className="btn-secondary min-h-9 shrink-0 rounded-xl px-3 py-1.5 text-[11px]"
         >
           <Plus size={13} />
@@ -3075,12 +3080,12 @@ function VariantsEditor({
                   }
                   return (
                     <div key={optionIndex} className="space-y-2">
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <input
                           value={option.label}
                           onChange={(e) => patchOption({ label: e.target.value })}
                           placeholder="Option (500g, Strawberry…)"
-                          className="h-9 flex-1 rounded-lg border border-cream/[0.12] bg-ink/40 px-3 text-xs font-bold text-cream outline-none focus:border-gold/50"
+                          className="h-9 min-w-[9rem] flex-1 rounded-lg border border-cream/[0.12] bg-ink/40 px-3 text-xs font-bold text-cream outline-none focus:border-gold/50"
                         />
                         <input
                           type="number"
@@ -3090,7 +3095,21 @@ function VariantsEditor({
                           onChange={(e) => patchOption({ price: e.target.value })}
                           placeholder={`Tk ${Number(basePrice || 0).toLocaleString("en-BD")}`}
                           title="This option's own price. Blank = the product price."
-                          className="h-9 w-28 shrink-0 rounded-lg border border-cream/[0.12] bg-ink/40 px-3 text-xs font-bold text-cream outline-none focus:border-gold/50"
+                          className="h-9 w-24 shrink-0 rounded-lg border border-cream/[0.12] bg-ink/40 px-3 text-xs font-bold text-cream outline-none focus:border-gold/50"
+                        />
+                        <input
+                          type="number"
+                          step="1"
+                          min="0"
+                          value={option.stock ?? ""}
+                          onChange={(e) => patchOption({ stock: e.target.value })}
+                          placeholder="Qty"
+                          title="Units of this option in stock. Blank = share the product's stock. 0 = sold out, so customers can't order it."
+                          className={`h-9 w-20 shrink-0 rounded-lg border bg-ink/40 px-3 text-xs font-bold outline-none focus:border-gold/50 ${
+                            String(option.stock ?? "").trim() === "0"
+                              ? "border-red-500/40 text-red-400"
+                              : "border-cream/[0.12] text-cream"
+                          }`}
                         />
                         <button
                           type="button"
@@ -3168,7 +3187,7 @@ function VariantsEditor({
                 onClick={() =>
                   update(groupIndex, {
                     ...group,
-                    options: [...group.options, { label: "", price: "", description: "", image_url: null }],
+                    options: [...group.options, { label: "", price: "", stock: "", description: "", image_url: null }],
                   })
                 }
                 className="mt-2.5 inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-cream/[0.12] bg-cream/[0.02] px-3 text-[11px] font-black text-cream/60 hover:text-cream"

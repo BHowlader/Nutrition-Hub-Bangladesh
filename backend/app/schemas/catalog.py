@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 
 from pydantic import BaseModel, Field, field_validator
@@ -10,6 +11,8 @@ class VariantOption(BaseModel):
     label: str = Field(min_length=1, max_length=60)
     # The option's own price. None means "sell at the product price".
     price: Decimal | None = Field(default=None, ge=0)
+    # The option's own stock pool. None means "count against the product's stock".
+    stock: int | None = Field(default=None, ge=0)
     # Replaces the product description while this option is selected.
     description: str | None = Field(default=None, max_length=2000)
     # Photo shown when this option is selected; joins the product gallery.
@@ -112,5 +115,7 @@ class ProductUpdate(BaseModel):
 class ProductRead(ProductBase):
     id: str
     category: CategoryRead | None = None
+    # Read-only: lets the storefront offer a "Latest" sort without a second request.
+    created_at: datetime | None = None
 
     model_config = {"from_attributes": True}
