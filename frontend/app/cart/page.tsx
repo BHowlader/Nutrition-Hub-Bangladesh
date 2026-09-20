@@ -12,12 +12,17 @@ import { productImage } from "@/lib/products";
 
 const BACKEND_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").trim().replace(/\/$/, "");
 
-// Pathao rates — mirrors backend/app/core/delivery.py, which bills the order.
-const DELIVERY_ZONES = [
-  { id: "inside_dhaka", label: "Inside Dhaka", charge: 90 },
-  { id: "sub_urban", label: "Sub-urban", charge: 130 },
-  { id: "outside_dhaka", label: "Outside Dhaka", charge: 170 },
-] as const;
+// Divisions, areas and Pathao rates come from backend/app/core/delivery.py —
+// the same table that prices the order, so the form can't quote a rate we
+// don't bill. The customer picks a place; the server picks the price.
+type DeliveryArea = { name: string; zone: string; charge: string };
+type DeliveryDivision = { name: string; areas: DeliveryArea[] };
+
+const ZONE_LABELS: Record<string, string> = {
+  inside_dhaka: "Inside Dhaka",
+  sub_urban: "Sub-urban",
+  outside_dhaka: "Outside Dhaka",
+};
 
 export default function CartPage() {
   const { user, loading: authLoading } = useAuth();
@@ -35,7 +40,9 @@ export default function CartPage() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
-  const [zoneId, setZoneId] = useState<string>(DELIVERY_ZONES[0].id);
+  const [divisions, setDivisions] = useState<DeliveryDivision[]>([]);
+  const [divisionName, setDivisionName] = useState("");
+  const [areaName, setAreaName] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -48,6 +55,13 @@ export default function CartPage() {
   useEffect(() => {
     setCoupon(null);
   }, [totalPrice]);
+
+  useEffect(() => {
+    fetch(`${BACKEND_URL}/api/orders/delivery-areas`)
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then(setDivisions)
+      .catch(() => setDivisions([]));
+  }, []);
 
   async function handleCheckout(e: React.FormEvent) {
     e.preventDefault();
@@ -63,7 +77,8 @@ export default function CartPage() {
           phone,
           address,
           payment_method: "cod",
-          delivery_zone: zoneId,
+          division: divisionName,
+          area: areaName,
           coupon_code: coupon?.code || undefined,
           items: items.map((it) => ({
             product_id: it.product_id,
@@ -134,8 +149,10 @@ export default function CartPage() {
   }
 
   const discountAmount = coupon ? Number(coupon.discount_amount) : 0;
-  const zone = DELIVERY_ZONES.find((z) => z.id === zoneId) || DELIVERY_ZONES[0];
-  const payableTotal = Math.max(totalPrice - discountAmount, 0) + zone.charge;
+  const areas = divisions.find((d) => d.name === divisionName)?.areas || [];
+  const area = areas.find((a) => a.name === areaName) || null;
+  const deliveryCharge = area ? Number(area.charge) : 0;
+  const payableTotal = Math.max(totalPrice - discountAmount, 0) + deliveryCharge;
 
   if (authLoading) return <PageLoading label="Loading cart" />;
 
@@ -361,8 +378,10 @@ export default function CartPage() {
                   </div>
                 )}
                 <div className="flex justify-between text-cream/60">
-                  <span>Delivery ({zone.label})</span>
-                  <span>৳{zone.charge}</span>
+                  <span>Delivery{area ? ` (${area.name})` : ""}</span>
+                  <span className={area ? "" : "text-cream/40"}>
+                    {area ? `৳${deliveryCharge.toLocaleString()}` : "Set your area at checkout"}
+                  </span>
                 </div>
               </div>
               <div className="mt-4 flex items-center justify-between">
@@ -412,38 +431,60 @@ export default function CartPage() {
                 maxLength={40}
                 pattern="^[+\d][\d\s\-()]{6,38}\d$"
               />
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="mb-1 block text-xs font-black uppercase tracking-wider text-cream/40">Division</label>
+                  <select
+                    value={divisionName}
+                    onChange={(e) => {
+                      setDivisionName(e.target.value);
+                      setAreaName("");
+                    }}
+                    required
+                    className="w-full rounded-xl border border-cream/10 bg-cream/[0.03] px-3 py-2 text-sm text-cream outline-none focus:border-gold/50"
+                  >
+                    <option value="">Select</option>
+                    {divisions.map((d) => (
+                      <option key={d.name} value={d.name} className="bg-card">{d.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-black uppercase tracking-wider text-cream/40">City / Area</label>
+                  <select
+                    value={areaName}
+                    onChange={(e) => setAreaName(e.target.value)}
+                    required
+                    disabled={!divisionName}
+                    className="w-full rounded-xl border border-cream/10 bg-cream/[0.03] px-3 py-2 text-sm text-cream outline-none focus:border-gold/50 disabled:opacity-40"
+                  >
+                    <option value="">{divisionName ? "Select" : "Pick a division"}</option>
+                    {areas.map((a) => (
+                      <option key={a.name} value={a.name} className="bg-card">{a.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
               <div>
-                <label className="mb-1 block text-xs font-black uppercase tracking-wider text-cream/40">Address (min. 8 characters)</label>
+                <label className="mb-1 block text-xs font-black uppercase tracking-wider text-cream/40">
+                  House / flat / road (min. 8 characters)
+                </label>
                 <textarea
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  rows={3}
+                  rows={2}
                   required
                   minLength={8}
-                  maxLength={500}
+                  maxLength={400}
+                  placeholder="Flat 3B, House 12, Road 7 — near the mosque"
                   className="w-full resize-none rounded-xl border border-cream/10 bg-cream/[0.03] px-3 py-2 text-sm text-cream outline-none focus:border-gold/50"
                 />
               </div>
-              <div>
-                <label className="mb-1 block text-xs font-black uppercase tracking-wider text-cream/40">Delivery area</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {DELIVERY_ZONES.map((z) => (
-                    <button
-                      key={z.id}
-                      type="button"
-                      onClick={() => setZoneId(z.id)}
-                      className={`rounded-xl border px-2 py-2 text-center text-[11px] font-bold transition-colors ${
-                        z.id === zoneId
-                          ? "border-gold/60 bg-gold/10 text-cream"
-                          : "border-cream/10 bg-cream/[0.03] text-cream/60 hover:border-cream/25"
-                      }`}
-                    >
-                      <span className="block">{z.label}</span>
-                      <span className="block text-[10px] font-black text-gold">৳{z.charge}</span>
-                    </button>
-                  ))}
-                </div>
-                <p className="mt-1 text-[10px] text-cream/35">Pathao rate, charged per order.</p>
+              <div className="flex justify-between text-xs text-cream/50">
+                <span>Delivery{area ? ` · ${ZONE_LABELS[area.zone] || area.zone}` : ""}</span>
+                <span className={area ? "font-bold text-cream" : ""}>
+                  {area ? `৳${deliveryCharge.toLocaleString()}` : "Select your area"}
+                </span>
               </div>
               <div className="flex justify-between border-t border-cream/10 pt-3 text-sm">
                 <span className="font-bold text-cream/70">Payable on delivery</span>
@@ -457,7 +498,7 @@ export default function CartPage() {
                 >
                   Cancel
                 </button>
-                <button type="submit" disabled={submitting} className="btn-primary flex-1 disabled:opacity-50">
+                <button type="submit" disabled={submitting || !area} className="btn-primary flex-1 disabled:opacity-50">
                   {submitting ? "Placing order…" : "Place order"}
                 </button>
               </div>

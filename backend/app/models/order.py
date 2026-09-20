@@ -42,7 +42,9 @@ class Order(Base):
     subtotal: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=0)
     discount_amount: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=0)
     coupon_code: Mapped[str | None] = mapped_column(String(40), nullable=True, index=True)
-    # Pathao zone the address falls in, and the charge it billed. See app/core/delivery.py.
+    # Where the parcel goes, and the Pathao zone those two resolve to. See app/core/delivery.py.
+    division: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    area: Mapped[str | None] = mapped_column(String(60), nullable=True, index=True)
     delivery_zone: Mapped[str] = mapped_column(String(20), default="inside_dhaka", server_default="inside_dhaka")
     delivery_charge: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=0, server_default="0")
     total: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=0)

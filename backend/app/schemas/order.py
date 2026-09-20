@@ -3,7 +3,6 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-from app.core.delivery import DEFAULT_DELIVERY_ZONE, DELIVERY_ZONE_PATTERN
 
 
 class OrderItemCreate(BaseModel):
@@ -15,10 +14,13 @@ class OrderItemCreate(BaseModel):
 class OrderCreate(BaseModel):
     customer_name: str = Field(min_length=2, max_length=160)
     phone: str = Field(min_length=8, max_length=40, pattern=r"^[+\d][\d\s\-()]{6,38}\d$")
-    address: str = Field(min_length=8, max_length=500)
+    # Street-level address only; the area and division below are appended to it.
+    address: str = Field(min_length=8, max_length=400)
     payment_method: str = Field(default="cod", pattern=r"^(cod|bkash|nagad|rocket|card)$")
     coupon_code: str | None = Field(default=None, min_length=3, max_length=40)
-    delivery_zone: str = Field(default=DEFAULT_DELIVERY_ZONE, pattern=DELIVERY_ZONE_PATTERN)
+    # The delivery zone — and so the charge — is derived from these, never sent.
+    division: str = Field(min_length=2, max_length=40)
+    area: str = Field(min_length=2, max_length=60)
     items: list[OrderItemCreate] = Field(min_length=1, max_length=50)
 
 
@@ -44,7 +46,9 @@ class OrderRead(BaseModel):
     subtotal: Decimal = Decimal("0")
     discount_amount: Decimal = Decimal("0")
     coupon_code: str | None = None
-    delivery_zone: str = DEFAULT_DELIVERY_ZONE
+    division: str | None = None
+    area: str | None = None
+    delivery_zone: str | None = None
     delivery_charge: Decimal = Decimal("0")
     total: Decimal
     items: list[OrderItemRead]
@@ -52,6 +56,17 @@ class OrderRead(BaseModel):
     user_id: str | None = None
 
     model_config = {"from_attributes": True}
+
+
+class DeliveryAreaRead(BaseModel):
+    name: str
+    zone: str
+    charge: Decimal
+
+
+class DeliveryDivisionRead(BaseModel):
+    name: str
+    areas: list[DeliveryAreaRead]
 
 
 class OrderStatusUpdate(BaseModel):

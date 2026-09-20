@@ -9,14 +9,14 @@ from app.core.audit import write_audit_log
 from app.core.auth import get_current_user, get_optional_user, require_admin_google, require_trusted_admin_origin
 from app.core.coupons import get_valid_coupon, money, normalize_coupon_code
 from app.core.database import get_db
-from app.core.delivery import delivery_charge
+from app.core.delivery import delivery_charge, divisions, zone_for
 from app.core.limiter import limiter
 from app.core.variants import chosen_options, option_stock, resolve_variant
 from app.models.catalog import Product
 from app.models.order import Order, OrderItem, OrderStatus, generate_order_id
 from app.models.user import User, UserRole
 from app.schemas.coupon import CouponValidateRequest, CouponValidateResponse
-from app.schemas.order import OrderCreate, OrderRead, OrderStatusUpdate
+from app.schemas.order import DeliveryDivisionRead, OrderCreate, OrderRead, OrderStatusUpdate
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 
@@ -44,14 +44,22 @@ def create_order(
     while db.get(Order, order_id) is not None:
         order_id = generate_order_id()
 
+    # 422s an address we don't serve, so the charge can never be talked down.
+    zone = zone_for(payload.division, payload.area)
+    division, area = payload.division.strip(), payload.area.strip()
+
     order = Order(
         id=order_id,
         customer_name=payload.customer_name,
         phone=payload.phone,
-        address=payload.address,
+        # Store the courier-ready line, so every screen that shows an address
+        # shows a complete one.
+        address=f"{payload.address.strip()}, {area}, {division}",
         payment_method=payload.payment_method,
-        delivery_zone=payload.delivery_zone,
-        delivery_charge=delivery_charge(payload.delivery_zone),
+        division=division,
+        area=area,
+        delivery_zone=zone,
+        delivery_charge=delivery_charge(zone),
         user_id=user.id if user else None,
     )
 
@@ -121,6 +129,13 @@ def create_order(
     except Exception:
         db.rollback()
         raise
+
+
+@router.get("/delivery-areas", response_model=list[DeliveryDivisionRead])
+def delivery_areas() -> list[dict]:
+    """Divisions, their areas, and what each area costs to ship to — the same
+    table that prices the order, so the checkout form can't drift from the bill."""
+    return divisions()
 
 
 @router.get("/track", response_model=OrderRead)

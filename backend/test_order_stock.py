@@ -65,6 +65,8 @@ def buy(db, variant, quantity=1):
             phone="01934753058",
             address="Mirpara, Rampura road",
             payment_method="cod",
+            division="Dhaka",
+            area="Rampura",
             items=[OrderItemCreate(product_id="p1", quantity=quantity, variant=variant)],
         ),
         db,
@@ -118,6 +120,8 @@ def test_one_order_cannot_outrun_stock_by_splitting_into_lines():
         phone="01934753058",
         address="Mirpara, Rampura road",
         payment_method="cod",
+        division="Dhaka",
+        area="Rampura",
         items=[
             OrderItemCreate(product_id="p1", quantity=2, variant="1kg / Strawberry"),
             OrderItemCreate(product_id="p1", quantity=2, variant="1kg / Strawberry"),
