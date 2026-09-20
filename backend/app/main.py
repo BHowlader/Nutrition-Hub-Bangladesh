@@ -176,6 +176,12 @@ def create_tables() -> None:
         conn.execute(text("ALTER TABLE users ALTER COLUMN email_verified SET DEFAULT FALSE"))
         conn.execute(text("ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS ip_address VARCHAR(64)"))
         conn.execute(text("ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS user_agent VARCHAR(500)"))
+        conn.execute(
+            text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_zone VARCHAR(20) NOT NULL DEFAULT 'inside_dhaka'")
+        )
+        conn.execute(
+            text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_charge NUMERIC(10, 2) NOT NULL DEFAULT 0")
+        )
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS badge VARCHAR(120)"))
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS detail VARCHAR(200)"))
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS accent VARCHAR(20)"))

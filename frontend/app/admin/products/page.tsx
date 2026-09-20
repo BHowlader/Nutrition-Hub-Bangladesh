@@ -136,6 +136,12 @@ interface OrderItem {
   product_slug?: string | null;
 }
 
+const DELIVERY_ZONE_LABELS: Record<string, string> = {
+  inside_dhaka: "Inside Dhaka",
+  sub_urban: "Sub-urban",
+  outside_dhaka: "Outside Dhaka",
+};
+
 interface Order {
   id: string;
   customer_name: string;
@@ -146,6 +152,8 @@ interface Order {
   subtotal: string;
   discount_amount: string;
   coupon_code: string | null;
+  delivery_zone?: string;
+  delivery_charge?: string;
   total: string;
   items: OrderItem[];
   created_at: string | null;
@@ -1601,6 +1609,10 @@ function OrdersSection({ orders, saving, onStatusChange, onDelete, canDelete }: 
                         <span className="text-red-400">- Tk {Number(order.discount_amount || 0).toLocaleString()}</span>
                       </div>
                     )}
+                    <div className="flex justify-between text-cream/50">
+                      <span>Delivery{order.delivery_zone ? ` (${DELIVERY_ZONE_LABELS[order.delivery_zone] || order.delivery_zone})` : ""}</span>
+                      <span className="text-cream">Tk {Number(order.delivery_charge || 0).toLocaleString()}</span>
+                    </div>
                     <div className="flex justify-between font-black text-cream pt-1 border-t border-cream/[0.04]">
                       <span className="text-gold">Total</span>
                       <span className="text-gold">Tk {Number(order.total).toLocaleString()}</span>
@@ -1822,6 +1834,10 @@ function OrdersSection({ orders, saving, onStatusChange, onDelete, canDelete }: 
                                     <span className="font-bold text-red-400">- Tk {Number(order.discount_amount || 0).toLocaleString()}</span>
                                   </div>
                                 )}
+                                <div className="flex justify-between items-center text-cream/60">
+                                  <span>Delivery{order.delivery_zone ? ` (${DELIVERY_ZONE_LABELS[order.delivery_zone] || order.delivery_zone})` : ""}</span>
+                                  <span className="font-bold text-cream">Tk {Number(order.delivery_charge || 0).toLocaleString()}</span>
+                                </div>
                                 <div className="h-px bg-cream/[0.06] my-2" />
                                 <div className="flex justify-between items-center">
                                   <span className="font-bold text-cream">Grand Total</span>

@@ -12,6 +12,13 @@ import { productImage } from "@/lib/products";
 
 const BACKEND_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").trim().replace(/\/$/, "");
 
+// Pathao rates — mirrors backend/app/core/delivery.py, which bills the order.
+const DELIVERY_ZONES = [
+  { id: "inside_dhaka", label: "Inside Dhaka", charge: 90 },
+  { id: "sub_urban", label: "Sub-urban", charge: 130 },
+  { id: "outside_dhaka", label: "Outside Dhaka", charge: 170 },
+] as const;
+
 export default function CartPage() {
   const { user, loading: authLoading } = useAuth();
   const { items, loading, totalCount, totalPrice, setQuantity, removeItem, clear, refresh } = useCart();
@@ -28,6 +35,7 @@ export default function CartPage() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [zoneId, setZoneId] = useState<string>(DELIVERY_ZONES[0].id);
 
   useEffect(() => {
     if (user) {
@@ -55,6 +63,7 @@ export default function CartPage() {
           phone,
           address,
           payment_method: "cod",
+          delivery_zone: zoneId,
           coupon_code: coupon?.code || undefined,
           items: items.map((it) => ({
             product_id: it.product_id,
@@ -125,7 +134,8 @@ export default function CartPage() {
   }
 
   const discountAmount = coupon ? Number(coupon.discount_amount) : 0;
-  const payableTotal = Math.max(totalPrice - discountAmount, 0);
+  const zone = DELIVERY_ZONES.find((z) => z.id === zoneId) || DELIVERY_ZONES[0];
+  const payableTotal = Math.max(totalPrice - discountAmount, 0) + zone.charge;
 
   if (authLoading) return <PageLoading label="Loading cart" />;
 
@@ -350,9 +360,9 @@ export default function CartPage() {
                     <span>-৳{discountAmount.toLocaleString()}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-xs text-cream/40">
-                  <span>Delivery</span>
-                  <span>Calculated at next step</span>
+                <div className="flex justify-between text-cream/60">
+                  <span>Delivery ({zone.label})</span>
+                  <span>৳{zone.charge}</span>
                 </div>
               </div>
               <div className="mt-4 flex items-center justify-between">
@@ -413,6 +423,31 @@ export default function CartPage() {
                   maxLength={500}
                   className="w-full resize-none rounded-xl border border-cream/10 bg-cream/[0.03] px-3 py-2 text-sm text-cream outline-none focus:border-gold/50"
                 />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-black uppercase tracking-wider text-cream/40">Delivery area</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {DELIVERY_ZONES.map((z) => (
+                    <button
+                      key={z.id}
+                      type="button"
+                      onClick={() => setZoneId(z.id)}
+                      className={`rounded-xl border px-2 py-2 text-center text-[11px] font-bold transition-colors ${
+                        z.id === zoneId
+                          ? "border-gold/60 bg-gold/10 text-cream"
+                          : "border-cream/10 bg-cream/[0.03] text-cream/60 hover:border-cream/25"
+                      }`}
+                    >
+                      <span className="block">{z.label}</span>
+                      <span className="block text-[10px] font-black text-gold">৳{z.charge}</span>
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-1 text-[10px] text-cream/35">Pathao rate, charged per order.</p>
+              </div>
+              <div className="flex justify-between border-t border-cream/10 pt-3 text-sm">
+                <span className="font-bold text-cream/70">Payable on delivery</span>
+                <span className="font-black text-cream">৳{payableTotal.toLocaleString()}</span>
               </div>
               <div className="flex gap-2 pt-2">
                 <button

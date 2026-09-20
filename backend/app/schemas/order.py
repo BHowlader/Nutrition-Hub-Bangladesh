@@ -3,6 +3,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
+from app.core.delivery import DEFAULT_DELIVERY_ZONE, DELIVERY_ZONE_PATTERN
+
 
 class OrderItemCreate(BaseModel):
     product_id: str
@@ -16,6 +18,7 @@ class OrderCreate(BaseModel):
     address: str = Field(min_length=8, max_length=500)
     payment_method: str = Field(default="cod", pattern=r"^(cod|bkash|nagad|rocket|card)$")
     coupon_code: str | None = Field(default=None, min_length=3, max_length=40)
+    delivery_zone: str = Field(default=DEFAULT_DELIVERY_ZONE, pattern=DELIVERY_ZONE_PATTERN)
     items: list[OrderItemCreate] = Field(min_length=1, max_length=50)
 
 
@@ -41,6 +44,8 @@ class OrderRead(BaseModel):
     subtotal: Decimal = Decimal("0")
     discount_amount: Decimal = Decimal("0")
     coupon_code: str | None = None
+    delivery_zone: str = DEFAULT_DELIVERY_ZONE
+    delivery_charge: Decimal = Decimal("0")
     total: Decimal
     items: list[OrderItemRead]
     created_at: datetime | None = None

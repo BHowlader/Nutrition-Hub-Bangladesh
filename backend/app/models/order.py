@@ -42,6 +42,9 @@ class Order(Base):
     subtotal: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=0)
     discount_amount: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=0)
     coupon_code: Mapped[str | None] = mapped_column(String(40), nullable=True, index=True)
+    # Pathao zone the address falls in, and the charge it billed. See app/core/delivery.py.
+    delivery_zone: Mapped[str] = mapped_column(String(20), default="inside_dhaka", server_default="inside_dhaka")
+    delivery_charge: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=0, server_default="0")
     total: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=0)
     user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)

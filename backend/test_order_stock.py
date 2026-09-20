@@ -91,7 +91,7 @@ def test_a_sold_out_option_cannot_be_ordered():
     db = fresh_db(product_stock=50, groups=variants(strawberry_stock=0))
     # The product itself has 50 units — only the flavour is out.
     assert status_of(buy, db, "1kg / Strawberry") == 409
-    assert buy(db, "1kg / Coffee").total == Decimal("1800")
+    assert buy(db, "1kg / Coffee").subtotal == Decimal("1800")
 
 
 def test_ordering_draws_the_option_down_not_the_product():

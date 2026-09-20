@@ -9,6 +9,7 @@ from app.core.audit import write_audit_log
 from app.core.auth import get_current_user, get_optional_user, require_admin_google, require_trusted_admin_origin
 from app.core.coupons import get_valid_coupon, money, normalize_coupon_code
 from app.core.database import get_db
+from app.core.delivery import delivery_charge
 from app.core.limiter import limiter
 from app.core.variants import chosen_options, option_stock, resolve_variant
 from app.models.catalog import Product
@@ -49,6 +50,8 @@ def create_order(
         phone=payload.phone,
         address=payload.address,
         payment_method=payload.payment_method,
+        delivery_zone=payload.delivery_zone,
+        delivery_charge=delivery_charge(payload.delivery_zone),
         user_id=user.id if user else None,
     )
 
@@ -103,7 +106,9 @@ def create_order(
             order.coupon_code = normalize_coupon_code(payload.coupon_code)
             order.discount_amount = discount
         order.subtotal = total
-        order.total = money(total - discount)
+        # Delivery is billed on top of the discounted goods, so a coupon never
+        # eats into what Pathao charges us to ship.
+        order.total = money(max(total - discount, Decimal("0")) + order.delivery_charge)
         db.add(order)
         db.commit()
         db.refresh(order)
